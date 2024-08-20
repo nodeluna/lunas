@@ -41,7 +41,7 @@ namespace llog{
 		}
 		return true;
 	}
-#ifdef REMOTE_ENABLED
+#endif // REMOTE_ENABLED
 
 	void local_error(const std::string& path, const std::string& msg, const int& exit_code){
 		llog::error(msg + " '" + path + "', " + std::strerror(errno));
