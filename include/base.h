@@ -12,6 +12,8 @@
 
 namespace base {
 	inline unsigned long int paths_count = 0;
+	inline unsigned long int to_be_synced = 0;
+	inline unsigned long int syncing_counter = 1;
 }
 
 #define NON_EXISTENT -1

@@ -17,9 +17,11 @@
 void fill_base(void){
 	unsigned long int index_path = 0;
 	for(const auto& i : input_paths){
+		llog::print("--> reading directory " + input_paths.at(index_path).path);
 		list_tree(i, index_path);
 		index_path++;
 	}
+	llog::print("");
 }
 
 void match_mtime(const std::string& src, const std::string& dest){
@@ -28,7 +30,12 @@ void match_mtime(const std::string& src, const std::string& dest){
 }
 
 void copy(const std::string& src, const std::string& dest, const short& type){
-	llog::print("syncing '" + src + "' to '" + dest + "'");
+	std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ")";
+	if(type == DIRECTORY)
+		llog::print(count + " [Dir] "+ src + "' to '" + dest + "'");
+	else
+		llog::print(count + " [File] " + src + "' to '" + dest + "'");
+	base::syncing_counter++;
 	if(options::dry_run)
 		return;
 	if(type == DIRECTORY)
@@ -57,7 +64,7 @@ unsigned long int get_src(const struct path& file){
 			goto end;
 		if(!options::rollback && src_mtime >= metadata.mtime)
 			goto end;
-		else if(options::rollback && src_mtime <= metadata.mtime)
+		else if(options::rollback && (src_mtime <= metadata.mtime || metadata.mtime == -1))
 			goto end;
 
 		src_mtime = metadata.mtime;
@@ -82,6 +89,8 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 			goto end;
 		if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
 			goto end;
+		if(metadata.mtime != NON_EXISTENT && metadata.type == DIRECTORY)
+			goto end;
 
 		if(options::update && src_mtime > metadata.mtime){
 			std::string dest = input_paths.at(dest_index).path + file.name;
@@ -105,9 +114,30 @@ void syncing(){
 	}
 }
 
+void counter(){
+	for(const auto& file : content){
+		long int tmp = -1;
+		unsigned long int files_dont_exist = 0;
+		for(const auto& metadata : file.metadatas){
+			if(tmp == -1 && metadata.mtime != -1){
+				tmp = metadata.mtime;
+				continue;
+			}
+			if(metadata.mtime != -1 && metadata.mtime != tmp && metadata.type != DIRECTORY){
+				base::to_be_synced += file.metadatas.size() - 1 - files_dont_exist;
+				break;
+			}else if(metadata.mtime == -1){
+				base::to_be_synced++;
+				files_dont_exist++;
+			}
+		}
+	}
+}
+
 int init_program(void){
 	base::paths_count = input_paths.size();
 	fill_base();
+	counter();
 	syncing();
 	return 0;
 }

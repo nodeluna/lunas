@@ -77,7 +77,7 @@ local: local_options building
 cppcheck:
 	$(info :: running static code analysis)
 	$(info  )
-	cppcheck --cppcheck-build-dir=build --std=c++17 --check-level=exhaustive --suppress=missingIncludeSystem --enable=all -I $(HEADER_DIR) $(SRC_DIR)
+	cppcheck --cppcheck-build-dir=build --std=c++20 --check-level=exhaustive --suppress=missingIncludeSystem --enable=all -I $(HEADER_DIR) $(SRC_DIR)
 
 asan: create_directory
 	$(info :: compiling with asan)

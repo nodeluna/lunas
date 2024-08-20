@@ -50,6 +50,7 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		options::update = false;
 		options::rollback = true;
 	}else if(option == "--dry-run" || option == "-dr"){
+		llog::print("--> dry run is on");
 		options::dry_run = true;
 	}else if(option == "--author"){
 		llog::print(about::author);
