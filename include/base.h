@@ -12,7 +12,7 @@
 
 struct input_path {
 	std::string path;
-	//short srcdest;
+	short srcdest;
 	long int mtime = -1;
 	short type = -1;
 	bool remote;

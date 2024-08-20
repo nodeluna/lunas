@@ -8,6 +8,7 @@
 #include "file_types.h"
 #include "utimes.h"
 #include "log.h"
+#include "cliargs.h"
 
 namespace fs = std::filesystem;
 
@@ -15,7 +16,7 @@ int list_tree(const struct local_path& local_path){
 	const std::string& dir_path = local_path.path;
 
 	if(status::local_type(dir_path, true) != DIRECTORY){
-		log::warn("path '" + dir_path + "' not a directory");
+		llog::warn("path '" + dir_path + "' not a directory");
 		return 1;
 	}
 

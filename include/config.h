@@ -19,12 +19,12 @@ namespace options{
 	inline bool dry_run = false;
 	inline bool mkdir = false;
 	inline bool progress_bar = false;
-	inline bool mtime_diff = false;
 	inline bool remove_extra = false;
 	inline bool follow_symlink = false;
 	inline bool fsync = false;
 	inline bool mtime_count = true;
 	inline bool no_broken_symlink = false;
+	inline bool update = false;
 	inline bool resume = false;
 	inline bool rollback = false;
 	inline bool checksum = false;
