@@ -18,10 +18,10 @@ void next_arg_exists(const int& argc, const char* argv[], int i){
 }
 
 void fill_local_path(const std::string& argument, const short& srcdest){
-	struct local_path local_path;
+	struct input_path local_path;
 	local_path.path = argument;
 	local_path.srcdest = srcdest;
-	local_paths.push_back(std::move(local_path));
+	input_paths.push_back(std::move(local_path));
 }
 
 int fillopts(const int& argc, const char* argv[], int& index){

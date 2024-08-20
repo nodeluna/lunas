@@ -15,8 +15,10 @@
 
 
 void fill_base(void){
-	for(const auto& i : local_paths){
-		list_tree(i);
+	unsigned long int index_path = 0;
+	for(const auto& i : input_paths){
+		list_tree(i, index_path);
+		index_path++;
 	}
 }
 
@@ -25,25 +27,17 @@ void match_mtime(const std::string& src, const std::string& dest){
 	utime::set_local(dest, time_val);
 }
 
-void append_path(const struct path& file, struct input_path& metadata, const std::string& path){
-	struct input_path input_path;
-	input_path.path = path;
-	input_path.mtime = -1;
-	input_path.type = metadata.type;
-	file.input_paths.push_back(input_path);
-}
-
-
-void copy(const struct path& file, struct input_path& metadata, const unsigned long int& src_mtime_i, const long int& src_mtime){
-	std::string src = file.input_paths.at(src_mtime_i).path + "/" + file.name;
-	std::string dest = metadata.path + "/" + file.name;
+void copy(const std::string& src, const std::string& dest, const short& type){
 	llog::print("syncing '" + src + "' to '" + dest + "'");
 	if(options::dry_run == false){
-		fs::copy_options opts = fs::copy_options::update_existing;
+		fs::copy_options opts;
+		if(options::update)
+			opts = fs::copy_options::update_existing;
+		else
+			opts = fs::copy_options::overwrite_existing;
 		fs::copy(src, dest, opts);
+		match_mtime(src, dest);
 	}
-	match_mtime(src, dest);
-	metadata.mtime = src_mtime;
 }
 
 unsigned long int get_src(const struct path& file){
@@ -51,9 +45,12 @@ unsigned long int get_src(const struct path& file){
 	unsigned long int src_mtime_i = 0;
 	unsigned long int i = 0;
 
-	for(const auto& metadata : file.input_paths){
-		if(condition::is_src(metadata.srcdest) == false)
-			continue;
+	if(options::rollback)
+		src_mtime = std::numeric_limits<long int>::max();
+
+	for(const auto& metadata : file.metadatas){
+		if(condition::is_src(input_paths.at(i).srcdest) == false)
+			goto end;
 		if(!options::rollback && src_mtime >= metadata.mtime)
 			goto end;
 		else if(options::rollback && src_mtime <= metadata.mtime)
@@ -68,54 +65,43 @@ end:
 	return src_mtime_i;
 }
 
-void updating(const struct path& file, std::set<std::string>& paths_track, const long int& src_mtime, const unsigned long int& src_mtime_i){
 
 
-	for(auto& metadata : file.input_paths){
-		if((!options::update && !options::rollback))
-			goto skip;
-		if(metadata.path == file.input_paths.at(src_mtime_i).path)
-			continue;
-		if(condition::is_dest(metadata.srcdest) == false)
-			continue;
-		if(options::update && src_mtime > metadata.mtime)
-			copy(file, metadata, src_mtime_i, src_mtime);
-		/*else if(options::rollback && src_mtime < metadata.mtime)
-			copy(file, metadata, src_mtime_i, src_mtime);*/
-skip:
-		if(paths_track.find(metadata.path) != paths_track.end())
-			paths_track.erase(metadata.path);
-	}
-}
+void updating(const struct path& file, const unsigned long int& src_mtime_i){
+	unsigned long int src_mtime = file.metadatas[src_mtime_i].mtime;
+	std::string src = input_paths.at(src_mtime_i).path + path_seperator + file.name;
 
-void making_files(const struct path& file, std::set<std::string>& paths_track, const long int& src_mtime, const unsigned long int& src_mtime_i){
-	for(const auto& path_track : paths_track){
-		if(path_track == file.input_paths.at(src_mtime_i).path)
-			continue;
-		if(condition::is_dest(file.input_paths.at(src_mtime_i).srcdest) == false)
-			continue;
-		append_path(file, file.input_paths.at(src_mtime_i), path_track);
-		copy(file, file.input_paths.back(), src_mtime_i, src_mtime);
+	unsigned long int dest_index = 0;
+	for(auto& metadata : file.metadatas){
+		if(src_mtime_i == dest_index)
+			goto end;
+		if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
+			goto end;
+
+		if(options::update && src_mtime > metadata.mtime){
+			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
+			copy(src, dest, metadata.type);
+		}else if(options::rollback && src_mtime < metadata.mtime){
+			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
+			copy(src, dest, metadata.type);
+		}else if(metadata.mtime == -1){
+			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
+			copy(src, dest, metadata.type);
+		}
+end:
+		dest_index++;
 	}
 }
 
 void syncing(){
 	for(const auto& file : content){
-		std::set<std::string> paths_track;
-		for(const auto& i : local_paths)
-			paths_track.insert(i.path);
-
 		unsigned long int src_mtime_i = get_src(file);
-		long int src_mtime = file.input_paths.at(src_mtime_i).mtime;
-
-		updating(file, paths_track, src_mtime, src_mtime_i);
-
-		making_files(file, paths_track, src_mtime, src_mtime_i);
+		updating(file, src_mtime_i);
 	}
 }
 
 int init_program(void){
-	base::paths_count = local_paths.size();
+	base::paths_count = input_paths.size();
 	fill_base();
 	syncing();
 	return 0;

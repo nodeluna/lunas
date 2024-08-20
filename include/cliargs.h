@@ -4,22 +4,21 @@
 #include <string>
 #include <vector>
 #include "base.h"
+#include "config.h"
 
-struct local_path{
+struct input_path {
 	std::string path;
-	short srcdest = SRCDEST;
+#ifdef REMOTE_ENABLED
+	std::string password;
+	std::string ip;
+	int port = 22;
+	sftp_session sftp = nullptr;
+#endif // REMOTE_ENABLED
+	bool remote = false;
+	short srcdest;
 };
 
-/* struct input_path {
-	std::string path;
-	short srcdest;
-	bool remote = false;
-	sftp_session sftp = nullptr;
-	int port = 22;
-	std::string password;
-} */
-
-inline std::vector<local_path> local_paths;
+inline std::vector<input_path> input_paths;
 
 void next_arg_exists(const int& argc, const char* argv[], int i);
 
