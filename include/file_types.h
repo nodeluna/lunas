@@ -19,4 +19,10 @@ namespace status{
 	short int local_type(const std::string& path, const bool& cerr);
 }
 
+namespace condition{
+	bool is_src(const short& type);
+
+	bool is_dest(const short& type);
+}
+
 #endif // TYPES

@@ -5,6 +5,7 @@
 #include "config.h"
 #include "file_types.h"
 #include "log.h"
+#include "base.h"
 
 namespace fs = std::filesystem;
 
@@ -39,5 +40,20 @@ namespace status{
 			return -1;
 		}
 		return local_types(status);
+	}
+}
+
+
+namespace condition{
+	bool is_src(const short& type){
+		if(type == SRC || type == SRCDEST)
+			return true;
+		return false;
+	}
+
+	bool is_dest(const short& type){
+		if(type == DEST || type == SRCDEST)
+			return true;
+		return false;
 	}
 }

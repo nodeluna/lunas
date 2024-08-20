@@ -41,6 +41,12 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		std::string argument = argv[index+1];
 		fill_local_path(argument, DEST);
 		index++;
+	}else if(option == "-u" || option == "--update"){
+		options::update = true;
+		options::rollback = false;
+	}else if(option == "-rb" || option == "--rollback"){
+		options::update = false;
+		options::rollback = true;
 	}else if(option == "--author"){
 		llog::print(about::author);
 		exit(0);

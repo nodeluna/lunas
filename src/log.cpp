@@ -16,7 +16,7 @@ namespace llog{
 	}
 
 	void warn(const std::string& msg) noexcept{
-		std::cerr << options::color_error << "-[!!!] " << msg << options::reset_color;
+		std::cerr << options::color_error << "-[!!!] " << msg << options::reset_color << "\n";
 	}
 
 	void print(const std::string& msg) noexcept{
