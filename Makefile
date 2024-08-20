@@ -1,5 +1,5 @@
 CC = g++
-CFLAGS = -O1 -Iinclude -Wall -Wextra -pedantic -std=c++17 -MMD -MP -g
+CFLAGS = -O1 -Iinclude -Wall -Wextra -pedantic -std=c++20 -MMD -MP -g
 ASANFLAGS = $(CFLAGS) -g -fsanitize=address -fno-omit-frame-pointer
 TARGET = lunas
 LIB = $(shell pkg-config --cflags --libs libssh)

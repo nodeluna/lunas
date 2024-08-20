@@ -72,7 +72,7 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	std::string src = input_paths.at(src_mtime_i).path + path_seperator + file.name;
 
 	unsigned long int dest_index = 0;
-	for(auto& metadata : file.metadatas){
+	for(const auto& metadata : file.metadatas){
 		if(src_mtime_i == dest_index)
 			goto end;
 		if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)

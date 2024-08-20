@@ -7,7 +7,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 file(GLOB SOURCES src/*.cpp)
 add_compile_options(-Wall -Wextra -pedantic -O1)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 add_executable(${PROJECT_NAME} ${SOURCES}) 
 
 install(TARGETS lunas DESTINATION bin)
