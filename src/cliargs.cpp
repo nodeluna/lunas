@@ -5,6 +5,8 @@
 #include "config.h"
 #include "log.h"
 #include "about.h"
+#include "path_parsing.h"
+
 
 void next_arg_exists(const int& argc, const char* argv[], int i){
         if((argc-1) == i){
@@ -19,7 +21,7 @@ void next_arg_exists(const int& argc, const char* argv[], int i){
 
 void fill_local_path(const std::string& argument, const short& srcdest){
 	struct input_path local_path;
-	local_path.path = argument;
+	local_path.path = parse_path::absolute(argument);
 	local_path.srcdest = srcdest;
 	input_paths.push_back(std::move(local_path));
 }

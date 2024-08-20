@@ -35,7 +35,7 @@ int list_tree(const struct input_path& local_path, const unsigned long int& path
 				llog::local_error(str_entry, "couldn't get mtime of file", EXIT_FAILURE);
 			metadata.mtime = time_val.mtime;
 
-			str_entry = str_entry.substr(dir_path.size()+1, str_entry.size());
+			str_entry = str_entry.substr(dir_path.size(), str_entry.size());
 
 			auto itr = find_in_tree(content, str_entry);
 			if(itr != content.end())

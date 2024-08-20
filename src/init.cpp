@@ -74,7 +74,7 @@ end:
 void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
 	const short& type = file.metadatas.at(src_mtime_i).type;
-	std::string src = input_paths.at(src_mtime_i).path + path_seperator + file.name;
+	std::string src = input_paths.at(src_mtime_i).path + file.name;
 
 	unsigned long int dest_index = 0;
 	for(const auto& metadata : file.metadatas){
@@ -84,13 +84,13 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 			goto end;
 
 		if(options::update && src_mtime > metadata.mtime){
-			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
+			std::string dest = input_paths.at(dest_index).path + file.name;
 			copy(src, dest, type);
 		}else if(options::rollback && src_mtime < metadata.mtime){
-			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
+			std::string dest = input_paths.at(dest_index).path + file.name;
 			copy(src, dest, type);
 		}else if(metadata.mtime == NON_EXISTENT){
-			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
+			std::string dest = input_paths.at(dest_index).path + file.name;
 			copy(src, dest, type);
 		}
 end:
