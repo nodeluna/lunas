@@ -29,7 +29,11 @@ void match_mtime(const std::string& src, const std::string& dest){
 
 void copy(const std::string& src, const std::string& dest, const short& type){
 	llog::print("syncing '" + src + "' to '" + dest + "'");
-	if(options::dry_run == false){
+	if(options::dry_run)
+		return;
+	if(type == DIRECTORY)
+		fs::create_directory(dest);
+	else{
 		fs::copy_options opts;
 		if(options::update)
 			opts = fs::copy_options::update_existing;
@@ -68,7 +72,8 @@ end:
 
 
 void updating(const struct path& file, const unsigned long int& src_mtime_i){
-	unsigned long int src_mtime = file.metadatas.at(src_mtime_i).mtime;
+	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
+	const short& type = file.metadatas.at(src_mtime_i).type;
 	std::string src = input_paths.at(src_mtime_i).path + path_seperator + file.name;
 
 	unsigned long int dest_index = 0;
@@ -80,13 +85,13 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 
 		if(options::update && src_mtime > metadata.mtime){
 			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
-			copy(src, dest, metadata.type);
+			copy(src, dest, type);
 		}else if(options::rollback && src_mtime < metadata.mtime){
 			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
-			copy(src, dest, metadata.type);
+			copy(src, dest, type);
 		}else if(metadata.mtime == NON_EXISTENT){
 			std::string dest = input_paths.at(dest_index).path + path_seperator + file.name;
-			copy(src, dest, metadata.type);
+			copy(src, dest, type);
 		}
 end:
 		dest_index++;
