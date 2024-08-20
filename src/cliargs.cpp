@@ -47,6 +47,8 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	}else if(option == "-rb" || option == "--rollback"){
 		options::update = false;
 		options::rollback = true;
+	}else if(option == "--dry-run" || option == "-dr"){
+		options::dry_run = true;
 	}else if(option == "--author"){
 		llog::print(about::author);
 		exit(0);

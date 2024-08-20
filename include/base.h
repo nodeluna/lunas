@@ -14,8 +14,10 @@ namespace base {
 	inline unsigned long int paths_count = 0;
 }
 
+#define NON_EXISTENT -1
+
 struct metadata {
-	long int mtime = -1;
+	long int mtime = NON_EXISTENT;
 	short type = -1;
 };
 
