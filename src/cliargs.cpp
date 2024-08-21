@@ -50,8 +50,10 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		options::update = false;
 		options::rollback = true;
 	}else if(option == "--dry-run" || option == "-dr"){
-		llog::print("--> dry run is on");
+		llog::print("--> dry run is on\n");
 		options::dry_run = true;
+	}else if(option == "--make-directory" || option == "-mkdir"){
+		options::mkdir = true;
 	}else if(option == "--author"){
 		llog::print(about::author);
 		exit(0);

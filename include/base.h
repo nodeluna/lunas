@@ -49,6 +49,4 @@ struct path {
 
 inline std::set<path> content;
 
-std::set<path>::iterator find_in_tree(const std::set<path>& tree, const std::string& target);
-
 #endif // BASE_DATA_STRUCTURE

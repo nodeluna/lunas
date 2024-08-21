@@ -14,9 +14,15 @@ namespace fs = std::filesystem;
 
 int list_tree(const struct input_path& local_path, const unsigned long int& path_index){
 	const std::string& dir_path = local_path.path;
+	short  input_type;
 
-	if(status::local_type(dir_path, true) != DIRECTORY){
+	if(fs::exists(dir_path) == false && options::mkdir)
+		fs::create_directory(dir_path);
+
+	if((input_type = status::local_type(dir_path, true)) != DIRECTORY && input_type != -1){
 		llog::warn("path '" + dir_path + "' not a directory");
+		return 1;
+	}else if(input_type == -1){
 		return 1;
 	}
 
@@ -37,7 +43,7 @@ int list_tree(const struct input_path& local_path, const unsigned long int& path
 
 			str_entry = str_entry.substr(dir_path.size(), str_entry.size());
 
-			auto itr = find_in_tree(content, str_entry);
+			auto itr = content.find(path(str_entry, metadata, path_index));
 			if(itr != content.end())
 				itr->metadatas[path_index] = metadata;
 			else

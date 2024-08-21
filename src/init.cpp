@@ -43,9 +43,9 @@ void copy(const std::string& src, const std::string& dest, const short& type){
 	else{
 		fs::copy_options opts;
 		if(options::update)
-			opts = fs::copy_options::update_existing;
+			opts = fs::copy_options::update_existing | fs::copy_options::copy_symlinks;
 		else
-			opts = fs::copy_options::overwrite_existing;
+			opts = fs::copy_options::overwrite_existing  | fs::copy_options::copy_symlinks;
 		fs::copy(src, dest, opts);
 		match_mtime(src, dest);
 	}
