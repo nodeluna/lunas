@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <string>
 #include "os.h"
+#include "log.h"
 
 namespace fs = std::filesystem;
 
@@ -19,7 +20,12 @@ namespace parse_path{
 	void append_to_relative_path(std::string& path, std::string& current_path, int& depth){
 		if(depth != 0){
 			depth -= 1;
-			current_path.resize(current_path.rfind(path_seperator));
+			if(current_path.rfind(path_seperator) != current_path.npos)
+				current_path.resize(current_path.rfind(path_seperator));
+			else{
+				llog::error("couldn't resolve relative path '" + path + "', too many '../'");
+				exit(1);
+			}
 			append_to_relative_path(path, current_path, depth);
 		}else if(current_path.back() != path_seperator)
 			path = current_path + path_seperator + path;

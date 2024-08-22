@@ -9,6 +9,7 @@
 
 #include <string>
 #include <cstdlib>
+#include <system_error>
 
 #define NO_EXIT -1
 
