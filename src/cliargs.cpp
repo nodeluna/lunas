@@ -1,12 +1,19 @@
+#include <cctype>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "cliargs.h"
 #include "config.h"
 #include "log.h"
 #include "about.h"
 #include "path_parsing.h"
 
+bool is_num(const std::string& x){
+    return std::all_of(x.begin(), x.end(), [](char c){
+	    return std::isdigit(c);
+	    });
+}
 
 void next_arg_exists(const int& argc, const char* argv[], int i){
         if((argc-1) == i){
@@ -26,6 +33,42 @@ void fill_local_path(const std::string& argument, const short& srcdest){
 	input_paths.push_back(std::move(local_path));
 }
 
+void fill_remote_path(const int& argc, const char* argv[], int& index, const short& srcdest){
+	index++;
+	struct input_path remote_path;
+	remote_path.ip = argv[index+1];
+	remote_path.srcdest = srcdest;
+	remote_path.remote = true;
+
+	while(index++ != (argc-1)){
+		std::string option = argv[index];
+		if(option.find('=') != option.npos)
+			option.resize(option.find('='));
+		if(option[0] == '-'){
+			break;
+		}
+		std::string argument = argv[index];
+		argument = argument.substr(argument.find('=')+1, argument.size());
+
+		if((option == "N" || option == "port") && is_num(argument) == false){
+			llog::error("argument '" + argument + "' for option '" + option + "' isn't a number");
+			exit(1);
+		}else if(option == "N" || option == "port"){
+			int port = std::stoi(argument);
+			if(port < 0){
+				llog::error("port number '" + std::to_string(port) + "' for '" + remote_path.ip + "' can't be negative ");
+				exit(1);
+			}
+			remote_path.port = port ;
+		}else if(option == "pw" || option == "password"){
+			remote_path.password = argument;
+		}else{
+			llog::error("-[X] option '" + option + "' isn't recognized");
+			exit(1);
+		}
+	}
+}
+
 int fillopts(const int& argc, const char* argv[], int& index){
 	std::string option = argv[index];
 	if(option == "-p" || option == "--path"){
@@ -42,6 +85,18 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
 		fill_local_path(argument, DEST);
+		index++;
+	}else if(option == "-r" || option == "--remote-path"){
+		next_arg_exists(argc, argv, index);
+		fill_remote_path(argc, argv, index, SRCDEST);
+		index++;
+	}else if(option == "-rs" || option == "-rsrc" || option == "--remote-source"){
+		next_arg_exists(argc, argv, index);
+		fill_remote_path(argc, argv, index, SRC);
+		index++;
+	}else if(option == "-rd" || option == "-rdest" || option == "--remote-destination"){
+		next_arg_exists(argc, argv, index);
+		fill_remote_path(argc, argv, index, DEST);
 		index++;
 	}else if(option == "-u" || option == "--update"){
 		options::update = true;
