@@ -69,6 +69,7 @@ namespace raii{
 namespace sftp{
 	int unlink(const sftp_session& sftp, const std::string& path);
 	int rmdir(const sftp_session& sftp, const std::string& path);
+	int mkdir(const sftp_session& sftp, const std::string& path);
 	sftp_attributes attributes(const sftp_session& sftp, const std::string& path);
 	std::string cmd(const ssh_session& ssh, const std::string& command, const std::string& ip);
 	std::string homedir(const ssh_session& ssh, const std::string& ip);

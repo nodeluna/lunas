@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <libssh/sftp.h>
+#include <fcntl.h>
 #include "raii_sftp.h"
 #include "log.h"
 
@@ -86,7 +87,7 @@ namespace raii{
 }
 
 namespace sftp{
-	int unlink(const sftp_session& sftp, const std::string& path){
+	/*int unlink(const sftp_session& sftp, const std::string& path){
 		if(options::dry_run == false)
 			return sftp_unlink(sftp, path.c_str());
 		return SSH_OK;
@@ -94,6 +95,11 @@ namespace sftp{
 	int rmdir(const sftp_session& sftp, const std::string& path){
 		if(options::dry_run == false)
 			return sftp_rmdir(sftp, path.c_str());
+		return SSH_OK;
+	}*/
+	int mkdir(const sftp_session& sftp, const std::string& path){
+		if(options::dry_run == false)
+			return sftp_mkdir(sftp, path.c_str(),  S_IRWXU);
 		return SSH_OK;
 	}
 	sftp_attributes attributes(const sftp_session& sftp, const std::string& path){
