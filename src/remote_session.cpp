@@ -57,7 +57,8 @@ namespace rsession {
 			llog::error("exiting...");
 			exit(1);
 		}
-		ssh_options_set(ssh, SSH_OPTIONS_HOST, ip.c_str());
+		std::string hostname = ip.substr(0, ip.find(':'));
+		ssh_options_set(ssh, SSH_OPTIONS_HOST, hostname.c_str());
 		ssh_options_set(ssh, SSH_OPTIONS_PORT, &port);
 		if(options::compression){
 			if(ssh_options_set(ssh, SSH_OPTIONS_COMPRESSION, "yes") != SSH_OK)
@@ -143,6 +144,7 @@ namespace rsession {
 			parse_path::adjust_relative_path(sftp_path, depth);
 			parse_path::append_to_relative_path(sftp_path, current_path, depth);
 		}
+		os::append_seperator(sftp_path);
 		return sftp_path;
 	}
 	int free_sftp(sftp_session& sftp){
