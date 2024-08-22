@@ -41,6 +41,18 @@ namespace status{
 		}
 		return local_types(status);
 	}
+	short int remote_type(const sftp_attributes& attributes){
+		if(attributes == NULL)
+			return -1;
+		if(attributes->type == SSH_FILEXFER_TYPE_SYMLINK)
+			return SYMLINK;
+		else if(attributes->type == SSH_FILEXFER_TYPE_DIRECTORY)
+			return DIRECTORY;
+		else if(attributes->type == SSH_FILEXFER_TYPE_REGULAR)
+			return REGULAR_FILE;
+		else
+			return SPECIAL_TYPE;
+    }
 }
 
 

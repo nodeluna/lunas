@@ -17,6 +17,8 @@ namespace status{
 	unsigned short int local_types(fs::file_status entry);
 
 	short int local_type(const std::string& path, const bool& cerr);
+
+	short int remote_type(const sftp_attributes& attributes);
 }
 
 namespace condition{
