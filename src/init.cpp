@@ -5,6 +5,13 @@
 #include <vector>
 #include <set>
 #include "config.h"
+
+#ifdef REMOTE_ENABLED
+#include <libssh/sftp.h>
+#include "remote_session.h"
+#include "fs_remote.h"
+#endif // REMOTE_ENABLED
+
 #include "init.h"
 #include "cliargs.h"
 #include "base.h"
@@ -12,13 +19,31 @@
 #include "log.h"
 #include "os.h"
 #include "utimes.h"
+#include "cppfs.h"
 
+
+#ifdef REMOTE_ENABLED
+void init_rsessions(void){
+	for(auto & remote_path : input_paths){
+		if(remote_path.remote == false)
+			continue;
+		ssh_session ssh = rsession::init_ssh(remote_path.ip, remote_path.port, remote_path.password);
+		remote_path.sftp = rsession::init_sftp(ssh, remote_path.ip);
+		remote_path.path = rsession::absolute_path(remote_path.sftp, remote_path.ip);
+	}
+}
+#endif // REMOTE_ENABLED
 
 void fill_base(void){
 	unsigned long int index_path = 0;
 	for(const auto& i : input_paths){
 		llog::print("--> reading directory " + input_paths.at(index_path).path);
-		list_tree(i, index_path);
+		if(i.remote == false)
+			fs_local::list_tree(i, index_path);
+#ifdef REMOTE_ENABLED
+		else
+			fs_remote::list_tree(i, index_path);
+#endif // REMOTE_ENABLED
 		index_path++;
 	}
 	llog::print("");
@@ -41,12 +66,12 @@ void copy(const std::string& src, const std::string& dest, const short& type){
 	if(type == DIRECTORY)
 		fs::create_directory(dest);
 	else{
-		fs::copy_options opts;
-		if(options::update)
-			opts = fs::copy_options::update_existing | fs::copy_options::copy_symlinks;
-		else
-			opts = fs::copy_options::overwrite_existing  | fs::copy_options::copy_symlinks;
-		fs::copy(src, dest, opts);
+		std::error_code ec;
+		cppfs::copy(src, dest, ec);
+		if(!llog::ec(dest, ec, "couln't sync", NO_EXIT)){
+			base::syncing_counter--;
+			return;
+		}
 		match_mtime(src, dest);
 	}
 }
@@ -136,6 +161,9 @@ void counter(){
 
 int init_program(void){
 	base::paths_count = input_paths.size();
+#ifdef REMOTE_ENABLED
+	init_rsessions();
+#endif // REMOTE_ENABLED
 	fill_base();
 	counter();
 	syncing();

@@ -33,6 +33,7 @@ void fill_local_path(const std::string& argument, const short& srcdest){
 	input_paths.push_back(std::move(local_path));
 }
 
+#ifdef REMOTE_ENABLED
 void fill_remote_path(const int& argc, const char* argv[], int& index, const short& srcdest){
 	struct input_path remote_path;
 	remote_path.ip = argv[index+1];
@@ -70,6 +71,7 @@ void fill_remote_path(const int& argc, const char* argv[], int& index, const sho
 	}
 	input_paths.push_back(std::move(remote_path));
 }
+#endif // REMOTE_ENABLED
 
 int fillopts(const int& argc, const char* argv[], int& index){
 	std::string option = argv[index];
@@ -88,6 +90,7 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		std::string argument = argv[index+1];
 		fill_local_path(argument, DEST);
 		index++;
+#ifdef REMOTE_ENABLED
 	}else if(option == "-r" || option == "--remote-path"){
 		next_arg_exists(argc, argv, index);
 		fill_remote_path(argc, argv, index, SRCDEST);
@@ -97,6 +100,7 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	}else if(option == "-rd" || option == "-rdest" || option == "--remote-destination"){
 		next_arg_exists(argc, argv, index);
 		fill_remote_path(argc, argv, index, DEST);
+#endif // REMOTE_ENABLED
 	}else if(option == "-u" || option == "--update"){
 		options::update = true;
 		options::rollback = false;
