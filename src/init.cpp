@@ -159,6 +159,18 @@ void counter(){
 	}
 }
 
+#ifdef REMOTE_ENABLED
+void free_rsessions(){
+	for(auto& input_path : input_paths){
+		if(input_path.remote == false)
+			continue;
+		ssh_session ssh = input_path.sftp->session;
+		rsession::free_sftp(input_path.sftp);
+		rsession::free_ssh(ssh);
+	}
+}
+#endif // REMOTE_ENABLED
+
 int init_program(void){
 	base::paths_count = input_paths.size();
 #ifdef REMOTE_ENABLED
@@ -167,5 +179,8 @@ int init_program(void){
 	fill_base();
 	counter();
 	syncing();
+#ifdef REMOTE_ENABLED
+	free_rsessions();
+#endif // REMOTE_ENABLED
 	return 0;
 }

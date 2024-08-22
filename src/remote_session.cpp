@@ -8,6 +8,7 @@
 #include "log.h"
 #include "raii_sftp.h"
 #include "path_parsing.h"
+#include "file_types.h"
 
 
 namespace rsession {
@@ -144,7 +145,11 @@ namespace rsession {
 			parse_path::adjust_relative_path(sftp_path, depth);
 			parse_path::append_to_relative_path(sftp_path, current_path, depth);
 		}
-		os::append_seperator(sftp_path);
+		sftp_attributes attributes = sftp::attributes(sftp, sftp_path);
+		if(status::remote_type(attributes) == DIRECTORY)
+			os::append_seperator(sftp_path);
+		if(attributes != NULL)
+			sftp_attributes_free(attributes);
 		return sftp_path;
 	}
 	int free_sftp(sftp_session& sftp){
