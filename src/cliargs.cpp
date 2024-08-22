@@ -34,17 +34,18 @@ void fill_local_path(const std::string& argument, const short& srcdest){
 }
 
 void fill_remote_path(const int& argc, const char* argv[], int& index, const short& srcdest){
-	index++;
 	struct input_path remote_path;
 	remote_path.ip = argv[index+1];
 	remote_path.srcdest = srcdest;
 	remote_path.remote = true;
 
+	index++;
 	while(index++ != (argc-1)){
 		std::string option = argv[index];
 		if(option.find('=') != option.npos)
 			option.resize(option.find('='));
 		if(option[0] == '-'){
+			index--;
 			break;
 		}
 		std::string argument = argv[index];
@@ -59,14 +60,15 @@ void fill_remote_path(const int& argc, const char* argv[], int& index, const sho
 				llog::error("port number '" + std::to_string(port) + "' for '" + remote_path.ip + "' can't be negative ");
 				exit(1);
 			}
-			remote_path.port = port ;
+			remote_path.port = port;
 		}else if(option == "pw" || option == "password"){
 			remote_path.password = argument;
 		}else{
-			llog::error("-[X] option '" + option + "' isn't recognized");
+			llog::error("option '" + option + "' isn't recognized");
 			exit(1);
 		}
 	}
+	input_paths.push_back(std::move(remote_path));
 }
 
 int fillopts(const int& argc, const char* argv[], int& index){
@@ -89,15 +91,12 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	}else if(option == "-r" || option == "--remote-path"){
 		next_arg_exists(argc, argv, index);
 		fill_remote_path(argc, argv, index, SRCDEST);
-		index++;
 	}else if(option == "-rs" || option == "-rsrc" || option == "--remote-source"){
 		next_arg_exists(argc, argv, index);
 		fill_remote_path(argc, argv, index, SRC);
-		index++;
 	}else if(option == "-rd" || option == "-rdest" || option == "--remote-destination"){
 		next_arg_exists(argc, argv, index);
 		fill_remote_path(argc, argv, index, DEST);
-		index++;
 	}else if(option == "-u" || option == "--update"){
 		options::update = true;
 		options::rollback = false;
