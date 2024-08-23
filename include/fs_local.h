@@ -1,5 +1,5 @@
-#ifndef FS
-#define FS
+#ifndef FS_LOCAL
+#define FS_LOCAL
 
 #include <filesystem>
 #include <string>
@@ -9,4 +9,4 @@ namespace fs_local {
 	int list_tree(const struct input_path& local_path, const unsigned long int& index_path);
 }
 
-#endif // FS
+#endif // FS_LOCAL

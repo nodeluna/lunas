@@ -15,7 +15,7 @@
 #include "init.h"
 #include "cliargs.h"
 #include "base.h"
-#include "fs.h"
+#include "fs_local.h"
 #include "log.h"
 #include "os.h"
 #include "cppfs.h"
@@ -36,7 +36,7 @@ void init_rsessions(void){
 
 void fill_base(void){
 	unsigned long int index_path = 0;
-	for(const auto& i : input_paths){
+	for(auto& i : input_paths){
 		llog::print("--> reading directory " + input_paths.at(index_path).path);
 		if(i.remote == false)
 			fs_local::list_tree(i, index_path);

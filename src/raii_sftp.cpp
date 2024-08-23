@@ -102,6 +102,12 @@ namespace sftp{
 			return sftp_mkdir(sftp, path.c_str(),  S_IRWXU);
 		return SSH_OK;
 	}
+
+	int symlink(const sftp_session& sftp, const std::string& target, const std::string& path){
+		if(options::dry_run == false)
+			return sftp_symlink(sftp, target.c_str(), path.c_str());
+		return SSH_OK;
+	}
 	sftp_attributes attributes(const sftp_session& sftp, const std::string& path){
 		sftp_attributes attributes;
 		if(options::follow_symlink)

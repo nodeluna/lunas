@@ -11,7 +11,7 @@
 #include "cliargs.h"
 
 namespace fs_remote {
-	void list_tree(const struct input_path& local_path, const unsigned long int& index_path);
+	void list_tree(struct input_path& local_path, const unsigned long int& index_path);
 }
 
 #endif // REMOTE_ENABLED

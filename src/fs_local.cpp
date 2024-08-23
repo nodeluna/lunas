@@ -4,7 +4,7 @@
 #include <iostream>
 #include <set>
 #include "base.h"
-#include "fs.h"
+#include "fs_local.h"
 #include "file_types.h"
 #include "utimes.h"
 #include "log.h"

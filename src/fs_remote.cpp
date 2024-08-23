@@ -52,13 +52,15 @@ namespace fs_remote {
 			llog::remote_error_ssh(remote_path.sftp->session, "couldn't reach the end of directory", remote_path.path, EXIT_FAILURE);
 	}
 
-	void list_tree(const struct input_path& remote_path, const unsigned long int& index_path){
+	void list_tree(struct input_path& remote_path, const unsigned long int& index_path){
 		sftp_attributes attributes = sftp_lstat(remote_path.sftp, remote_path.path.c_str());
 		std::unique_ptr<raii::sftp::attributes> attr_obj = std::make_unique<raii::sftp::attributes>(&attributes);
 		if(attributes == NULL && sftp_get_error(remote_path.sftp) == SSH_FX_NO_SUCH_FILE){
 			if(options::mkdir){
 				int rc = sftp::mkdir(remote_path.sftp, remote_path.path);
 				llog::rc(remote_path.sftp, remote_path.path, rc, "couldn't make input directory", EXIT_FAILURE);
+				llog::print("-[!] created input directory '" + remote_path.path + "', it was not found");
+				os::append_seperator(remote_path.path);
 			}else {
 				llog::error("input directory of '" + remote_path.ip + "' doesn't exist. use -mkdir to create it");
 				exit(1);
