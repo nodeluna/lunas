@@ -18,8 +18,8 @@
 #include "fs.h"
 #include "log.h"
 #include "os.h"
-#include "utimes.h"
 #include "cppfs.h"
+#include "copy.h"
 
 
 #ifdef REMOTE_ENABLED
@@ -49,33 +49,6 @@ void fill_base(void){
 	llog::print("");
 }
 
-void match_mtime(const std::string& src, const std::string& dest){
-	struct time_val time_val = utime::get_local(src, 3);
-	utime::set_local(dest, time_val);
-}
-
-void copy(const std::string& src, const std::string& dest, const short& type){
-	std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ")";
-	if(type == DIRECTORY)
-		llog::print(count + " [Dir] "+ src + "' to '" + dest + "'");
-	else
-		llog::print(count + " [File] " + src + "' to '" + dest + "'");
-	base::syncing_counter++;
-	if(options::dry_run)
-		return;
-	if(type == DIRECTORY)
-		fs::create_directory(dest);
-	else{
-		std::error_code ec;
-		cppfs::copy(src, dest, ec);
-		if(!llog::ec(dest, ec, "couln't sync", NO_EXIT)){
-			base::syncing_counter--;
-			return;
-		}
-		match_mtime(src, dest);
-	}
-}
-
 unsigned long int get_src(const struct path& file){
 	long int src_mtime = -2;
 	unsigned long int src_mtime_i = 0;
@@ -101,14 +74,13 @@ end:
 	return src_mtime_i;
 }
 
-
-
 void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
 	const short& type = file.metadatas.at(src_mtime_i).type;
 	std::string src = input_paths.at(src_mtime_i).path + file.name;
 
 	unsigned long int dest_index = 0;
+	bool sync = false;
 	for(const auto& metadata : file.metadatas){
 		if(src_mtime_i == dest_index)
 			goto end;
@@ -117,17 +89,22 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 		if(metadata.mtime != NON_EXISTENT && metadata.type == DIRECTORY)
 			goto end;
 
-		if(options::update && src_mtime > metadata.mtime){
+		if(options::update && src_mtime > metadata.mtime)
+			sync = true;
+		else if(options::rollback && src_mtime < metadata.mtime)
+			sync = true;
+		else if(metadata.mtime == NON_EXISTENT)
+			sync = true;
+		if(sync){
 			std::string dest = input_paths.at(dest_index).path + file.name;
-			copy(src, dest, type);
-		}else if(options::rollback && src_mtime < metadata.mtime){
-			std::string dest = input_paths.at(dest_index).path + file.name;
-			copy(src, dest, type);
-		}else if(metadata.mtime == NON_EXISTENT){
-			std::string dest = input_paths.at(dest_index).path + file.name;
-			copy(src, dest, type);
+#ifdef REMOTE_ENABLED
+			lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, type);
+#else
+			lunas::copy(src, dest, type);
+#endif // REMOTE_ENABLED
 		}
 end:
+		sync = false;
 		dest_index++;
 	}
 }

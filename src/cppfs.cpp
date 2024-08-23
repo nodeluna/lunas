@@ -26,8 +26,13 @@ namespace cppfs{
 		else if(options::rollback)
 			opts = opts | std::filesystem::copy_options::overwrite_existing;
 
-		if(options::dry_run)
+		if(options::dry_run == false)
 			std::filesystem::copy(src, dest, opts, ec);
 
+	}
+
+	void mkdir(const std::string& dest, std::error_code& ec){
+		if(options::dry_run == false)
+			std::filesystem::create_directory(dest, ec);
 	}
 }

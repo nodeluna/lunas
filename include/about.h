@@ -5,7 +5,8 @@
 
 namespace about{
 	inline std::string author = 
-		"\n  nodeluna - https://github.com/nodeluna\n";
+		"\n  -> nodeluna - nodeluna@proton.me"
+		"\n  -> https://github.com/nodeluna\n";
 
 	inline std::string version = "\n  lunas ---";
 }
