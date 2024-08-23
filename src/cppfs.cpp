@@ -35,4 +35,9 @@ namespace cppfs{
 		if(options::dry_run == false)
 			std::filesystem::create_directory(dest, ec);
 	}
+
+	void symlink(const std::string& target, const std::string& dest, std::error_code& ec){
+		if(options::dry_run == false)
+			std::filesystem::create_symlink(target, dest, ec);
+	}
 }

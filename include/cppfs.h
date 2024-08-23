@@ -11,6 +11,7 @@ namespace cppfs{
 	*/
 	std::filesystem::file_status copy(const std::string& src, const std::string& dest, std::error_code& ec);
 	void mkdir(const std::string& dest, std::error_code& ec);
+	void symlink(const std::string& target, const std::string& dest, std::error_code& ec);
 }
 
 #endif // CPPFS

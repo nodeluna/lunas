@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <exception>
 #include <filesystem>
 #include <string>
@@ -17,8 +18,12 @@ namespace fs_local {
 		const std::string& dir_path = local_path.path;
 		short  input_type;
 
-		if(fs::exists(dir_path) == false && options::mkdir)
-			fs::create_directory(dir_path);
+		if(fs::exists(dir_path) == false && options::mkdir){
+			std::error_code ec;
+			fs::create_directory(dir_path, ec);
+			llog::ec(dir_path, ec, "couldn't create input directory", EXIT_FAILURE);
+			llog::print("-[!] created input directory '" + local_path.path + "', it was not found");
+		}
 
 		if((input_type = status::local_type(dir_path, true)) != DIRECTORY && input_type != -1){
 			llog::warn("path '" + dir_path + "' not a directory");
