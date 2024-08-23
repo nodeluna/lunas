@@ -118,6 +118,9 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	}else if(option == "--version" ||  option == "-V"){
 		llog::print(about::version);
 		exit(0);
+	}else if(option == "--help"){
+		llog::print(about::help);
+		exit(0);
 	}else{
 		llog::error("option '" + option + "' wasn't recognized, read the man page");
 		exit(1);
