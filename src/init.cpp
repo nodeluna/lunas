@@ -51,7 +51,7 @@ void fill_base(void){
 
 unsigned long int get_src(const struct path& file){
 	long int src_mtime = -2;
-	unsigned long int src_mtime_i = 0;
+	unsigned long int src_mtime_i = std::numeric_limits<unsigned long int>::max();
 	unsigned long int i = 0;
 
 	if(options::rollback)
@@ -112,6 +112,8 @@ end:
 void syncing(){
 	for(const auto& file : content){
 		unsigned long int src_mtime_i = get_src(file);
+		if(src_mtime_i == std::numeric_limits<unsigned long int>::max())
+			continue;
 		updating(file, src_mtime_i);
 	}
 }
