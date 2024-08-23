@@ -7,6 +7,83 @@
 .SH USAGE
 .B NOT READY !
 
+.SH OPTIONS
+.TP
+.B [-p, --path] <dir>
+
+path of the directory to be synced. this option can be used many times to sync multiple directories
+
+.TP
+.B [-r, --remote-path] <user@ip:/path/to/dir>
+
+path of the remote sftp directory to be synced. this option can be used many times to sync multiple directories
+
+.TP
+.B [N=NUMBER, port=NUMBER]
+
+the port number. this option, if used, must come after the relevant remote path. It defaults to 22, if the option is not used
+        example: -rdest user@ip:/path/to/dir port=NUMBER
+
+.TP
+.B [pw=PASSWORD, password=PASSWORD]
+
+password of the remote directory, this option, if used, must come after the relevant remote path.
+otherwise, you should be prompted for the password if publickey authentication wasn't successful
+
+        example:  -r user@ip:/path/to/dir port=NUMBER password=PASSWORD
+        example:  -r user@ip:/path/to/dir pw=PASSWORD N=NUMBER
+
+.TP
+.B [-mkdir, --make-directory]
+
+make any input directory if it doesn't exists, locally and remotely
+
+.TP
+.B [-s, -src, --source] </path/to/dir>
+
+path of the source local directory. this option can be used many times to sync multiple directories
+
+.TP
+.B [-d, -dest, --destination] </path/to/dir>
+
+path of the destination local directory. this option can be used many times to sync multiple directories
+
+.TP
+.B [-rs, -rsrc, --remote-source] <user@ip:/path/to/dir>
+
+path of the remote source sftp directory. this option can be used many times to sync multiple directories
+
+.TP
+.B [-rd, -rdest, --remote-destination] <user@ip:/path/to/dir>
+
+path of the remote destination sftp directory. this option can be used many times to sync multiple directories
+
+.TP
+.B [-dr, --dry-run]
+
+outputs what would be synced without actually syncing them
+
+.TP
+.B [-u, --update]
+
+check mtime of files and re-sync the file if mtime wasn't the same. this option enables -a mtime. the destination file, if exists, gets removed then re-synced again. it replaces old mtime files with newer mtime ones.
+
+[-rb, --rollback] can be used to replace newer files with older ones
+
+        example: -s /path/to/dir -rd user@ip:/path/to/dir port=NUMBER -u
+        example:  -p /path/to/dir -p /path/to/dir2 -p /path/to/dir3 user@ip:/path/to/dir4 port=NUMBER pw=PASSWORD -u
+
+.TP
+.B [--author]
+
+print the program's author
+
+.TP
+.B [-h, --help]
+
+print the help statement
+
+
 .SH AUTHOR
 .PP 
 

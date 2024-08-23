@@ -17,9 +17,9 @@ namespace fs_local {
 	void copy(const std::string& src, const std::string& dest, const short& type){
 		std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ")";
 		if(type == DIRECTORY)
-			llog::print(count + " [Dir] "+ src + "' to '" + dest + "'");
+			llog::print(count + " [Dir] '" + dest + "'");
 		else
-			llog::print(count + " [File] " + src + "' to '" + dest + "'");
+			llog::print(count + " [File] '" + dest + "'");
 
 		std::error_code ec;
 
