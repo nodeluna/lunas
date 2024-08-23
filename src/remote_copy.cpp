@@ -14,9 +14,9 @@ namespace fs_remote {
 	void copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp, const short& type){
 		std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ")";
 		if(type == DIRECTORY)
-			llog::print(count + " [Dir] "+ src + "' to '" + dest + "'");
+			llog::print(count + " [Dir] '" + dest + "'");
 		else
-			llog::print(count + " [File] " + src + "' to '" + dest + "'");
+			llog::print(count + " [File] '" + dest + "'");
 
 		int copied = 0;
 		if(src_sftp != nullptr && dest_sftp == nullptr)

@@ -40,6 +40,7 @@ namespace about{
 #else
 		"    [X REMOTE X]\n"
 		"        remote is disabled in the compilation process\n"
+		"\n"
 #endif // REMOTE_ENABLED
 		"    [-mkdir, --make-directory]\n"
 		"        make any input directory if it doesn't exists, locally and remotely\n"

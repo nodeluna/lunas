@@ -10,6 +10,7 @@
 #include "utimes.h"
 #include "log.h"
 #include "cliargs.h"
+#include "cppfs.h"
 
 namespace fs = std::filesystem;
 
@@ -50,10 +51,12 @@ namespace fs_local {
 		short input_type;
 		std::error_code ec;
 		if(fs::exists(local_path.path, ec) == false && options::mkdir){
-			fs::create_directory(local_path.path, ec);
+			cppfs::mkdir(local_path.path, ec);
 			llog::ec(local_path.path, ec, "couldn't create input directory", EXIT_FAILURE);
 			llog::print("-[!] created input directory '" + local_path.path + "', it was not found");
 			os::append_seperator(local_path.path);
+			if(options::dry_run)
+				return 0;
 		}
 		llog::ec(local_path.path, ec, "couldn't check input directory", EXIT_FAILURE);
 

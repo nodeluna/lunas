@@ -10,6 +10,7 @@
 #include <string>
 #include <filesystem>
 #include "log.h"
+#include "config.h"
 
 namespace fs = std::filesystem;
 
@@ -18,7 +19,9 @@ namespace status{
 
 	short int local_type(const std::string& path, const bool& cerr);
 
+#ifdef REMOTE_ENABLED
 	short int remote_type(const sftp_attributes& attributes);
+#endif // REMOTE_ENABLED
 }
 
 namespace condition{

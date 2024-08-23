@@ -41,6 +41,8 @@ namespace status{
 		}
 		return local_types(status);
 	}
+
+#ifdef REMOTE_ENABLED
 	short int remote_type(const sftp_attributes& attributes){
 		if(attributes == NULL)
 			return -1;
@@ -53,6 +55,7 @@ namespace status{
 		else
 			return SPECIAL_TYPE;
     }
+#endif // REMOTE_ENABLED
 }
 
 

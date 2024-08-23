@@ -61,6 +61,8 @@ namespace fs_remote {
 				llog::rc(remote_path.sftp, remote_path.path, rc, "couldn't make input directory", EXIT_FAILURE);
 				llog::print("-[!] created input directory '" + remote_path.path + "', it was not found");
 				os::append_seperator(remote_path.path);
+				if(options::dry_run)
+					return;
 			}else {
 				llog::error("input directory of '" + remote_path.ip + "' doesn't exist. use -mkdir to create it");
 				exit(1);
