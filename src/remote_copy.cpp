@@ -19,12 +19,18 @@ namespace fs_remote {
 			llog::print(count + " [File] '" + dest + "'");
 
 		int copied = 0;
+		if(options::dry_run){
+			copied = 1;
+			goto done;
+		}
 		if(src_sftp != nullptr && dest_sftp == nullptr)
 			copied = remote_to_local::copy(src, dest, src_sftp, type);
 		else if(src_sftp == nullptr && dest_sftp != nullptr)
 			copied = local_to_remote::copy(src, dest, dest_sftp, type);
 		else
 			copied = remote_to_remote::copy(src, dest, src_sftp, dest_sftp, type);
+
+done:
 		if (copied > 0)
 			base::syncing_counter++;
 	}
