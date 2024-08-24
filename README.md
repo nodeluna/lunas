@@ -30,7 +30,7 @@
 
 ## dependencies
 
-    lunas need libssh to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
+    lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
 
     lunas can be compiled without libssh, with local syncing only, as follows
 
