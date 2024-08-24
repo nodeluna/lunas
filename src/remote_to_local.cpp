@@ -8,8 +8,10 @@
 #include <cstring>
 #include <cerrno>
 #include <fcntl.h>
-#include <array>
+#include <queue>
+#include <vector>
 #include "remote_to_local.h"
+#include "remote_copy.h"
 #include "file_types.h"
 #include "log.h"
 #include "cppfs.h"
@@ -46,37 +48,77 @@ namespace remote_to_local {
 		}
 		raii::fstream::file file_obj_dest = raii::fstream::file(&dest_file, dest);
 
-		int bytes_read = 1, bytes_written, bytes_requested;
-		std::array<char, REMOTE_BUFFER_SIZE> buffer;
-		sftp_aio aio;
+		sftp_limits_t limit = sftp_limits(sftp);
+		const int buffer_size = limit->max_read_length;
+		sftp_limits_free(limit);
 
-		while(bytes_read > 0){
-			bytes_requested = sftp_aio_begin_read(src_file, sizeof(buffer), &aio);
-			if(bytes_requested == SSH_ERROR){
-				llog::error("error reading '" + src + "', " + ssh_get_error(sftp->session));
-				break;
+		std::queue<buffque> queue;
+
+		constexpr int max_requests = 5;
+		int requests_sent = 0, bytes_written, bytes_requested;
+		std::uintmax_t src_size = 0, dest_size = 0, total_bytes_read = 0, total_bytes_requested = 0;
+
+		sftp_attributes attr = sftp_stat(sftp, src.c_str());
+		if(attr == NULL){
+			llog::error("couldn't get src size '" + src + "', " + ssh_get_error(sftp->session));
+			goto fail;
+		}
+		src_size = attr->size;
+		sftp_attributes_free(attr);
+
+		while(dest_size < src_size){
+			while(requests_sent < max_requests && total_bytes_requested < src_size){
+				struct buffque bq(buffer_size);
+
+				bytes_requested = sftp_aio_begin_read(src_file, buffer_size, &bq.aio);
+				if(bytes_requested == SSH_ERROR){
+					llog::error("error reading '" + src + "', " + ssh_get_error(sftp->session));
+					goto fail;
+				}else if(bytes_requested == 0)
+					break;
+
+				requests_sent++;
+				queue.push(bq);
+				total_bytes_requested += bytes_requested;
 			}
 read_again:
-			bytes_read = sftp_aio_wait_read(&aio, buffer.data(), sizeof(buffer));
-			if(bytes_read == SSH_ERROR){
-				sftp_aio_free(aio);
+			if(queue.empty())
+				break;
+
+			queue.front().bytes_xfered = sftp_aio_wait_read(&queue.front().aio, queue.front().buffer.data(), buffer_size);
+			if(queue.front().bytes_xfered == SSH_ERROR){
 				llog::error("error reading '" + src + "', " + ssh_get_error(sftp->session));
 				goto fail;
-			}else if(bytes_read == SSH_AGAIN){
+			}else if(queue.front().bytes_xfered == SSH_AGAIN)
 				goto read_again;
-			}
+
+			total_bytes_read += queue.front().bytes_xfered;
 
 			std::fpos pos = dest_file.tellp();
-			dest_file.write(buffer.data(), bytes_read);
+			dest_file.write(queue.front().buffer.data(), queue.front().bytes_xfered);
 			bytes_written = dest_file.tellp() - pos;
-			if(bytes_written != bytes_read || dest_file.bad() || dest_file.fail()){
+			if(bytes_written != queue.front().bytes_xfered || dest_file.bad() || dest_file.fail()){
 				llog::error("error writing '" + dest + "', " + std::strerror(errno));
 				goto fail;
 			}
+
+			dest_size += bytes_written;
+			queue.pop();
+			requests_sent--;
+		}
+
+		if(dest_size != src_size){
+			llog::error("error occured while syncing '" + dest + "', mismatch src/dest sizes");
+			goto fail;
 		}
 
 		return 1;
 fail:
+		while(queue.empty() != true){
+			sftp_aio_free(queue.front().aio);
+			queue.pop();
+		}
+
 		return 0;
 	}
 
