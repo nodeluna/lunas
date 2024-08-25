@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <queue>
 #include <vector>
+#include <filesystem>
 #include "remote_to_local.h"
 #include "remote_copy.h"
 #include "file_types.h"
@@ -60,12 +61,13 @@ namespace remote_to_local {
 		}
 
 		std::fstream dest_file;
-		dest_file.open(dest, std::ios::out | std::ios::binary);
+		dest_file.open(dest+".ls.part", std::ios::out | std::ios::binary);
 		if(dest_file.is_open() == false){
 			llog::error("couldn't open dest '" + dest + "', " + std::strerror(errno));
 			return syncstat;
 		}
 		raii::fstream::file file_obj_dest = raii::fstream::file(&dest_file, dest);
+		std::error_code ec;
 
 		sftp_limits_t limit = sftp_limits(sftp);
 		const std::uint64_t buffer_size = limit->max_read_length;
@@ -122,6 +124,10 @@ read_again:
 			llog::error("error occured while syncing '" + dest + "', mismatch src/dest sizes");
 			goto fail;
 		}
+
+		std::filesystem::rename(dest+".ls.part", dest, ec);
+		if(llog::ec(dest, ec, "couldn't rename file to its original name", NO_EXIT) == false)
+			return syncstat;
 
 		syncstat.code = 1;
 		return syncstat;

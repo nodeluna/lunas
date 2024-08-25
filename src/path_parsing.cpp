@@ -47,15 +47,19 @@ namespace parse_path{
 	}
 
 	std::string absolute(const std::string& path){
+		std::string temp_path = path;
 		if (path.size() == 0)
 			return "";
-		if (path.front() == path_seperator)
-			return path;
-		if (path.size() > 1 && path.substr(0, 2) == "~/")
-			return std::getenv("HOME") + std::string(1, path_seperator) + path.substr(2, path.size());
+		if (path.front() == path_seperator){
+			os::append_seperator(temp_path);
+			return temp_path;
+		}if (path.size() > 1 && path.substr(0, 2) == "~/"){
+			temp_path = std::getenv("HOME") + std::string(1, path_seperator) + path.substr(2, path.size());
+			os::append_seperator(temp_path);
+			return temp_path;
+		}
 
 		int depth = 0;
-		std::string temp_path = path;
 		std::string current_path = fs::current_path().string();
 		parse_path::adjust_relative_path(temp_path, depth);
 		parse_path::append_to_relative_path(temp_path, current_path, depth);

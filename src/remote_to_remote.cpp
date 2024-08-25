@@ -57,12 +57,13 @@ namespace remote_to_remote {
 
 		int access_type = O_WRONLY | O_CREAT | O_TRUNC;
 		int perms = S_IRWXU;
-		sftp_file dest_file = sftp_open(dest_sftp, dest.c_str(), access_type, perms);
+		sftp_file dest_file = sftp_open(dest_sftp, (dest+".ls.part").c_str(), access_type, perms);
 		if(dest_file == NULL){
 			llog::error("couldn't open dest '" + dest + "', " + ssh_get_error(dest_sftp->session));
 			return syncstat;
 		}
 		raii::sftp::file file_obj_dest = raii::sftp::file(&dest_file, dest);
+		int rc;
 
 		sftp_limits_t limit = sftp_limits(dest_sftp);
 		std::uint64_t buffer_size = limit->max_write_length;
@@ -147,6 +148,9 @@ write:
 			goto fail;
 		}
 
+		rc = sftp_rename(dest_sftp, (dest+".ls.part").c_str(), dest.c_str());
+		if(llog::rc(dest_sftp, dest, rc, "couldn't rename file to its original name", NO_EXIT) == false)
+			return syncstat;
 		syncstat.code = 1;
 		return syncstat;
 fail:

@@ -19,8 +19,11 @@ namespace fs_local {
 		try {
 			for(const auto& entry : fs::recursive_directory_iterator(local_path.path, fs::directory_options::skip_permission_denied)){
 				std::string str_entry = entry.path().string();
-				if(str_entry.size() > 8 && str_entry.substr(str_entry.size()-8, str_entry.size()) == ".ls.part")
+				if(str_entry.size() > 8 && str_entry.substr(str_entry.size()-8, str_entry.size()) == ".ls.part"){
+					std::error_code ec = cppfs::remove(str_entry);
+					llog::ec(str_entry, ec, "couldn't remove incomplete file.ls.part", NO_EXIT); 
 					continue;
+				}
 				struct metadata metadata;
 
 				short type = status::local_type(str_entry, false);

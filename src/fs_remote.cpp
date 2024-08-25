@@ -29,12 +29,15 @@ namespace fs_remote {
 			std::string full_path;
 			{
 			std::string file_name = attributes->name;
-			if(file_name.size() > 8 && file_name.substr(file_name.size()-8, file_name.size()) == ".ls.part")
-				continue;
 			if(file_name == ".." || file_name == ".")
 				continue;
 
 			full_path = dir_path + file_name;
+			if(file_name.size() > 8 && file_name.substr(file_name.size()-8, file_name.size()) == ".ls.part"){
+				int rc = sftp::unlink(remote_path.sftp, full_path);
+				llog::rc(remote_path.sftp, full_path, rc, "couldn't remove incomplete file.ls.part", NO_EXIT);
+				continue;
+			}
 			}
 			std::string relative_path = full_path.substr(remote_path.path.size(), full_path.size());
 

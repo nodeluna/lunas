@@ -87,12 +87,12 @@ namespace raii{
 }
 
 namespace sftp{
-	/*int unlink(const sftp_session& sftp, const std::string& path){
+	int unlink(const sftp_session& sftp, const std::string& path){
 		if(options::dry_run == false)
 			return sftp_unlink(sftp, path.c_str());
 		return SSH_OK;
 	}
-	int rmdir(const sftp_session& sftp, const std::string& path){
+	/*int rmdir(const sftp_session& sftp, const std::string& path){
 		if(options::dry_run == false)
 			return sftp_rmdir(sftp, path.c_str());
 		return SSH_OK;

@@ -3,13 +3,13 @@
 #include "config.h"
 
 namespace cppfs{
-	/*std::error_code remove(const std::string& path){
+	std::error_code remove(const std::string& path){
 		std::error_code ec;
 		if(options::dry_run == false)
 			std::filesystem::remove(path, ec);
 		return ec;
 	}
-	std::filesystem::file_status status(const std::string& path, std::error_code& ec){
+	/*std::filesystem::file_status status(const std::string& path, std::error_code& ec){
 		if(options::follow_symlink)
 			return std::filesystem::status(path, ec);
 		else
@@ -25,9 +25,13 @@ namespace cppfs{
 			opts = opts | std::filesystem::copy_options::update_existing;
 		else if(options::rollback)
 			opts = opts | std::filesystem::copy_options::overwrite_existing;
-
-		if(options::dry_run == false)
-			std::filesystem::copy(src, dest, opts, ec);
+		
+		if(options::dry_run == false){
+			std::filesystem::copy(src, dest+".ls.part", opts, ec);
+			if(ec.value() != 0)
+				return;
+			std::filesystem::rename(dest+".ls.part", dest, ec);
+		}
 
 	}
 
