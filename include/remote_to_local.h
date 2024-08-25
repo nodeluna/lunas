@@ -7,12 +7,13 @@
 
 #include <libssh/sftp.h>
 #include <string>
+#include "copy.h"
 
 namespace remote_to_local {
-	int copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type);
-	int rfile(const std::string& src, const std::string& dest, const sftp_session& sftp);
-	int mkdir(const std::string& src, const std::string& dest, const sftp_session& sftp);
-	int symlink(const std::string& src, const std::string& dest, const sftp_session& sftp);
+	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type);
+	struct syncstat rfile(const std::string& src, const std::string& dest, const sftp_session& sftp);
+	struct syncstat mkdir(const std::string& src, const std::string& dest, const sftp_session& sftp);
+	struct syncstat symlink(const std::string& src, const std::string& dest, const sftp_session& sftp);
 }
 
 

@@ -18,6 +18,9 @@ struct input_path {
 	bool remote = false;
 	short srcdest;
 	std::uintmax_t available_space = 0;
+	std::uintmax_t synced_size = 0;
+	std::uintmax_t synced_files = 0;
+	std::uintmax_t synced_dirs = 0;
 };
 
 inline std::vector<input_path> input_paths;

@@ -29,6 +29,8 @@ namespace fs_remote {
 			std::string full_path;
 			{
 			std::string file_name = attributes->name;
+			if(file_name.size() > 8 && file_name.substr(file_name.size()-8, file_name.size()) == ".ls.part")
+				continue;
 			if(file_name == ".." || file_name == ".")
 				continue;
 

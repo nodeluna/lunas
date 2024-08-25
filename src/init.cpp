@@ -20,6 +20,7 @@
 #include "os.h"
 #include "cppfs.h"
 #include "copy.h"
+#include "size_units.h"
 
 
 #ifdef REMOTE_ENABLED
@@ -74,6 +75,17 @@ end:
 	return src_mtime_i;
 }
 
+void register_sync(const struct syncstat& syncstat, const unsigned long int& dest_index, const short& type){
+	if(syncstat.code == 0)
+		return;
+	input_paths.at(dest_index).synced_size += syncstat.copied_size;
+	if(type == DIRECTORY)
+		input_paths.at(dest_index).synced_dirs++;
+	else
+		input_paths.at(dest_index).synced_files++;
+	base::syncing_counter++;
+}
+
 void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
 	const short& type = file.metadatas.at(src_mtime_i).type;
@@ -98,10 +110,11 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 		if(sync){
 			std::string dest = input_paths.at(dest_index).path + file.name;
 #ifdef REMOTE_ENABLED
-			lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, type);
+			syncstat syncstat = lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, type);
 #else
-			lunas::copy(src, dest, type);
+			struct syncstat syncstat =lunas::copy(src, dest, type);
 #endif // REMOTE_ENABLED
+			register_sync(syncstat, dest_index, type);
 		}
 end:
 		sync = false;
@@ -150,6 +163,16 @@ void free_rsessions(){
 }
 #endif // REMOTE_ENABLED
 
+void print_stats(){
+	llog::print("");
+	for(const auto& input_path : input_paths){
+		std::string stats = size_units(input_path.synced_size);
+		stats += ", Files: " + std::to_string(input_path.synced_files);
+		stats += ", Dirs: " + std::to_string(input_path.synced_dirs);
+		llog::print("total synced to '" + input_path.path + "': " + stats);
+	}
+}
+
 int init_program(void){
 	base::paths_count = input_paths.size();
 #ifdef REMOTE_ENABLED
@@ -161,5 +184,6 @@ int init_program(void){
 #ifdef REMOTE_ENABLED
 	free_rsessions();
 #endif // REMOTE_ENABLED
+	print_stats();
 	return 0;
 }

@@ -7,17 +7,19 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 #include <libssh/sftp.h>
+#include "copy.h"
 
 struct buffque {
 	std::vector<char> buffer;
 	int bytes_xfered = 0;
 	sftp_aio aio = NULL;
-	explicit buffque(int size) : buffer(size) {}
+	explicit buffque(std::uint64_t size) : buffer(size) {}
 };
 
 namespace fs_remote {
-	void copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp, const short& type);
+	syncstat copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp, const short& type);
 }
 
 

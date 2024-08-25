@@ -10,6 +10,7 @@
 #include <cstring>
 #include <cerrno>
 #include <fcntl.h>
+#include "copy.h"
 #include "remote_copy.h"
 #include "local_to_remote.h"
 #include "log.h"
@@ -21,45 +22,54 @@
 namespace fs = std::filesystem;
 
 namespace local_to_remote {
-	int copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type){
+	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type){
+		struct syncstat syncstat;
+
 		if(type == REGULAR_FILE)
-			return local_to_remote::rfile(src, dest, sftp);
+			syncstat = local_to_remote::rfile(src, dest, sftp);
 		else if(type == DIRECTORY)
-			return local_to_remote::mkdir(src, dest, sftp);
+			syncstat = local_to_remote::mkdir(src, dest, sftp);
 		else if(type == SYMLINK)
-			return local_to_remote::symlink(src, dest, sftp);
+			syncstat = local_to_remote::symlink(src, dest, sftp);
 		else
 			llog::error("can't sync special file '" + src + "'");
 
-		return 0;
+		return syncstat;
 	}
 
-	int rfile(const std::string& src, const std::string& dest, const sftp_session& sftp){
+	struct syncstat rfile(const std::string& src, const std::string& dest, const sftp_session& sftp){
 		std::fstream src_file(src, std::ios::in | std::ios::binary);
+		struct syncstat syncstat;
 		if(!src_file.is_open()){
 			llog::error("couldn't open src '" + src + "', " + std::strerror(errno));
-			return 0;
+			return syncstat;
 		}
 		raii::fstream::file file_obj_src = raii::fstream::file(&src_file, src);
+
+		std::uintmax_t dest_size = 0, src_size = fs::file_size(src), total_bytes_requested = 0, position = 0;
+		syncstat.copied_size = src_size;
+		if(options::dry_run){
+			syncstat.code = 1;
+			return syncstat;
+		}
 
 		int access_type = O_WRONLY | O_CREAT | O_TRUNC;
 		int perms = S_IRWXU;
 		sftp_file dest_file = sftp_open(sftp, dest.c_str(), access_type, perms);
 		if(dest_file == NULL){
 			llog::error("couldn't open dest '" + dest + "', " + ssh_get_error(sftp->session));
-			return 0;
+			return syncstat;
 		}
 		raii::sftp::file file_obj_dest = raii::sftp::file(&dest_file, dest);
 
 		sftp_limits_t limit = sftp_limits(sftp);
-		const int buffer_size = limit->max_write_length;
+		const std::uint64_t buffer_size = limit->max_write_length;
 		sftp_limits_free(limit);
 
 		std::queue<buffque> queue;
 
 		constexpr int max_requests = 5;
 		int requests_sent = 0, bytes_written, bytes_requested;
-		std::uintmax_t dest_size = 0, src_size = fs::file_size(src), total_bytes_requested = 0, position = 0;
 
 		while(dest_size < src_size){
 			struct buffque bq(buffer_size);
@@ -112,34 +122,49 @@ done_reading:
 			goto fail;
 		}
 
-		return 1;
+		syncstat.code = 1;
+		return syncstat;
 fail:
 		while(!queue.empty()){
 			sftp_aio_free(queue.front().aio);
 			queue.pop();
 		}
-		return 0;
+		return syncstat;
 	}
 
-	int mkdir(const std::string& src, const std::string& dest, const sftp_session& sftp){
+	struct syncstat mkdir(const std::string& src, const std::string& dest, const sftp_session& sftp){
+		struct syncstat syncstat;
+		if(options::dry_run){
+			syncstat.code = 1;
+			return syncstat;
+		}
+
 		int rc = sftp::mkdir(sftp, dest);
 		if(llog::rc(sftp, dest, rc, "couldn't make directory", NO_EXIT) == false)
-			return 0;
+			return syncstat;
 
-		return 1;
+		syncstat.code = 1;
+		return syncstat;
 	}
 
-	int symlink(const std::string& src, const std::string& dest, const sftp_session& sftp){
+	struct syncstat symlink(const std::string& src, const std::string& dest, const sftp_session& sftp){
+		struct syncstat syncstat;
+		if(options::dry_run){
+			syncstat.code = 1;
+			return syncstat;
+		}
+
 		std::error_code ec;
 		std::string target = fs::read_symlink(src, ec);
 		if(llog::ec(src, ec, "couldn't read symlink", NO_EXIT) == false)
-			return 0;
+			return syncstat;
 
 		int rc = sftp::symlink(sftp, target, dest);
 		if(llog::rc(sftp, dest, rc, "couldn't make symlink", NO_EXIT) == false)
-			return 0;
+			return syncstat;
 
-		return 1;
+		syncstat.code = 1;
+		return syncstat;
 	}
 }
 

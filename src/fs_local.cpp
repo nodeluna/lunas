@@ -19,6 +19,8 @@ namespace fs_local {
 		try {
 			for(const auto& entry : fs::recursive_directory_iterator(local_path.path, fs::directory_options::skip_permission_denied)){
 				std::string str_entry = entry.path().string();
+				if(str_entry.size() > 8 && str_entry.substr(str_entry.size()-8, str_entry.size()) == ".ls.part")
+					continue;
 				struct metadata metadata;
 
 				short type = status::local_type(str_entry, false);
