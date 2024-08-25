@@ -53,9 +53,7 @@
 
 ## remote syncing
 
-## NOT READY!
     thanks to libssh, lunas can sync remote directories with local or/and remote ones using sftp. Read the --help statement
-## NOT READY!
 
 ## author
 
