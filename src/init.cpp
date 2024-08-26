@@ -112,7 +112,7 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 #ifdef REMOTE_ENABLED
 			syncstat syncstat = lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, type);
 #else
-			struct syncstat syncstat =lunas::copy(src, dest, type);
+			struct syncstat syncstat = lunas::copy(src, dest, type);
 #endif // REMOTE_ENABLED
 			register_sync(syncstat, dest_index, type);
 		}

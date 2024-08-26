@@ -13,6 +13,7 @@
 #include "raii_sftp.h"
 #include "base.h"
 #include "cliargs.h"
+#include "permissions.h"
 
 
 namespace remote_to_remote {
@@ -47,6 +48,7 @@ namespace remote_to_remote {
 
 		std::uintmax_t src_size = 0, dest_size = 0, total_write_bytes_requested = 0, total_read_bytes_requested = 0;
 		src_size = attr->size;
+		unsigned int perms = attr->permissions;
 		sftp_attributes_free(attr);
 		syncstat.copied_size = src_size;
 
@@ -56,7 +58,6 @@ namespace remote_to_remote {
 		}
 
 		int access_type = O_WRONLY | O_CREAT | O_TRUNC;
-		int perms = S_IRWXU;
 		sftp_file dest_file = sftp_open(dest_sftp, (dest+".ls.part").c_str(), access_type, perms);
 		if(dest_file == NULL){
 			llog::error("couldn't open dest '" + dest + "', " + ssh_get_error(dest_sftp->session));
@@ -173,7 +174,8 @@ fail:
 			return syncstat;
 		}
 
-		int rc = sftp::mkdir(dest_sftp, dest);
+		unsigned int perms = (unsigned int)permissions::get_remote(src_sftp, src);
+		int rc = sftp::mkdir(dest_sftp, dest, perms);
 		if(llog::rc(dest_sftp, dest, rc, "couldn't make directory", NO_EXIT) == false)
 			return syncstat;
 

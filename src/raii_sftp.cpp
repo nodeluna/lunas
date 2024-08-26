@@ -97,9 +97,9 @@ namespace sftp{
 			return sftp_rmdir(sftp, path.c_str());
 		return SSH_OK;
 	}*/
-	int mkdir(const sftp_session& sftp, const std::string& path){
+	int mkdir(const sftp_session& sftp, const std::string& path, const unsigned int& perms){
 		if(options::dry_run == false)
-			return sftp_mkdir(sftp, path.c_str(),  S_IRWXU);
+			return sftp_mkdir(sftp, path.c_str(), perms);
 		return SSH_OK;
 	}
 

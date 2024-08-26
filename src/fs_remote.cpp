@@ -3,12 +3,14 @@
 #ifdef REMOTE_ENABLED
 
 #include <string>
+#include <cstring>
+#include <fcntl.h>
 #include <libssh/sftp.h>
 #include "fs_remote.h"
 #include "base.h"
 #include "raii_sftp.h"
 #include "file_types.h"
-#include <cstring>
+
 
 
 namespace fs_remote {
@@ -62,7 +64,7 @@ namespace fs_remote {
 		std::unique_ptr<raii::sftp::attributes> attr_obj = std::make_unique<raii::sftp::attributes>(&attributes);
 		if(attributes == NULL && sftp_get_error(remote_path.sftp) == SSH_FX_NO_SUCH_FILE){
 			if(options::mkdir){
-				int rc = sftp::mkdir(remote_path.sftp, remote_path.path);
+				int rc = sftp::mkdir(remote_path.sftp, remote_path.path, S_IRWXU);
 				llog::rc(remote_path.sftp, remote_path.path, rc, "couldn't make input directory", EXIT_FAILURE);
 				llog::print("-[!] created input directory '" + remote_path.path + "', it was not found");
 				os::append_seperator(remote_path.path);

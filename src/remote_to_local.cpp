@@ -18,6 +18,7 @@
 #include "cppfs.h"
 #include "raii_sftp.h"
 #include "raii_fstream.h"
+#include "permissions.h"
 
 
 namespace remote_to_local {
@@ -52,6 +53,7 @@ namespace remote_to_local {
 		}
 		std::uintmax_t src_size = 0, dest_size = 0, total_bytes_read = 0, total_bytes_requested = 0;
 		src_size = attr->size;
+		std::filesystem::perms perms = (std::filesystem::perms)attr->permissions;
 		sftp_attributes_free(attr);
 		syncstat.copied_size = src_size;
 
@@ -129,6 +131,8 @@ read_again:
 		if(llog::ec(dest, ec, "couldn't rename file to its original name", NO_EXIT) == false)
 			return syncstat;
 
+		ec = permissions::set_local(dest, perms);
+		llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT);
 		syncstat.code = 1;
 		return syncstat;
 fail:
@@ -152,6 +156,9 @@ fail:
 		if(llog::ec(dest, ec, "couldn't make directory", NO_EXIT) == false)
 			return syncstat;
 
+		std::filesystem::perms perms = (std::filesystem::perms) permissions::get_remote(sftp, src);
+		ec = permissions::set_local(dest, perms);
+		llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT);
 		syncstat.code = 1;
 		return syncstat;
 	}

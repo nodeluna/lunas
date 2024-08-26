@@ -17,6 +17,7 @@
 #include "file_types.h"
 #include "raii_sftp.h"
 #include "raii_fstream.h"
+#include "permissions.h"
 
 
 namespace fs = std::filesystem;
@@ -53,8 +54,10 @@ namespace local_to_remote {
 			return syncstat;
 		}
 
+		std::error_code ec;
 		int access_type = O_WRONLY | O_CREAT | O_TRUNC;
-		int perms = S_IRWXU;
+		unsigned int perms = (unsigned int)permissions::get_local(src, ec);
+		llog::ec(src, ec, "couldn't get file permissions", NO_EXIT);
 		sftp_file dest_file = sftp_open(sftp, (dest+".ls.part").c_str(), access_type, perms);
 		if(dest_file == NULL){
 			llog::error("couldn't open dest '" + dest + "', " + ssh_get_error(sftp->session));
@@ -143,7 +146,10 @@ fail:
 			return syncstat;
 		}
 
-		int rc = sftp::mkdir(sftp, dest);
+		std::error_code ec;
+		unsigned int perms = (unsigned int)permissions::get_local(src, ec);
+		llog::ec(src, ec, "couldn't get file permissions", NO_EXIT);
+		int rc = sftp::mkdir(sftp, dest, perms);
 		if(llog::rc(sftp, dest, rc, "couldn't make directory", NO_EXIT) == false)
 			return syncstat;
 
