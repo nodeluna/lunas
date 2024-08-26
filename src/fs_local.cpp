@@ -32,7 +32,7 @@ namespace fs_local {
 				metadata.type = type;
 
 				struct time_val time_val = utime::get_local(str_entry, 2);
-				if(time_val.mtime == 0)
+				if(time_val.mtime == -1)
 					llog::local_error(str_entry, "couldn't get mtime of file", EXIT_FAILURE);
 				metadata.mtime = time_val.mtime;
 

@@ -9,12 +9,15 @@
 #include "remote_to_local.h"
 #include "remote_to_remote.h"
 #include "base.h"
+#include "remote_attrs.h"
+#include "log.h"
+
 
 namespace fs_remote {
 	syncstat copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp, const short& type){
 		std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ")";
 		if(type == DIRECTORY)
-			llog::print(count + " [Dir] '" + dest + "'");
+			llog::print(count + " [Dir]  '" + dest + "'");
 		else
 			llog::print(count + " [File] '" + dest + "'");
 
@@ -26,6 +29,8 @@ namespace fs_remote {
 		else
 			syncstat = remote_to_remote::copy(src, dest, src_sftp, dest_sftp, type);
 
+		if(syncstat.code == 1 && options::dry_run == false)
+			remote_attrs::sync_utimes(src, dest, src_sftp, dest_sftp, type);
 		return syncstat;
 	}
 }

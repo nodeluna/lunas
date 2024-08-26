@@ -9,7 +9,7 @@ namespace about{
 		"\n  -> nodeluna - nodeluna@proton.me"
 		"\n  -> https://github.com/nodeluna\n";
 
-	inline std::string version = "\n  lunas ---";
+	inline std::string version = "\n  -> lunas --- ";
 
 	inline std::string help =">>> A syncing cli tool that can handle more than two directories locally and remotely\n"
 		"        _\n"

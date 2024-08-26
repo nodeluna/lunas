@@ -6,21 +6,14 @@
 #include "file_types.h"
 #include "base.h"
 #include "cppfs.h"
-#include "utimes.h"
-
-
-
-void match_mtime(const std::string& src, const std::string& dest){
-	struct time_val time_val = utime::get_local(src, 3);
-	utime::set_local(dest, time_val);
-}
+#include "local_attrs.h"
 
 
 namespace fs_local {
 	syncstat copy(const std::string& src, const std::string& dest, const short& type){
 		std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ")";
 		if(type == DIRECTORY)
-			llog::print(count + " [Dir] '" + dest + "'");
+			llog::print(count + " [Dir]  '" + dest + "'");
 		else
 			llog::print(count + " [File] '" + dest + "'");
 
@@ -45,7 +38,8 @@ namespace fs_local {
 			return syncstat;
 		}
 
-		match_mtime(src, dest);
+		if(options::dry_run == false)
+			local_attrs::sync_utimes(src, dest);
 		syncstat.code = 1;
 		return syncstat;
 	}
