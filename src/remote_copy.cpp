@@ -30,7 +30,7 @@ namespace fs_remote {
 		else
 			syncstat = remote_to_remote::copy(src, dest, src_sftp, dest_sftp, type);
 
-		if(syncstat.code == 1 && options::dry_run == false)
+		if(options::dry_run == false && syncstat.code == 1)
 			remote_attrs::sync_utimes(src, dest, src_sftp, dest_sftp, type); 
 
 		return syncstat;

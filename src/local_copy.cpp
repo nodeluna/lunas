@@ -2,6 +2,7 @@
 #include <filesystem>
 #include "copy.h"
 #include "local_copy.h"
+#include "local_to_local.h"
 #include "log.h"
 #include "file_types.h"
 #include "base.h"
@@ -18,31 +19,10 @@ namespace fs_local {
 		else
 			llog::print(count + " [File] '" + dest + "'");
 
-		std::error_code ec;
-		struct syncstat syncstat;
+		struct syncstat	syncstat = local_to_local::copy(src, dest, type);
 
-		if(type == REGULAR_FILE){
-			cppfs::copy(src, dest, ec);
-			if(llog::ec(dest, ec, "couldn't sync", NO_EXIT) == false)
-				return syncstat;
-			syncstat.copied_size = std::filesystem::file_size(src);
-		}else if(type == DIRECTORY){
-			cppfs::mkdir(dest, ec);
-			if(llog::ec(dest, ec, "couldn't sync", NO_EXIT) == false)
-				return syncstat;
-		}else if(type == SYMLINK){
-			cppfs::copy(src, dest, ec);
-			if(llog::ec(dest, ec, "couldn't sync", NO_EXIT) == false)
-				return syncstat;
-		}else{
-			llog::error("can't copy special file '" + src + "'");
-			return syncstat;
-		}
-
-		if(options::dry_run == false){
+		if(options::dry_run == false && syncstat.code == 1)
 			local_attrs::sync_utimes(src, dest);
-			local_attrs::sync_permissions(src, dest);
-		}
 
 		syncstat.code = 1;
 		return syncstat;

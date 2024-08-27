@@ -57,7 +57,7 @@ namespace local_to_remote {
 		std::error_code ec;
 		int access_type = O_WRONLY | O_CREAT | O_TRUNC;
 		unsigned int perms = (unsigned int)permissions::get_local(src, ec);
-		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT))
+		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT) == false)
 			return syncstat;
 
 		sftp_file dest_file = sftp_open(sftp, (dest+".ls.part").c_str(), access_type, perms);
@@ -150,7 +150,7 @@ fail:
 
 		std::error_code ec;
 		unsigned int perms = (unsigned int)permissions::get_local(src, ec);
-		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT))
+		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT) == false)
 			return syncstat;
 
 		int rc = sftp::mkdir(sftp, dest, perms);

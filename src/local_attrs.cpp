@@ -27,10 +27,10 @@ namespace local_attrs {
 	int sync_permissions(const std::string& src, const std::string& dest){
 		std::error_code ec;
 		std::filesystem::perms perms = permissions::get_local(src, ec);
-		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT))
+		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT) == false)
 			return 0;
 		ec = permissions::set_local(dest, perms);
-		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT))
+		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT) == false)
 			return 0;
 		return 1;
 	}

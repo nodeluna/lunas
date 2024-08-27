@@ -73,7 +73,7 @@ namespace remote_to_local {
 		std::error_code ec;
 
 		ec = permissions::set_local(dest+".ls.part", perms);
-		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT))
+		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT) == false)
 			return syncstat;
 
 		sftp_limits_t limit = sftp_limits(sftp);
@@ -162,11 +162,11 @@ fail:
 
 		int rc = 0;
 		std::filesystem::perms perms = (std::filesystem::perms) permissions::get_remote(sftp, src, rc);
-		if(llog::rc(sftp, src, rc, "couldn't get file permissions", NO_EXIT))
+		if(llog::rc(sftp, src, rc, "couldn't get file permissions", NO_EXIT) == false)
 			return syncstat;
 
 		ec = permissions::set_local(dest, perms);
-		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT)){
+		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT) == false){
 			cppfs::remove(dest);
 			return syncstat;
 		}
