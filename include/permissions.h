@@ -15,7 +15,7 @@ namespace permissions{
 	std::error_code set_local(const std::string& path, std::filesystem::perms permissions);
 
 #ifdef REMOTE_ENABLED
-	unsigned int get_remote(const sftp_session& sftp, const std::string& path);
+	unsigned int get_remote(const sftp_session& sftp, const std::string& path, int& rc);
 	int set_remote(const sftp_session& sftp, const std::string& path, unsigned int permissions);
 #endif // REMOTE_ENABLED
 }

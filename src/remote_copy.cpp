@@ -10,6 +10,7 @@
 #include "remote_to_remote.h"
 #include "base.h"
 #include "remote_attrs.h"
+#include "local_attrs.h"
 #include "log.h"
 
 
@@ -30,7 +31,8 @@ namespace fs_remote {
 			syncstat = remote_to_remote::copy(src, dest, src_sftp, dest_sftp, type);
 
 		if(syncstat.code == 1 && options::dry_run == false)
-			remote_attrs::sync_utimes(src, dest, src_sftp, dest_sftp, type);
+			remote_attrs::sync_utimes(src, dest, src_sftp, dest_sftp, type); 
+
 		return syncstat;
 	}
 }

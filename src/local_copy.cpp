@@ -41,11 +41,9 @@ namespace fs_local {
 
 		if(options::dry_run == false){
 			local_attrs::sync_utimes(src, dest);
-			std::filesystem::perms perms = permissions::get_local(src, ec);
-			llog::ec(src, ec, "couldn't get file permissions", NO_EXIT);
-			ec = permissions::set_local(dest, perms);
-			llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT);
+			local_attrs::sync_permissions(src, dest);
 		}
+
 		syncstat.code = 1;
 		return syncstat;
 	}

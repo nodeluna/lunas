@@ -152,6 +152,7 @@ write:
 		rc = sftp_rename(dest_sftp, (dest+".ls.part").c_str(), dest.c_str());
 		if(llog::rc(dest_sftp, dest, rc, "couldn't rename file to its original name", NO_EXIT) == false)
 			return syncstat;
+
 		syncstat.code = 1;
 		return syncstat;
 fail:
@@ -173,9 +174,12 @@ fail:
 			syncstat.code = 1;
 			return syncstat;
 		}
+		int rc = 0;
+		unsigned int perms = (unsigned int)permissions::get_remote(src_sftp, src, rc);
+		if(llog::rc(src_sftp, src, rc, "couldn't get file permissions", NO_EXIT) == false)
+			return syncstat;
 
-		unsigned int perms = (unsigned int)permissions::get_remote(src_sftp, src);
-		int rc = sftp::mkdir(dest_sftp, dest, perms);
+		rc = sftp::mkdir(dest_sftp, dest, perms);
 		if(llog::rc(dest_sftp, dest, rc, "couldn't make directory", NO_EXIT) == false)
 			return syncstat;
 

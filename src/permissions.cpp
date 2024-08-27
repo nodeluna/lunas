@@ -23,18 +23,20 @@ namespace permissions{
 	}
 
 #ifdef REMOTE_ENABLED
-	unsigned int get_remote(const sftp_session& sftp, const std::string& path){
+	unsigned int get_remote(const sftp_session& sftp, const std::string& path, int& rc){
 		sftp_attributes attributes = sftp_lstat(sftp, path.c_str());
 		if(attributes != NULL){
 			unsigned int perms = (unsigned int)attributes->permissions;
 			sftp_attributes_free(attributes);
+			rc = SSH_OK;
 			return perms;
 		}
+		rc = -1;
 		return (S_IRUSR | S_IWUSR | S_IRGRP);
 	}
 
-	/*int set_permissions_remote(const std::string& path, unsigned int permissions, const sftp_session& sftp){
-		int rc = sftp_chmod(*sftp, path.c_str(), permissions);
+	/*int set_remote(const sftp_session& sftp, const std::string& path, unsigned int permissions){
+		int rc = sftp_chmod(sftp, path.c_str(), permissions);
 		return rc;
 	}*/
 #endif // REMOTE_ENABLED

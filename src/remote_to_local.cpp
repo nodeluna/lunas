@@ -19,6 +19,7 @@
 #include "raii_sftp.h"
 #include "raii_fstream.h"
 #include "permissions.h"
+#include "remote_attrs.h"
 
 
 namespace remote_to_local {
@@ -70,6 +71,10 @@ namespace remote_to_local {
 		}
 		raii::fstream::file file_obj_dest = raii::fstream::file(&dest_file, dest);
 		std::error_code ec;
+
+		ec = permissions::set_local(dest+".ls.part", perms);
+		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT))
+			return syncstat;
 
 		sftp_limits_t limit = sftp_limits(sftp);
 		const std::uint64_t buffer_size = limit->max_read_length;
@@ -131,8 +136,6 @@ read_again:
 		if(llog::ec(dest, ec, "couldn't rename file to its original name", NO_EXIT) == false)
 			return syncstat;
 
-		ec = permissions::set_local(dest, perms);
-		llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT);
 		syncstat.code = 1;
 		return syncstat;
 fail:
@@ -156,9 +159,18 @@ fail:
 		if(llog::ec(dest, ec, "couldn't make directory", NO_EXIT) == false)
 			return syncstat;
 
-		std::filesystem::perms perms = (std::filesystem::perms) permissions::get_remote(sftp, src);
+
+		int rc = 0;
+		std::filesystem::perms perms = (std::filesystem::perms) permissions::get_remote(sftp, src, rc);
+		if(llog::rc(sftp, src, rc, "couldn't get file permissions", NO_EXIT))
+			return syncstat;
+
 		ec = permissions::set_local(dest, perms);
-		llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT);
+		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT)){
+			cppfs::remove(dest);
+			return syncstat;
+		}
+
 		syncstat.code = 1;
 		return syncstat;
 	}
