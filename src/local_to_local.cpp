@@ -81,14 +81,14 @@ namespace local_to_local {
 		}
 
 		raii::fstream::file file_obj_src = raii::fstream::file(&src_file, src);
-		std::fstream dest_file(dest, std::ios::out | std::ios::binary);
+		std::fstream dest_file(dest+".ls.part", std::ios::out | std::ios::binary);
 		if(dest_file.is_open() == false){
 			llog::error("couldn't open dest '" + dest + "', " + std::strerror(errno));
 			return syncstat;
 		}
 		raii::fstream::file file_obj_dest = raii::fstream::file(&dest_file, dest);
 
-		if(local_attrs::sync_permissions(src, dest) != 1)
+		if(local_attrs::sync_permissions(src, dest+".ls.part") != 1)
 			return syncstat;
 
 		int max_requests = 5, requests_sent = 0, bytes_written;
@@ -133,6 +133,10 @@ namespace local_to_local {
 			goto fail;
 		}
 		
+		std::filesystem::rename(dest+".ls.part", dest, ec);
+		if(llog::ec(dest, ec, "couldn't rename file to its original name", NO_EXIT) == false)
+			return syncstat;
+
 		syncstat.code = 1;
 		return syncstat;
 fail:

@@ -100,6 +100,22 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	}else if(option == "-rd" || option == "-rdest" || option == "--remote-destination"){
 		next_arg_exists(argc, argv, index);
 		fill_remote_path(argc, argv, index, DEST);
+	}else if(option == "--compression" || option == "-C"){
+		options::compression = true;
+	}else if(option == "--compression-level" || option == "-CL"){
+		next_arg_exists(argc, argv, index);
+		std::string argument = argv[index+1];
+		if(is_num(argument) == false){
+			llog::error("argument '" + argument + "' for option '" + option + "' isn't a number");
+			exit(1);
+		}
+		int level = std::stoi(argument);
+		if(level > 9 || level <= 0){
+			llog::error("compression level must be between 1-9. provided level '" + argument + "'");
+			exit(1);
+		}
+		options::compression = level;
+		index++;
 #endif // REMOTE_ENABLED
 	}else if(option == "-u" || option == "--update"){
 		options::update = true;

@@ -59,6 +59,16 @@ path of the remote source sftp directory. this option can be used many times to 
 path of the remote destination sftp directory. this option can be used many times to sync multiple directories
 
 .TP
+.B [-C, --compression]
+
+enable compression in remote transfer, zlib is used
+
+.TP
+.B [-CL, --compression-level]
+
+chose the compression level, 1-9, 9 being the most efficient but slower
+
+.TP
 .B [-dr, --dry-run]
 
 outputs what would be synced without actually syncing them

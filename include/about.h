@@ -57,6 +57,12 @@ namespace about{
 		"\n"
 		"    [-rd, -rdest, --remote-destination] <user@ip:/path/to/dir>\n"
 		"        path of the remote destination sftp directory. this option can be used many times to sync multiple directories\n"
+		"\n"
+		"    [-C, --compression]\n"
+		"        enable compression in remote transfer, zlib is used\n"
+		"\n"
+		"    [-CL, --compression-level]\n"
+		"        chose the compression level, 1-9, 9 being the most efficient but slower\n"
 #endif // REMOTE_ENABLED
 		"\n"
 		"\x1b[1;31m    [-u, --update]   \x1b[1;0m\n"
