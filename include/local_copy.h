@@ -10,7 +10,7 @@
 
 struct lbuffque{
 	std::vector<char> buffer;
-	std::future<std::pair<std::vector<char>*, long int>> future;
+	long int bytes_read = 0;
 	explicit lbuffque(std::uint64_t size) : buffer(size) {}
 };
 

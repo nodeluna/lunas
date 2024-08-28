@@ -6,6 +6,7 @@
 #include <cstring>
 #include <cerrno>
 #include <mutex>
+#include <condition_variable>
 #include "local_to_local.h"
 #include "file_types.h"
 #include "copy.h"
@@ -16,24 +17,33 @@
 #include "local_attrs.h"
 
 std::mutex file_mutex;
+std::condition_variable cv;
 
-std::future<std::pair<std::vector<char>*, long int>> fstream_aio_read_begin(std::fstream& src_file, std::vector<char>* buffer, unsigned long int &position){
-	return std::async(std::launch::async, [&src_file, buffer, &position](){
-			std::lock_guard<std::mutex>lock_file(file_mutex);
+std::future<void> fstream_aio_read_begin(std::fstream& src_file, std::queue<lbuffque>* queue, unsigned long int &position){
+	return std::async(std::launch::async, [&src_file, queue, &position](){
+			std::unique_lock<std::mutex> lock_file(file_mutex);
 
-			if(src_file.eof())
-				return std::make_pair(buffer, (long int) 0);
+			if(src_file.eof()){
+				queue->back().bytes_read = 0;
+				goto done;
+			}
 
 			src_file.seekg(position);
-			if(src_file.fail() || src_file.bad())
-				return std::make_pair(buffer, (long int)-1);
+			if(src_file.fail() || src_file.bad()){
+				queue->back().bytes_read = -1;
+				goto done;
+			}
 
-			src_file.read(buffer->data(), buffer->size());
-			if(src_file.bad())
-				return std::make_pair(buffer, (long int)-1);
+			src_file.read(queue->back().buffer.data(), queue->back().buffer.size());
+			if(src_file.bad()){
+				queue->back().bytes_read = -1;
+				goto done;
+			}
+
 			position += src_file.gcount();
-
-			return std::make_pair(buffer, src_file.gcount());
+			queue->back().bytes_read = src_file.gcount();
+done:
+			cv.notify_one();
 		});
 }
 
@@ -91,26 +101,24 @@ namespace local_to_local {
 			while(requests_sent < max_requests && total_bytes_requested < src_size){
 				struct lbuffque bq(buffer_size);
 				queue.push(std::move(bq));
-				queue.back().future = fstream_aio_read_begin(src_file, &queue.back().buffer, position);
+				fstream_aio_read_begin(src_file, &queue, position);
 				requests_sent++;
 				total_bytes_requested += buffer_size;
 			}
 
-			if(queue.empty())
-				break;
-				
-			auto result = queue.front().future.get();
-			if(result.second == -1){
+			std::unique_lock<std::mutex> lock(file_mutex);
+			cv.wait(lock, [&queue](){ return !queue.empty();});
+
+			if(queue.front().bytes_read == -1){
 				llog::error("error reading '" + src + "', " + std::strerror(errno));
 				goto fail;
-			}else if(result.second == 0){
+			}else if(queue.front().bytes_read == 0)
 				break;
-			}
 
 			std::fpos pos = dest_file.tellp();
-			dest_file.write(queue.front().buffer.data(), result.second);
+			dest_file.write(queue.front().buffer.data(), queue.front().bytes_read);
 			bytes_written = dest_file.tellp() - pos;
-			if(bytes_written != result.second || dest_file.bad() || dest_file.fail()){
+			if(bytes_written != queue.front().bytes_read || dest_file.bad() || dest_file.fail()){
 				llog::error("error writing '" + dest + "', " + std::strerror(errno));
 				goto fail;
 			}
