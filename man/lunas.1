@@ -14,6 +14,16 @@
 path of the directory to be synced. this option can be used many times to sync multiple directories
 
 .TP
+.B [-s, -src, --source] </path/to/dir>
+
+path of the source local directory. this option can be used many times to sync multiple directories
+
+.TP
+.B [-d, -dest, --destination] </path/to/dir>
+
+path of the destination local directory. this option can be used many times to sync multiple directories
+
+.TP
 .B [-r, --remote-path] <user@ip:/path/to/dir>
 
 path of the remote sftp directory to be synced. this option can be used many times to sync multiple directories
@@ -34,21 +44,6 @@ otherwise, you should be prompted for the password if publickey authentication w
         example:  -r user@ip:/path/to/dir pw=PASSWORD N=NUMBER
 
 .TP
-.B [-mkdir, --make-directory]
-
-make any input directory if it doesn't exists, locally and remotely
-
-.TP
-.B [-s, -src, --source] </path/to/dir>
-
-path of the source local directory. this option can be used many times to sync multiple directories
-
-.TP
-.B [-d, -dest, --destination] </path/to/dir>
-
-path of the destination local directory. this option can be used many times to sync multiple directories
-
-.TP
 .B [-rs, -rsrc, --remote-source] <user@ip:/path/to/dir>
 
 path of the remote source sftp directory. this option can be used many times to sync multiple directories
@@ -67,6 +62,16 @@ enable compression in remote transfer, zlib is used
 .B [-CL, --compression-level]
 
 chose the compression level, 1-9, 9 being the most efficient but slower
+
+.TP
+.B [-mkdir, --make-directory]
+
+make any input directory if it doesn't exists, locally and remotely
+
+.TP
+.B [-F, --fsync]
+
+synchronize the copied file with the filesystem
 
 .TP
 .B [-u, --update]

@@ -92,7 +92,7 @@ namespace local_to_local {
 			llog::error("couldn't open dest '" + dest + "', " + std::strerror(errno));
 			return syncstat;
 		}
-		raii::fstream::file file_obj_dest = raii::fstream::file(&dest_file, dest);
+		std::unique_ptr<raii::fstream::file> file_obj_dest = std::make_unique<raii::fstream::file>(&dest_file, dest);
 
 		if(local_attrs::sync_permissions(src, dest+".ls.part") != 1)
 			return syncstat;
@@ -139,7 +139,14 @@ namespace local_to_local {
 			llog::error("error occured while syncing '" + dest + "', mismatch src/dest sizes");
 			goto fail;
 		}
-		
+
+		if(options::fsync){
+			int rc = dest_file.sync();
+			if(rc != 0)
+				llog::warn("couldn't fsync '" + dest + "', " + std::strerror(errno));
+		}
+
+		file_obj_dest.reset();
 		std::filesystem::rename(dest+".ls.part", dest, ec);
 		if(llog::ec(dest, ec, "couldn't rename file to its original name", NO_EXIT) == false)
 			return syncstat;

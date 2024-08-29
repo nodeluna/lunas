@@ -134,6 +134,8 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		options::verbose = true;
 	}else if(option == "--quiet" || option == "-q"){
 		options::quiet = true;
+	}else if(option == "--fsync" || option == "-F"){
+		options::fsync = true;
 	}else if(option == "--author"){
 		llog::print(about::author);
 		exit(0);
