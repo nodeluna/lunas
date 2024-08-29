@@ -7,8 +7,9 @@
 #include <string>
 #include <cstring>
 #include <iostream>
-
 #include "log.h"
+#include "file_types.h"
+#include "base.h"
 
 namespace llog{
 	void error(const std::string& msg) noexcept{
@@ -55,5 +56,24 @@ namespace llog{
 			return false;
 		}
 		return true;
+	}
+	
+	void print_sync(const std::string& src, const std::string& dest, const short& type){
+		std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ") ";
+		std::string space(count.size() - 3, ' ');
+		if(type == DIRECTORY){
+			if(options::verbose)
+				llog::print(count + "[Dir]  '" + src + "'\n" + space + "-> [At]   '" + dest + "'");
+			else
+				llog::print(count + "[Dir]  '" + dest + "'");
+		
+		}else{
+			if(options::verbose)
+				llog::print(count + "[File] '" + src + "'\n" + space + "-> [To]   '" + dest + "'");
+			else
+				llog::print(count + "[File] '" + dest + "'");
+		}
+
+
 	}
 }

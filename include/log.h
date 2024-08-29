@@ -31,6 +31,8 @@ namespace llog{
 	void local_error(const std::string& path, const std::string& msg, const int& exit_code);
 
 	bool ec(const std::string& path, const std::error_code& ec, const std::string& msg, const int& exit_code);
+
+	void print_sync(const std::string& src, const std::string& dest, const short& type);
 }
 
 #endif // LUNA_LOG

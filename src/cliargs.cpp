@@ -130,6 +130,8 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		options::mkdir = true;
 	}else if(option == "--progress" || option == "-P"){
 		options::progress_bar = true;
+	}else if(option == "--verbose" || option == "-v"){
+		options::verbose = true;
 	}else if(option == "--author"){
 		llog::print(about::author);
 		exit(0);

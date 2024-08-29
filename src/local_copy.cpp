@@ -13,11 +13,7 @@
 
 namespace fs_local {
 	syncstat copy(const std::string& src, const std::string& dest, const short& type){
-		std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ")";
-		if(type == DIRECTORY)
-			llog::print(count + " [Dir]  '" + dest + "'");
-		else
-			llog::print(count + " [File] '" + dest + "'");
+		llog::print_sync(src, dest, type);
 
 		struct syncstat	syncstat = local_to_local::copy(src, dest, type);
 
