@@ -15,6 +15,8 @@
 #include "log.h"
 #include "raii_fstream.h"
 #include "local_attrs.h"
+#include "progress.h"
+
 
 std::mutex file_mutex;
 std::condition_variable cv;
@@ -47,6 +49,10 @@ done:
 		});
 }
 
+void fstream_aio_wait_read(std::queue<lbuffque>& queue){
+	std::unique_lock<std::mutex> lock(file_mutex);
+	cv.wait(lock, [&queue](){ return !queue.empty();});
+}
 
 namespace local_to_local {
 	struct syncstat copy(const std::string& src, const std::string& dest, const short& type){
@@ -96,6 +102,7 @@ namespace local_to_local {
 		unsigned long int position = 0;
 		std::queue<lbuffque> queue;
 
+		struct progress::obj _;
 
 		while(dest_size < src_size){
 			while(requests_sent < max_requests && total_bytes_requested < src_size){
@@ -106,8 +113,7 @@ namespace local_to_local {
 				total_bytes_requested += buffer_size;
 			}
 
-			std::unique_lock<std::mutex> lock(file_mutex);
-			cv.wait(lock, [&queue](){ return !queue.empty();});
+			fstream_aio_wait_read(queue);
 
 			if(queue.front().bytes_read == -1){
 				llog::error("error reading '" + src + "', " + std::strerror(errno));
@@ -124,6 +130,7 @@ namespace local_to_local {
 			}
 
 			dest_size += bytes_written;
+			progress::ingoing(src_size, dest_size);
 			queue.pop();
 			requests_sent--;
 		}

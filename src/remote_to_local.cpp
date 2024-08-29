@@ -20,6 +20,7 @@
 #include "raii_fstream.h"
 #include "permissions.h"
 #include "remote_attrs.h"
+#include "progress.h"
 
 
 namespace remote_to_local {
@@ -84,6 +85,7 @@ namespace remote_to_local {
 
 		constexpr int max_requests = 5;
 		int requests_sent = 0, bytes_written, bytes_requested;
+		struct progress::obj _;
 
 
 		while(dest_size < src_size){
@@ -123,6 +125,7 @@ read_again:
 			}
 
 			dest_size += bytes_written;
+			progress::ingoing(src_size, dest_size);
 			queue.pop();
 			requests_sent--;
 		}

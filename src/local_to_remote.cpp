@@ -18,6 +18,7 @@
 #include "raii_sftp.h"
 #include "raii_fstream.h"
 #include "permissions.h"
+#include "progress.h"
 
 
 namespace fs = std::filesystem;
@@ -76,6 +77,7 @@ namespace local_to_remote {
 
 		constexpr int max_requests = 5;
 		int requests_sent = 0, bytes_written, bytes_requested;
+		struct progress::obj _;
 
 		while(dest_size < src_size){
 			struct buffque bq(buffer_size);
@@ -108,6 +110,7 @@ done_reading:
 				}
 				requests_sent--;
 				dest_size += bytes_written;
+				progress::ingoing(src_size, dest_size);
 				queue.pop();
 			}
 

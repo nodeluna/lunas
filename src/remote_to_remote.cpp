@@ -14,6 +14,7 @@
 #include "base.h"
 #include "cliargs.h"
 #include "permissions.h"
+#include "progress.h"
 
 
 namespace remote_to_remote {
@@ -80,6 +81,7 @@ namespace remote_to_remote {
 
 		constexpr int max_requests = 3;
 		int read_requests_sent = 0, write_requests_sent = 0, bytes_written, bytes_requested;
+		struct progress::obj _;
 
 
 		while(dest_size < src_size){
@@ -125,6 +127,7 @@ write:
 				if(read_requests_sent > 0)
 					read_requests_sent--;
 				dest_size += bytes_written;
+				progress::ingoing(src_size, dest_size);
 				wqueue.pop();
 			}
 
