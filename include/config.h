@@ -14,7 +14,7 @@
 
 namespace options{
 	inline std::vector<std::string> exclude;
-	inline bool quiet_mode = false;
+	inline bool quiet = false;
 	inline bool verbose = false;
 	inline bool dry_run = false;
 	inline bool mkdir = false;

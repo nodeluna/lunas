@@ -59,6 +59,8 @@ namespace llog{
 	}
 	
 	void print_sync(const std::string& src, const std::string& dest, const short& type){
+		if(options::quiet)
+			return;
 		std::string count = "(" + std::to_string(base::syncing_counter) + std::string("/") + std::to_string(base::to_be_synced) + ") ";
 		std::string space(count.size() - 3, ' ');
 		if(type == DIRECTORY){
