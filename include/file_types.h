@@ -21,6 +21,8 @@ namespace status{
 
 #ifdef REMOTE_ENABLED
 	short int remote_type(const sftp_attributes& attributes);
+
+	short int remote_type2(const sftp_session& sftp, const std::string& path, bool cerr);
 #endif // REMOTE_ENABLED
 }
 

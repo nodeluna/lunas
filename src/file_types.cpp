@@ -6,6 +6,7 @@
 #include "file_types.h"
 #include "log.h"
 #include "base.h"
+#include "raii_sftp.h"
 
 namespace fs = std::filesystem;
 
@@ -55,6 +56,21 @@ namespace status{
 		else
 			return SPECIAL_TYPE;
     }
+
+	short int remote_type2(const sftp_session& sftp, const std::string& path, bool cerr){
+		sftp_attributes attributes;
+		if(options::follow_symlink)
+			attributes = sftp_stat(sftp, path.c_str());
+		else
+			attributes = sftp_lstat(sftp, path.c_str());
+		if(attributes == NULL){
+			if(cerr)
+				llog::remote_error(sftp, path, "couldn't get type of", NO_EXIT);
+			return -1;
+		}
+		raii::sftp::attributes attr_obj = raii::sftp::attributes(&attributes);
+		return remote_type(attributes);
+	}
 #endif // REMOTE_ENABLED
 }
 

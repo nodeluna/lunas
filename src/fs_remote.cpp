@@ -25,7 +25,6 @@ namespace fs_remote {
 			std::unique_ptr<raii::sftp::attributes> attr_obj = std::make_unique<raii::sftp::attributes>(&attributes);
 
 			struct metadata metadata;
-			metadata.type = (short int)(attributes->type);
 			metadata.mtime = attributes->mtime;
 
 			std::string full_path;
@@ -42,6 +41,13 @@ namespace fs_remote {
 			}
 			}
 			std::string relative_path = full_path.substr(remote_path.path.size(), full_path.size());
+
+			if(options::follow_symlink){
+				metadata.type = status::remote_type2(remote_path.sftp, full_path, true);
+				if(metadata.type == -1)
+					exit(1);
+			}else
+				metadata.type = (short int)(attributes->type);
 
 			auto itr = content.find(path(relative_path, metadata, index_path));
 			if(itr != content.end())
@@ -60,7 +66,7 @@ namespace fs_remote {
 	}
 
 	void list_tree(struct input_path& remote_path, const unsigned long int& index_path){
-		sftp_attributes attributes = sftp_lstat(remote_path.sftp, remote_path.path.c_str());
+		sftp_attributes attributes = sftp_stat(remote_path.sftp, remote_path.path.c_str());
 		std::unique_ptr<raii::sftp::attributes> attr_obj = std::make_unique<raii::sftp::attributes>(&attributes);
 		if(attributes == NULL && sftp_get_error(remote_path.sftp) == SSH_FX_NO_SUCH_FILE){
 			if(options::mkdir){
@@ -77,7 +83,8 @@ namespace fs_remote {
 		}else if(status::remote_type(attributes) != DIRECTORY){
 			llog::error("input path of '" + remote_path.ip + "' isn't a directory");
 			exit(1);
-		}
+		}else if(status::remote_type(attributes) == DIRECTORY)
+			os::append_seperator(remote_path.path);
 		attr_obj.reset();
 
 		fs_remote::readdir(remote_path, remote_path.path, index_path);

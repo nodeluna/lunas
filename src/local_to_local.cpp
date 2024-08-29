@@ -178,7 +178,7 @@ fail:
 	struct syncstat symlink(const std::string& src, const std::string& dest){
 		struct syncstat syncstat;
 		std::error_code ec;
-		cppfs::copy(src, dest, ec);
+		cppfs::symlink(src, dest, ec);
 		if(llog::ec(dest, ec, "couldn't make symlink", NO_EXIT) == false)
 			return syncstat;
 		syncstat.code = 1;

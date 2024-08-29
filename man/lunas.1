@@ -74,6 +74,11 @@ make any input directory if it doesn't exists, locally and remotely
 synchronize the copied file with the filesystem
 
 .TP
+.B [-L, --dereference]
+
+follow symlinks. sync the target the symlink is pointing to instead of the symlink itself
+
+.TP
 .B [-u, --update]
 
 check mtime of files and re-sync the file if mtime wasn't the same. this option enables -a mtime. the destination file, if exists, gets removed then re-synced again. it replaces old mtime files with newer mtime ones.

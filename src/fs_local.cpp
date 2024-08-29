@@ -65,7 +65,9 @@ namespace fs_local {
 		}
 		llog::ec(local_path.path, ec, "couldn't check input directory", EXIT_FAILURE);
 
-		if((input_type = status::local_type(local_path.path, true)) != DIRECTORY && input_type != -1){
+		fs::file_status status = fs::status(local_path.path, ec);
+		llog::ec(local_path.path, ec, "couldn't check input path", EXIT_FAILURE);
+		if((input_type = status::local_types(status) != DIRECTORY) && input_type != -1){
 			llog::error("input path '" + local_path.path + "' isn't a directory");
 			exit(1);
 		}else if(input_type == -1)
