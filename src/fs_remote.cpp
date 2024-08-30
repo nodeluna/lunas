@@ -10,6 +10,7 @@
 #include "base.h"
 #include "raii_sftp.h"
 #include "file_types.h"
+#include "resume.h"
 
 
 
@@ -28,26 +29,32 @@ namespace fs_remote {
 			metadata.mtime = attributes->mtime;
 
 			std::string full_path;
+			std::string relative_path;
 			{
 			std::string file_name = attributes->name;
 			if(file_name == ".." || file_name == ".")
 				continue;
 
 			full_path = dir_path + file_name;
-			if(file_name.size() > 8 && file_name.substr(file_name.size()-8, file_name.size()) == ".ls.part"){
-				int rc = sftp::unlink(remote_path.sftp, full_path);
-				llog::rc(remote_path.sftp, full_path, rc, "couldn't remove incomplete file.ls.part", NO_EXIT);
-				continue;
-			}
-			}
-			std::string relative_path = full_path.substr(remote_path.path.size(), full_path.size());
-
 			if(options::follow_symlink){
 				metadata.type = status::remote_type2(remote_path.sftp, full_path, true);
 				if(metadata.type == -1)
 					exit(1);
 			}else
 				metadata.type = (short int)(attributes->type);
+
+			relative_path = full_path.substr(remote_path.path.size(), full_path.size());
+
+			if(resume::is_lspart(file_name)){
+				if(options::resume)
+					part_files.insert(path(relative_path, metadata, index_path));
+				else{
+					int rc = sftp::unlink(remote_path.sftp, full_path);
+					llog::rc(remote_path.sftp, full_path, rc, "couldn't remove incomplete file.ls.part", NO_EXIT);
+				}
+				continue;
+			}
+			}
 
 			auto itr = content.find(path(relative_path, metadata, index_path));
 			if(itr != content.end())

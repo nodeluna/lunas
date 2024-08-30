@@ -79,30 +79,45 @@ namespace local_to_local {
 		if(llog::ec(src, ec, "couldn't get src size", NO_EXIT) == false)
 			return syncstat;
 		syncstat.copied_size = src_size;
+		if(options::dry_run){
+			syncstat.code = 1;
+			return syncstat;
+		}
 
 		std::fstream src_file(src, std::ios::in | std::ios::binary);
 		if(src_file.is_open() == false){
 			llog::error("couldn't open src '" + src + "', " + std::strerror(errno));
 			return syncstat;
 		}
-
 		raii::fstream::file file_obj_src = raii::fstream::file(&src_file, src);
-		std::fstream dest_file(dest+".ls.part", std::ios::out | std::ios::binary);
+
+		std::ios::openmode openmode;
+
+		if(options::resume){
+			dest_size = std::filesystem::file_size(dest, ec);
+			if(llog::ec(dest, ec, "couldn't get dest size", NO_EXIT) == false)
+				return syncstat;
+			openmode = std::ios::out | std::ios::binary | std::ios::app;
+		}else{
+			openmode = std::ios::out | std::ios::binary;
+		}
+		std::fstream dest_file(dest, openmode);
 		if(dest_file.is_open() == false){
 			llog::error("couldn't open dest '" + dest + "', " + std::strerror(errno));
 			return syncstat;
 		}
-		std::unique_ptr<raii::fstream::file> file_obj_dest = std::make_unique<raii::fstream::file>(&dest_file, dest);
+		raii::fstream::file file_obj_dest = raii::fstream::file(&dest_file, dest);
 
-		if(local_attrs::sync_permissions(src, dest+".ls.part") != 1)
+		if(local_attrs::sync_permissions(src, dest) != 1)
 			return syncstat;
 
 		int max_requests = 5, requests_sent = 0, bytes_written;
 		const std::uint64_t buffer_size = LOCAL_BUFFER_SIZE;
-		unsigned long int position = 0;
+		std::uintmax_t position = dest_size;
 		std::queue<lbuffque> queue;
 
 		struct progress::obj _;
+
 
 		while(dest_size < src_size){
 			while(requests_sent < max_requests && total_bytes_requested < src_size){
@@ -146,11 +161,6 @@ namespace local_to_local {
 				llog::warn("couldn't fsync '" + dest + "', " + std::strerror(errno));
 		}
 
-		file_obj_dest.reset();
-		std::filesystem::rename(dest+".ls.part", dest, ec);
-		if(llog::ec(dest, ec, "couldn't rename file to its original name", NO_EXIT) == false)
-			return syncstat;
-
 		syncstat.code = 1;
 		return syncstat;
 fail:
@@ -162,6 +172,10 @@ fail:
 	}
 	struct syncstat mkdir(const std::string& src, const std::string& dest){
 		struct syncstat syncstat;
+		if(options::dry_run){
+			syncstat.code = 1;
+			return syncstat;
+		}
 		std::error_code ec;
 		cppfs::mkdir(dest, ec);
 		if(llog::ec(dest, ec, "couldn't make directory", NO_EXIT) == false)
@@ -177,6 +191,10 @@ fail:
 
 	struct syncstat symlink(const std::string& src, const std::string& dest){
 		struct syncstat syncstat;
+		if(options::dry_run){
+			syncstat.code = 1;
+			return syncstat;
+		}
 		std::error_code ec;
 		cppfs::symlink(src, dest, ec);
 		if(llog::ec(dest, ec, "couldn't make symlink", NO_EXIT) == false)

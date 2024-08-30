@@ -49,4 +49,6 @@ struct path {
 
 inline std::set<path> content;
 
+inline std::set<path> part_files;
+
 #endif // BASE_DATA_STRUCTURE

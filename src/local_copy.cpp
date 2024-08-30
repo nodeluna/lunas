@@ -13,14 +13,33 @@
 
 namespace fs_local {
 	syncstat copy(const std::string& src, const std::string& dest, const short& type){
-		llog::print_sync(src, dest, type);
+		std::string original_dest = lunas::original_dest(dest);
+		llog::print_sync(src, original_dest, type);
 
 		struct syncstat	syncstat = local_to_local::copy(src, dest, type);
 
-		if(options::dry_run == false && syncstat.code == 1)
-			local_attrs::sync_utimes(src, dest);
+		{
+		struct fs_local::original_name _(dest, original_dest, syncstat.code);
+		}
 
-		syncstat.code = 1;
+		if(options::dry_run == false && syncstat.code == 1)
+			local_attrs::sync_utimes(src, original_dest);
+
 		return syncstat;
+	}
+
+	original_name::original_name(const std::string& dest_lspart, const std::string& original_name, int& code) : 
+		lspart(dest_lspart), dest(original_name), synccode(code) {}
+
+	original_name::~original_name(){
+		if(options::dry_run)
+			return;
+		if(synccode != 1 || dest == lspart)
+			return;
+
+		std::error_code ec;
+		std::filesystem::rename(lspart, dest, ec);
+		if(llog::ec(lspart, ec, "couldn't rename file to its original name", NO_EXIT) == false)
+			synccode = 0;
 	}
 }

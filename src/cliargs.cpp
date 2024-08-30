@@ -128,6 +128,8 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		options::dry_run = true;
 	}else if(option == "--make-directory" || option == "-mkdir"){
 		options::mkdir = true;
+	}else if(option == "--resume" || option == "-R"){
+		options::resume = true;
 	}else if(option == "--progress" || option == "-P"){
 		options::progress_bar = true;
 	}else if(option == "--verbose" || option == "-v"){

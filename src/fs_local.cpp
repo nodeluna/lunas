@@ -11,6 +11,7 @@
 #include "log.h"
 #include "cliargs.h"
 #include "cppfs.h"
+#include "resume.h"
 
 namespace fs = std::filesystem;
 
@@ -19,13 +20,7 @@ namespace fs_local {
 		try {
 			for(const auto& entry : fs::recursive_directory_iterator(local_path.path, fs::directory_options::skip_permission_denied)){
 				std::string str_entry = entry.path().string();
-				if(str_entry.size() > 8 && str_entry.substr(str_entry.size()-8, str_entry.size()) == ".ls.part"){
-					std::error_code ec = cppfs::remove(str_entry);
-					llog::ec(str_entry, ec, "couldn't remove incomplete file.ls.part", NO_EXIT); 
-					continue;
-				}
 				struct metadata metadata;
-
 				short type = status::local_type(str_entry, false);
 				if(type == -1)
 					llog::local_error(str_entry, "couldn't get type of", EXIT_FAILURE);
@@ -35,6 +30,17 @@ namespace fs_local {
 				if(time_val.mtime == -1)
 					llog::local_error(str_entry, "couldn't get mtime of file", EXIT_FAILURE);
 				metadata.mtime = time_val.mtime;
+
+				if(resume::is_lspart(str_entry)){
+					if(options::resume){
+						std::string relative_path = str_entry.substr(local_path.path.size(), str_entry.size());
+						part_files.insert(path(relative_path, metadata, path_index));
+					}else{
+						std::error_code ec = cppfs::remove(str_entry);
+						llog::ec(str_entry, ec, "couldn't remove incomplete file.ls.part", NO_EXIT); 
+					}
+					continue;
+				}
 
 				str_entry = str_entry.substr(local_path.path.size(), str_entry.size());
 

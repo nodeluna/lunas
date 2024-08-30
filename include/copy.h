@@ -21,6 +21,8 @@ namespace lunas{
 #else
 	syncstat copy(const std::string& src, const std::string& dest, const short& type);
 #endif // REMOTE_ENABLED
+
+	std::string original_dest(const std::string& dest_with_hash);
 }
 
 #endif // HANDLING_COPYING

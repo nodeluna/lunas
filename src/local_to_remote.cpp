@@ -40,34 +40,48 @@ namespace local_to_remote {
 	}
 
 	struct syncstat rfile(const std::string& src, const std::string& dest, const sftp_session& sftp){
-		std::fstream src_file(src, std::ios::in | std::ios::binary);
 		struct syncstat syncstat;
+
+		std::fstream src_file(src, std::ios::in | std::ios::binary);
 		if(!src_file.is_open()){
 			llog::error("couldn't open src '" + src + "', " + std::strerror(errno));
 			return syncstat;
 		}
 		raii::fstream::file file_obj_src = raii::fstream::file(&src_file, src);
 
-		std::uintmax_t dest_size = 0, src_size = fs::file_size(src), total_bytes_requested = 0, position = 0;
+		std::uintmax_t dest_size = 0, src_size = fs::file_size(src);
 		syncstat.copied_size = src_size;
+
 		if(options::dry_run){
 			syncstat.code = 1;
 			return syncstat;
 		}
 
 		std::error_code ec;
-		int access_type = O_WRONLY | O_CREAT | O_TRUNC;
+		int access_type;
+		if(options::resume){
+			sftp_attributes attrs = sftp_stat(sftp, dest.c_str());
+			if(attrs == NULL && sftp_get_error(sftp) != SSH_FX_NO_SUCH_FILE){
+				llog::error("couldn't check '" + dest + "', " + ssh_get_error(sftp->session));
+				return syncstat;
+			}else if(attrs != NULL){
+				dest_size = attrs->size;
+				sftp_attributes_free(attrs);
+			}
+			access_type = O_WRONLY | O_CREAT | O_APPEND;
+		}else
+			access_type = O_WRONLY | O_CREAT | O_TRUNC;
+
 		unsigned int perms = (unsigned int)permissions::get_local(src, ec);
 		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT) == false)
 			return syncstat;
 
-		sftp_file dest_file = sftp_open(sftp, (dest+".ls.part").c_str(), access_type, perms);
+		sftp_file dest_file = sftp_open(sftp, dest.c_str(), access_type, perms);
 		if(dest_file == NULL){
 			llog::error("couldn't open dest '" + dest + "', " + ssh_get_error(sftp->session));
 			return syncstat;
 		}
-		std::unique_ptr<raii::sftp::file> file_obj_dest = std::make_unique<raii::sftp::file>(&dest_file, dest);
-		int rc;
+		raii::sftp::file file_obj_dest = raii::sftp::file(&dest_file, dest);
 
 		sftp_limits_t limit = sftp_limits(sftp);
 		const std::uint64_t buffer_size = limit->max_write_length;
@@ -77,6 +91,7 @@ namespace local_to_remote {
 
 		constexpr int max_requests = 5;
 		int requests_sent = 0, bytes_written, bytes_requested;
+		std::uintmax_t total_bytes_requested = dest_size, position = dest_size;
 		struct progress::obj _;
 
 		while(dest_size < src_size){
@@ -132,15 +147,11 @@ done_reading:
 		}
 
 		if(options::fsync){
-			rc = sftp_fsync(dest_file);
+			int rc = sftp_fsync(dest_file);
 			if(rc != SSH_OK)
 				llog::warn("couldn't fsync '" + dest + "', " + ssh_get_error(sftp->session));
 		}
 
-		file_obj_dest.reset();
-		rc = sftp_rename(sftp, (dest+".ls.part").c_str(), dest.c_str());
-		if(llog::rc(sftp, dest, rc, "couldn't rename file to its original name", NO_EXIT) == false)
-			return syncstat;
 		syncstat.code = 1;
 		return syncstat;
 fail:

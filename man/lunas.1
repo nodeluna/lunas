@@ -79,6 +79,23 @@ synchronize the copied file with the filesystem
 follow symlinks. sync the target the symlink is pointing to instead of the symlink itself
 
 .TP
+.B [-R, --resume]
+
+resume interrupted file transfer. enabled by default
+
+files are copied to 'file.HASH.ls.part' before they are renamed to their original name 'file', HASH = hash(full_path_of_src + its_mtime) 
+
+this is done to ensure if the src of an interrupted file was modified or --rollback was used instead of --update with multiple 
+.br
+input paths it doesn't resume with a wrong src
+
+in case the srcs for 'file.HASH.ls.part' didn't produce the same HASH, it is considered orphaned and removed
+
+if no src was found to check, then 'file.HASH.ls.part' is ignored
+
+if 'file' and 'file.HASH.ls.part' both exists at destination and 'file' has the same mtime of its src, then the 'file.HASH.ls.part' is removed
+
+.TP
 .B [-u, --update]
 
 check mtime of files and re-sync the file if mtime wasn't the same. this option enables -a mtime. the destination file, if exists, gets removed then re-synced again. it replaces old mtime files with newer mtime ones.

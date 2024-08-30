@@ -13,6 +13,7 @@
 #include <filesystem>
 #include "remote_to_local.h"
 #include "remote_copy.h"
+#include "local_copy.h"
 #include "file_types.h"
 #include "log.h"
 #include "cppfs.h"
@@ -26,7 +27,6 @@
 namespace remote_to_local {
 	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type){
 		struct syncstat syncstat;
-
 		if(type == REGULAR_FILE)
 			syncstat = remote_to_local::rfile(src, dest, sftp);
 		else if(type == DIRECTORY)
@@ -41,6 +41,7 @@ namespace remote_to_local {
 
 	struct syncstat rfile(const std::string& src, const std::string& dest, const sftp_session& sftp){
 		struct syncstat syncstat;
+
 		sftp_file src_file = sftp_open(sftp, src.c_str(), O_RDONLY, 0);
 		if(src_file == NULL){
 			llog::error("couldn't open src '" + src + "', " + ssh_get_error(sftp->session));
@@ -53,7 +54,7 @@ namespace remote_to_local {
 			llog::error("couldn't get src size '" + src + "', " + ssh_get_error(sftp->session));
 			return syncstat;
 		}
-		std::uintmax_t src_size = 0, dest_size = 0, total_bytes_read = 0, total_bytes_requested = 0;
+		std::uintmax_t src_size = 0, dest_size = 0;
 		src_size = attr->size;
 		std::filesystem::perms perms = (std::filesystem::perms)attr->permissions;
 		sftp_attributes_free(attr);
@@ -64,16 +65,31 @@ namespace remote_to_local {
 			return syncstat;
 		}
 
-		std::fstream dest_file;
-		dest_file.open(dest+".ls.part", std::ios::out | std::ios::binary);
+		std::error_code ec;
+		std::ios::openmode openmode;
+
+		if(options::resume){
+			dest_size = std::filesystem::file_size(dest, ec);
+			if(llog::ec(dest, ec, "couldn't get dest size", NO_EXIT) == false)
+				return syncstat;
+
+			int rc = sftp_seek64(src_file, dest_size);
+			if(llog::rc(sftp, src, rc, "couldn't move file pointer", NO_EXIT) == false)
+				return syncstat;
+
+			openmode = std::ios::out | std::ios::binary | std::ios::app;
+		}else{
+			openmode = std::ios::out | std::ios::binary;
+		}
+
+		std::fstream dest_file(dest, openmode);
 		if(dest_file.is_open() == false){
 			llog::error("couldn't open dest '" + dest + "', " + std::strerror(errno));
 			return syncstat;
 		}
-		std::unique_ptr<raii::fstream::file> file_obj_dest = std::make_unique<raii::fstream::file>(&dest_file, dest);
-		std::error_code ec;
+		raii::fstream::file file_obj_dest = raii::fstream::file(&dest_file, dest);
 
-		ec = permissions::set_local(dest+".ls.part", perms);
+		ec = permissions::set_local(dest, perms);
 		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT) == false)
 			return syncstat;
 
@@ -85,6 +101,7 @@ namespace remote_to_local {
 
 		constexpr int max_requests = 5;
 		int requests_sent = 0, bytes_written, bytes_requested;
+		std::uintmax_t total_bytes_requested = dest_size;
 		struct progress::obj _;
 
 
@@ -114,8 +131,6 @@ read_again:
 			}else if(queue.front().bytes_xfered == SSH_AGAIN)
 				goto read_again;
 
-			total_bytes_read += queue.front().bytes_xfered;
-
 			std::fpos pos = dest_file.tellp();
 			dest_file.write(queue.front().buffer.data(), queue.front().bytes_xfered);
 			bytes_written = dest_file.tellp() - pos;
@@ -140,11 +155,6 @@ read_again:
 			if(rc != 0)
 				llog::warn("couldn't fsync '" + dest + "', " + std::strerror(errno));
 		}
-
-		file_obj_dest.reset();
-		std::filesystem::rename(dest+".ls.part", dest, ec);
-		if(llog::ec(dest, ec, "couldn't rename file to its original name", NO_EXIT) == false)
-			return syncstat;
 
 		syncstat.code = 1;
 		return syncstat;

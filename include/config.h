@@ -18,14 +18,14 @@ namespace options{
 	inline bool verbose = false;
 	inline bool dry_run = false;
 	inline bool mkdir = false;
-	inline bool progress_bar = false;
+	inline bool progress_bar = true;
 	inline bool remove_extra = false;
 	inline bool follow_symlink = false;
 	inline bool fsync = false;
 	inline bool mtime_count = true;
 	inline bool no_broken_symlink = false;
 	inline bool update = false;
-	inline bool resume = false;
+	inline bool resume = true;
 	inline bool rollback = false;
 	inline bool checksum = false;
 	inline bool compression = false;

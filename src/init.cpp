@@ -21,6 +21,7 @@
 #include "cppfs.h"
 #include "copy.h"
 #include "size_units.h"
+#include "resume.h"
 
 
 #ifdef REMOTE_ENABLED
@@ -89,7 +90,7 @@ void register_sync(const struct syncstat& syncstat, const unsigned long int& des
 void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
 	const short& type = file.metadatas.at(src_mtime_i).type;
-	std::string src = input_paths.at(src_mtime_i).path + file.name;
+	const std::string src = input_paths.at(src_mtime_i).path + file.name;
 
 	unsigned long int dest_index = 0;
 	bool sync = false;
@@ -108,7 +109,8 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 		else if(metadata.mtime == NON_EXISTENT)
 			sync = true;
 		if(sync){
-			std::string dest = input_paths.at(dest_index).path + file.name;
+			size_t src_quick_hash = resume::get_src_hash(src, src_mtime);
+			std::string dest = input_paths.at(dest_index).path + file.name + "." + std::to_string(src_quick_hash) + ".ls.part";
 #ifdef REMOTE_ENABLED
 			syncstat syncstat = lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, type);
 #else
@@ -180,6 +182,10 @@ int init_program(void){
 #endif // REMOTE_ENABLED
 	fill_base();
 	counter();
+	if(options::resume && !part_files.empty())
+		resume::init();
+	else
+		options::resume = false;
 	syncing();
 #ifdef REMOTE_ENABLED
 	free_rsessions();

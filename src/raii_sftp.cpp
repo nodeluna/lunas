@@ -92,11 +92,11 @@ namespace sftp{
 			return sftp_unlink(sftp, path.c_str());
 		return SSH_OK;
 	}
-	/*int rmdir(const sftp_session& sftp, const std::string& path){
+	int rmdir(const sftp_session& sftp, const std::string& path){
 		if(options::dry_run == false)
 			return sftp_rmdir(sftp, path.c_str());
 		return SSH_OK;
-	}*/
+	}
 	int mkdir(const sftp_session& sftp, const std::string& path, const unsigned int& perms){
 		if(options::dry_run == false)
 			return sftp_mkdir(sftp, path.c_str(), perms);

@@ -47,7 +47,7 @@ namespace remote_to_remote {
 			return syncstat;
 		}
 
-		std::uintmax_t src_size = 0, dest_size = 0, total_write_bytes_requested = 0, total_read_bytes_requested = 0;
+		std::uintmax_t src_size = 0, dest_size = 0;
 		src_size = attr->size;
 		unsigned int perms = attr->permissions;
 		sftp_attributes_free(attr);
@@ -58,14 +58,29 @@ namespace remote_to_remote {
 			return syncstat;
 		}
 
-		int access_type = O_WRONLY | O_CREAT | O_TRUNC;
-		sftp_file dest_file = sftp_open(dest_sftp, (dest+".ls.part").c_str(), access_type, perms);
+		int access_type, rc;
+		if(options::resume){
+			sftp_attributes attrs = sftp_stat(dest_sftp, dest.c_str());
+			if(attrs == NULL && sftp_get_error(dest_sftp) != SSH_FX_NO_SUCH_FILE){
+				llog::error("couldn't check '" + dest + "', " + ssh_get_error(dest_sftp->session));
+				return syncstat;
+			}else if(attrs != NULL){
+				dest_size = attrs->size;
+				sftp_attributes_free(attrs);
+				rc = sftp_seek64(src_file, dest_size);
+				if(llog::rc(src_sftp, src, rc, "couldn't move file pointer", NO_EXIT) == false)
+					return syncstat;
+			}
+			access_type = O_WRONLY | O_CREAT | O_APPEND;
+		}else
+			access_type = O_WRONLY | O_CREAT | O_TRUNC;
+
+		sftp_file dest_file = sftp_open(dest_sftp, (dest).c_str(), access_type, perms);
 		if(dest_file == NULL){
 			llog::error("couldn't open dest '" + dest + "', " + ssh_get_error(dest_sftp->session));
 			return syncstat;
 		}
-		std::unique_ptr<raii::sftp::file> file_obj_dest = std::make_unique<raii::sftp::file>(&dest_file, dest);
-		int rc;
+		raii::sftp::file file_obj_dest = raii::sftp::file(&dest_file, dest);
 
 		sftp_limits_t limit = sftp_limits(dest_sftp);
 		std::uint64_t buffer_size = limit->max_write_length;
@@ -81,6 +96,7 @@ namespace remote_to_remote {
 
 		constexpr int max_requests = 3;
 		int read_requests_sent = 0, write_requests_sent = 0, bytes_written, bytes_requested;
+		std::uintmax_t total_write_bytes_requested = dest_size, total_read_bytes_requested = dest_size;
 		struct progress::obj _;
 
 
@@ -157,11 +173,6 @@ write:
 			if(rc != SSH_OK)
 				llog::warn("couldn't fsync '" + dest + "', " + ssh_get_error(dest_sftp->session));
 		}
-
-		file_obj_dest.reset();
-		rc = sftp_rename(dest_sftp, (dest+".ls.part").c_str(), dest.c_str());
-		if(llog::rc(dest_sftp, dest, rc, "couldn't rename file to its original name", NO_EXIT) == false)
-			return syncstat;
 
 		syncstat.code = 1;
 		return syncstat;

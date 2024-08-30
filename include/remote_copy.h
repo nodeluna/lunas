@@ -20,6 +20,17 @@ struct buffque {
 
 namespace fs_remote {
 	syncstat copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp, const short& type);
+
+	struct original_name {
+		original_name(const sftp_session& session, const std::string& dest_lspart, const std::string& original_name, int& code);
+		~original_name();
+		private:
+			const sftp_session& sftp;
+			const std::string& lspart;
+			const std::string& dest;
+			int& synccode;
+	};
+
 }
 
 
