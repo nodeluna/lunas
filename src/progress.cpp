@@ -29,13 +29,13 @@ namespace progress {
 	}
 
 	void prepare(void){
-		if(options::progress_bar == false)
+		if(options::progress_bar == false || options::quiet)
 			return;
 		std::cout << '\n';
 	}
 
 	void ingoing(const double& full_size, const double& occupied){
-		if(options::progress_bar == false)
+		if(options::progress_bar == false || options::quiet)
 			return;
 		std::cout << "\x1b[1B\r";
 		progress::bar(full_size, occupied);
@@ -44,7 +44,7 @@ namespace progress {
 	}
 
 	void reset(void){
-		if(options::progress_bar == false)
+		if(options::progress_bar == false || options::quiet)
 			return;
 		std::cout << "\x1b[2K";
 		std::cout << "\x1b[1B\r";
