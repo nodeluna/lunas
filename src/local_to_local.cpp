@@ -196,7 +196,11 @@ fail:
 			return syncstat;
 		}
 		std::error_code ec;
-		cppfs::symlink(src, dest, ec);
+		std::string target = fs::read_symlink(src, ec);
+		if(llog::ec(src, ec, "couldn't read symlink", NO_EXIT) == false)
+			return syncstat;
+
+		cppfs::symlink(target, dest, ec);
 		if(llog::ec(dest, ec, "couldn't make symlink", NO_EXIT) == false)
 			return syncstat;
 		syncstat.code = 1;
