@@ -127,7 +127,7 @@ end:
 void syncing(){
 	for(const auto& file : content){
 		unsigned long int src_mtime_i = get_src(file);
-		if(src_mtime_i == std::numeric_limits<unsigned long int>::max())
+		if(src_mtime_i == std::numeric_limits<unsigned long int>::max() || file.metadatas.at(src_mtime_i).mtime == NON_EXISTENT)
 			continue;
 		updating(file, src_mtime_i);
 	}
