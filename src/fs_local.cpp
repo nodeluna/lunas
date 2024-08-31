@@ -12,6 +12,7 @@
 #include "cliargs.h"
 #include "cppfs.h"
 #include "resume.h"
+#include "exclude.h"
 
 namespace fs = std::filesystem;
 
@@ -20,6 +21,8 @@ namespace fs_local {
 		try {
 			for(const auto& entry : fs::recursive_directory_iterator(local_path.path, fs::directory_options::skip_permission_denied)){
 				std::string str_entry = entry.path().string();
+				if(utils::exclude(str_entry, local_path.path))
+						continue;
 				struct metadata metadata;
 				short type = status::local_type(str_entry, false);
 				if(type == -1)

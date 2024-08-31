@@ -69,6 +69,22 @@ chose the compression level, 1-9, 9 being the most efficient but slower
 make any input directory if it doesn't exists, locally and remotely
 
 .TP
+.B [-x, --exclude] <relative/path/inside/input/dir>
+
+exclude a path from getting synced. this option can be used many times to *exclude* multiple directories/files
+
+	# only relative path starting from inside the input dir '/dir1/dir2/' like dir3/dir or dir3/file is allowed
+.br
+
+		example:  -r user@ip:/dir1/dir2/ -x dir3/dir -x dir3/file -x this_file_is_inside_dir2
+.br
+		example:  -p /dir1/dir2/ -x dir3/dir -x dir3/file -x dir3/dir4/dir5 -x this_dir_is_inside_dir2
+.br
+
+	# a /full/path or regular ./relative/paths aren't allowed, and would get ignored
+.br
+
+.TP
 .B [-F, --fsync]
 
 synchronize the copied file with the filesystem

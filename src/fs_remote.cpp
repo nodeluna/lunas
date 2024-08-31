@@ -11,6 +11,7 @@
 #include "raii_sftp.h"
 #include "file_types.h"
 #include "resume.h"
+#include "exclude.h"
 
 
 
@@ -36,6 +37,9 @@ namespace fs_remote {
 				continue;
 
 			full_path = dir_path + file_name;
+			if(utils::exclude(full_path, remote_path.path))
+					continue;
+
 			if(options::follow_symlink){
 				metadata.type = status::remote_type2(remote_path.sftp, full_path, true);
 				if(metadata.type == -1)

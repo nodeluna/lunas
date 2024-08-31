@@ -140,6 +140,12 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		options::fsync = true;
 	}else if(option == "--dereference" || option == "-L"){
 		options::follow_symlink = true;
+	}else if(option == "--exclude" || option == "-x"){
+		next_arg_exists(argc, argv, index);
+		std::string argument = argv[index+1];
+		os::pop_seperator(argument);
+		options::exclude.insert(argument);
+		index++;
 	}else if(option == "--author"){
 		llog::print(about::author);
 		exit(0);

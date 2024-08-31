@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include "os.h"
 
 #if (!defined(DISABLE_REMOTE))
@@ -13,7 +14,7 @@
 #endif
 
 namespace options{
-	inline std::vector<std::string> exclude;
+	inline std::unordered_set<std::string> exclude;
 	inline bool quiet = false;
 	inline bool verbose = false;
 	inline bool dry_run = false;
