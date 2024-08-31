@@ -1,4 +1,5 @@
 #include <string>
+#include <algorithm>
 #include "config.h"
 
 
@@ -12,10 +13,10 @@ namespace utils{
 			return true;
 
 		std::string relative_path = path.substr(input_path.size(), path.size());
-		for(const auto& exclude : options::exclude){
-			if(relative_path.size() > exclude.size() && relative_path.substr(0, exclude.size()) == exclude)
-				return true;
-		}
-		return false;
+
+		return std::any_of(options::exclude.begin(), options::exclude.end(), 
+				[&](const std::string& x_path){
+					return relative_path.size() > x_path.size() && relative_path.substr(0, x_path.size()) == x_path;
+				});
 	}
 }
