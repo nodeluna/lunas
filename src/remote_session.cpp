@@ -59,8 +59,17 @@ namespace rsession {
 		return ssh_userauth_password(ssh, NULL, password.c_str());
 	}
 
-	int auth_publickey(const ssh_session& ssh){
-		return ssh_userauth_publickey_auto(ssh, NULL, NULL);
+	int auth_publickey(const ssh_session& ssh, const char* password){
+		return ssh_userauth_publickey_auto(ssh, NULL, password);
+	}
+
+	int auth_publickey_passphrase(const ssh_session& ssh, const std::string& ip, const std::string& pw){
+		std::string password = pw;
+		if(password.empty()){
+			llog::print("--> login for: '" + ip + "'");
+			password = getpass("   --> private-key passphrase: ");
+		}
+		return rsession::auth_publickey(ssh, password.c_str());
 	}
 
 	int auth_none(const ssh_session& ssh){
@@ -98,15 +107,22 @@ namespace rsession {
 				rc = rsession::auth_none(ssh);
 				break;
 			case SSH_AUTH_METHOD_PUBLICKEY:
-				rc = rsession::auth_publickey(ssh);
+				rc = rsession::auth_publickey(ssh, NULL);
+				if(rc == SSH_AUTH_DENIED)
+					rsession::auth_publickey_passphrase(ssh, ip, pw);
 				break;
 			case SSH_AUTH_METHOD_PASSWORD:
 				rc = rsession::auth_password(ssh, ip, pw);
 				break;
 			case SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY:
-				rc = rsession::auth_publickey(ssh);
+				rc = rsession::auth_publickey(ssh, NULL);
 				if(rc == SSH_AUTH_SUCCESS)
 					return rc;
+				else if(rc == SSH_AUTH_DENIED){
+					rc = rsession::auth_publickey_passphrase(ssh, ip, pw);
+					if(rc == SSH_AUTH_SUCCESS)
+						break;
+				}
 				rc = rsession::auth_password(ssh, ip, pw);
 				break;
 			default:
