@@ -7,6 +7,8 @@
 #include "config.h"
 
 
+bool lock = false;
+
 namespace progress {
 	void bar(const double& full_size, const double& occupied){
 		std::string stat = "\r(" + size_units(occupied) + "/" + size_units(full_size) + ") [";
@@ -25,7 +27,7 @@ namespace progress {
 		std::cout << std::setfill('~') << std::setw(free_width) << "" << std::flush;
 		std::cout << "] ";
 		std::cout << "\x1b[1;32m" << size_percentage << "\x1b[1;0m";
-		std::cout << "\n";
+		lock = true;
 	}
 
 	void prepare(void){
@@ -39,18 +41,22 @@ namespace progress {
 			return;
 		std::cout << "\x1b[1B\r";
 		progress::bar(full_size, occupied);
-		std::cout << "\x1b[2A\r";
+		std::cout << "\x1b[1A\r";
 
 	}
 
 	void reset(void){
 		if(options::progress_bar == false || options::quiet)
 			return;
-		std::cout << "\x1b[2K";
-		std::cout << "\x1b[1B\r";
-		std::cout << "\x1b[2K";
-		std::cout << "\x1b[2A";
-		std::cout << "\n\n\n\n\n";
-		std::cout << "\x1b[6A";
+		if(lock){
+			std::cout << "\x1b[2K";
+			std::cout << "\x1b[1B\r";
+			std::cout << "\x1b[2K";
+			std::cout << "\x1b[2A";
+			std::cout << "\n\n\n\n\n";
+			std::cout << "\x1b[6A";
+		}else
+			std::cout << "\x1b[1A";
+		lock = false;
 	}
 }

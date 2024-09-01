@@ -11,6 +11,7 @@
 
 
 namespace permissions{
+	bool is_local_readable(const std::string& path);
 	std::filesystem::perms get_local(const std::string& path, std::error_code& ec);
 	std::error_code set_local(const std::string& path, std::filesystem::perms permissions);
 

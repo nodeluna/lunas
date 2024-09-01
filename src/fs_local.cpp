@@ -13,6 +13,7 @@
 #include "cppfs.h"
 #include "resume.h"
 #include "exclude.h"
+#include "permissions.h"
 
 namespace fs = std::filesystem;
 
@@ -81,6 +82,11 @@ namespace fs_local {
 			exit(1);
 		}else if(input_type == -1)
 			exit(1);
+
+		if(permissions::is_local_readable(local_path.path) == false){
+			llog::error("couldn't read input directory '" + local_path.path + "', permission denied");
+			exit(1);
+		}
 
 		return fs_local::readdir(local_path, path_index);
 	}

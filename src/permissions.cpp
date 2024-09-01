@@ -5,11 +5,23 @@
 #endif // REMOTE_ENABLED
 
 #include <filesystem>
+#include <system_error>
 #include <fcntl.h>
-
 #include "permissions.h"
+#include "log.h"
+
+namespace fs = std::filesystem;
 
 namespace permissions{
+	bool is_local_readable(const std::string& path){
+		std::error_code ec;
+		std::filesystem::perms perms = permissions::get_local(path, ec);
+		llog::ec(path, ec, "couldn't check permission", EXIT_FAILURE);
+		if((perms & fs::perms::owner_read) != fs::perms::none)
+			return true;
+		return false;
+	}
+	
 	std::filesystem::perms get_local(const std::string& path, std::error_code& ec){
 		if(ec.value() == 0)
 			return std::filesystem::symlink_status(path, ec).permissions();
