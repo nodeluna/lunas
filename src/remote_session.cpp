@@ -12,7 +12,7 @@
 
 
 namespace rsession {
-	int verify_publickey(ssh_session& ssh, const std::string& ip){
+	int verify_publickey(const ssh_session& ssh, const std::string& ip){
 		ssh_known_hosts_e response = ssh_session_is_known_server(ssh);
 		switch(response){
 			case SSH_KNOWN_HOSTS_OK:
@@ -50,6 +50,78 @@ namespace rsession {
 		return 0;
 	}
 
+	int auth_password(const ssh_session& ssh, const std::string& ip, const std::string& pw){
+		std::string password = pw;
+		if(password.empty()){
+			llog::print("--> login for: '" + ip + "'");
+			password = getpass("   --> Password: ");
+		}
+		return ssh_userauth_password(ssh, NULL, password.c_str());
+	}
+
+	int auth_publickey(const ssh_session& ssh){
+		return ssh_userauth_publickey_auto(ssh, NULL, NULL);
+	}
+
+	int auth_none(const ssh_session& ssh){
+		return ssh_userauth_none(ssh, NULL);
+	}
+
+	std::string auth_method(const int& method){
+		switch(method){
+			case SSH_AUTH_METHOD_NONE:
+				return "none";
+			case SSH_AUTH_METHOD_PASSWORD:
+				return "password";
+			case SSH_AUTH_METHOD_PUBLICKEY:
+				return "publickey";
+			case SSH_AUTH_METHOD_HOSTBASED:
+				return "hostbased";
+			case SSH_AUTH_METHOD_INTERACTIVE:
+				return "keyboard-interactive";
+			case SSH_AUTH_METHOD_GSSAPI_MIC:
+				return "gssapi-mic";
+			default:
+				return "unknown method";
+		}
+		return "unknown method";
+	}
+
+	int auth_list(const ssh_session& ssh, const std::string& ip, const std::string& pw){
+		int rc = ssh_userauth_none(ssh, NULL);
+		if(rc == SSH_AUTH_SUCCESS || rc == SSH_AUTH_ERROR)
+			return rc;
+
+		int method = ssh_userauth_list(ssh, NULL);
+		switch(method){
+			case SSH_AUTH_METHOD_NONE:
+				rc = rsession::auth_none(ssh);
+				break;
+			case SSH_AUTH_METHOD_PUBLICKEY:
+				rc = rsession::auth_publickey(ssh);
+				break;
+			case SSH_AUTH_METHOD_PASSWORD:
+				rc = rsession::auth_password(ssh, ip, pw);
+				break;
+			case SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY:
+				rc = rsession::auth_publickey(ssh);
+				if(rc == SSH_AUTH_SUCCESS)
+					return rc;
+				rc = rsession::auth_password(ssh, ip, pw);
+				break;
+			default:
+				llog::error("unsupported auth method for '" + ip + "', " + rsession::auth_method(method));
+				llog::error(ssh_get_error(ssh));
+				llog::error("exiting...");
+				exit(1);
+		}
+
+		if(rc == SSH_AUTH_SUCCESS)
+			return rc;
+
+		return SSH_AUTH_ERROR;
+	}
+
 	ssh_session init_ssh(const std::string& ip, const int& port, const std::string& pw){
 		ssh_session ssh = ssh_new();
 		int rc;
@@ -77,25 +149,18 @@ namespace rsession {
 			exit(1);
 		}
 
-		rc = ssh_userauth_publickey_auto(ssh, NULL, NULL);
-		if (rc == SSH_AUTH_SUCCESS){
+		rc = rsession::auth_list(ssh, ip, pw);
+		if(rc == SSH_AUTH_SUCCESS)
 			rsession::verify_publickey(ssh, ip);
-		}else{
-			std::string password = pw;
-			if(password.size() == 0){
-				llog::print("--> login for: '" + ip + "'");
-				password = getpass("   --> Password: ");
-			}
-			rc = ssh_userauth_password(ssh, NULL, password.c_str());
-			if (rc != SSH_AUTH_SUCCESS){
-				llog::error("Couldn't Authenticate");
-				llog::error(ssh_get_error(ssh));
-				ssh_disconnect(ssh);
-				ssh_free(ssh);
-				exit(1);
-			}
-			rsession::verify_publickey(ssh, ip);
+		else{
+			llog::error("couldn't authenticate to '" + ip + "'");
+			llog::error(ssh_get_error(ssh));
+			llog::error("exiting...");
+			ssh_disconnect(ssh);
+			ssh_free(ssh);
+			exit(1);
 		}
+
 		return ssh;
 	}
 
