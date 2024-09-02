@@ -11,7 +11,15 @@ namespace about{
 
 	inline std::string version = "\n  -> lunas --- ";
 
-	inline std::string help =">>> A syncing cli tool that can handle more than two directories locally and remotely\n"
+	inline std::string license = 
+		"\n  -> GPLv3+\n"
+		"  -> This program is distributed in the hope that it will be useful,\n"
+		"	but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+		"	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n"
+		"	See the GNU General Public License version 3 for more details.\n"
+		"  -> https://www.gnu.org/licenses/gpl-3.0.en.html";
+
+	inline std::string help ="  -> A syncing cli tool that can handle more than two directories locally and remotely\n"
 		"        _\n"
 		"       | |  _  _   _ _    __ _   ___ \n"
 		"       | | | || | | ' \\  / _` | (_-< \n"
@@ -40,7 +48,6 @@ namespace about{
 		"\n"
 		"    [pw=PASSWORD, password=PASSWORD]\n"
 		"        password of the remote directory. if this option was used, it must come after the relevant remote path.\n"
-		"        publickey authetication is used by default, if it wasn't successful you should be prompted for the password\n"
 		"        example: -rdest user@ip:/path/to/dir pw=PASSWORD N=NUMBER\n"
 		"\n"
 		"    [-rs, -rsrc, --remote-source] <user@ip:/path/to/dir>\n"
@@ -98,11 +105,61 @@ namespace about{
 		"    [--author]\n"
 		"        print the program's author\n"
 		"\n"
+		"    [--license]\n"
+		"        print the program's license\n"
+		"\n"
 		"    [-h, --help]\n"
 		"        print this help statement\n"
 		"\n"
 		"\x1b[1;31m  usage\n"
 		"	NOT READY!\n\x1b[1;0m";
+
+	inline std::string smol_help ="  -> A syncing cli tool that can handle more than two directories locally and remotely\n"
+		"        _\n"
+		"       | |  _  _   _ _    __ _   ___ \n"
+		"       | | | || | | ' \\  / _` | (_-< \n"
+		"       |_|  \\_,_| |_||_| \\__,_| /__/\n"
+		"\n"
+		"\x1b[1;31m  usage\n"
+		"	NOT READY!\n\x1b[1;0m"
+		"\n"
+		"  options\n"
+		"    [-p, --path] <dir>\n"
+		"        path of the local directory to be synced. this option can be used many times to sync multiple directories\n"
+		"\n"
+		"    [-s, -src, --source] </path/to/dir>\n"
+		"        path of the source local directory. this option can be used many times to sync multiple directories\n"
+		"\n"
+		"    [-d, -dest, --destination] </path/to/dir>\n"
+		"        path of the destination local directory. this option can be used many times to sync multiple directories\n"
+		"\n"
+#ifdef REMOTE_ENABLED
+		"    [-r, --remote-path] <user@ip:/path/to/dir>\n"
+		"        path of the remote sftp directory to be synce. this option can be used many times to sync multiple directories\n"
+		"\n"
+		"    [N=NUMBER, port=NUMBER]\n"
+		"        the port number. if this option was used, it must come after the relevant remote path. It defaults to 22, if the option is not used\n"
+		"        example: -rdest user@ip:/path/to/dir port=NUMBER\n"
+		"\n"
+		"    [pw=PASSWORD, password=PASSWORD]\n"
+		"        password of the remote directory. if this option was used, it must come after the relevant remote path.\n"
+		"        example: -rdest user@ip:/path/to/dir pw=PASSWORD N=NUMBER\n"
+		"\n"
+		"    [-rs, -rsrc, --remote-source] <user@ip:/path/to/dir>\n"
+		"        path of the remote source sftp directory. this option can be used many times to sync multiple directories\n"
+		"\n"
+		"    [-rd, -rdest, --remote-destination] <user@ip:/path/to/dir>\n"
+		"        path of the remote destination sftp directory. this option can be used many times to sync multiple directories\n"
+#else
+		"    [X REMOTE X]\n"
+		"        remote is disabled in the compilation process\n"
+#endif // REMOTE_ENABLED
+		"\n"
+		"    [-h, --help]\n"
+		"\x1b[1;31m        to print the full help statement for more options and information\x1b[0m\n"
+		"\n"
+		"\x1b[1;31m  usage\n"
+		"	NOT READY!\x1b[1;0m";
 }
 
 #endif // ABOUT

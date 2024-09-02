@@ -152,7 +152,9 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	}else if(option == "--version" ||  option == "-V"){
 		llog::print(about::version);
 		exit(0);
-	}else if(option == "--help"){
+	}else if(option == "--license"){
+		llog::print(about::license);
+	}else if(option == "--help" || option == "-h"){
 		llog::print(about::help);
 		exit(0);
 	}else{
