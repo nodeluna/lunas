@@ -101,6 +101,13 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 			goto end;
 		if(metadata.mtime != NON_EXISTENT && metadata.type == DIRECTORY)
 			goto end;
+		if(metadata.mtime != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
+			llog::warn("conflict in types between *" + get_type_name(metadata.type) +"* '" +
+					input_paths.at(dest_index).path + file.name + "' and *" +
+					get_type_name(file.metadatas.at(src_mtime_i).type) + "* '" + src + "'");
+			llog::warn("not syncing them");
+			goto end;
+		}
 
 		if(options::update && src_mtime > metadata.mtime)
 			sync = true;

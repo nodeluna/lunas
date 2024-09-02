@@ -14,6 +14,8 @@
 
 namespace fs = std::filesystem;
 
+std::string get_type_name(const short& type);
+
 namespace status{
 	unsigned short int local_types(fs::file_status entry);
 

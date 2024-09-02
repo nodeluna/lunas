@@ -10,6 +10,18 @@
 
 namespace fs = std::filesystem;
 
+
+std::string get_type_name(const short& type){
+	if(type == REGULAR_FILE)
+		return "regular file";
+	else if(type == DIRECTORY)
+		return "directory";
+	else if(type == SYMLINK)
+		return "symlink";
+	else
+		return "special file";
+}
+
 namespace status{
 	unsigned short int local_types(fs::file_status entry){
 		unsigned short int type;
