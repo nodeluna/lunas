@@ -165,6 +165,39 @@ void free_rsessions(){
 }
 #endif // REMOTE_ENABLED
 
+void diff_input_paths(void){
+	size_t out = 0, in = 0;
+	auto print_and_exit = [&](const std::string& path1, const std::string& path2){
+				llog::error("input paths are the same");
+				llog::error(path1);
+				llog::error(path2);
+				llog::error("exiting...");
+				exit(1);
+	};
+
+	for(const auto& path1 : input_paths){
+		for(const auto& path2 : input_paths){
+			if(out == in)
+				continue;
+			else if((path1.remote && !path2.remote) || (!path1.remote && path2.remote))
+				continue;
+
+			if(!path1.remote && !path2.remote && path1.path == path2.path){
+				print_and_exit(path1.path, path2.path);
+			}
+			else if(path1.remote && path2.remote && path1.path == path2.path){
+				std::string hostname1 = path1.ip.substr(0, path1.ip.find(":"));
+				std::string hostname2 = path1.ip.substr(0, path2.ip.find(":"));
+				if(hostname1 == hostname2){
+					print_and_exit(path1.ip, path2.ip);
+				}
+			}
+			in++;
+		}
+		out++;
+	}
+}
+
 void print_stats(){
 	llog::print("");
 	for(const auto& input_path : input_paths){
@@ -180,6 +213,7 @@ int init_program(void){
 #ifdef REMOTE_ENABLED
 	init_rsessions();
 #endif // REMOTE_ENABLED
+	diff_input_paths();
 	fill_base();
 	counter();
 	if(options::resume && !part_files.empty())
