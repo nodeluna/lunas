@@ -109,7 +109,7 @@ namespace rsession {
 			case SSH_AUTH_METHOD_PUBLICKEY:
 				rc = rsession::auth_publickey(ssh, NULL);
 				if(rc == SSH_AUTH_DENIED)
-					rsession::auth_publickey_passphrase(ssh, ip, pw);
+					rc = rsession::auth_publickey_passphrase(ssh, ip, pw);
 				break;
 			case SSH_AUTH_METHOD_PASSWORD:
 				rc = rsession::auth_password(ssh, ip, pw);
