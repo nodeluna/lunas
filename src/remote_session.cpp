@@ -121,7 +121,7 @@ namespace rsession {
 			default:
 				return "unknown method";
 		}
-		return "unknown method";
+		return "unknown method: " + method;
 	}
 
 	int auth_list(const ssh_session& ssh, const std::string& ip, const std::string& pw){
@@ -163,6 +163,7 @@ namespace rsession {
 					rc = rsession::auth_publickey_passphrase(ssh, ip, pw);
 					if(rc == SSH_AUTH_SUCCESS)
 						break;
+					llog::error(ssh_get_error(ssh));
 				}
 				rc = rsession::auth_password(ssh, ip, pw);
 				break;
