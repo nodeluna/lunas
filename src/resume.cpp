@@ -16,6 +16,7 @@
 #include "cppfs.h"
 #include "raii_sftp.h"
 #include "cliargs.h"
+#include "file_types.h"
 
 
 
@@ -60,8 +61,10 @@ namespace resume {
 	}
 
 	void sync(std::set<path>::iterator& itr, const struct path& lspart, const unsigned long int& dest_index){
+		if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
+			return;
 		unsigned long int src_mtime_i = get_src(*itr);
-		if(src_mtime_i == std::numeric_limits<unsigned long int>::max())
+		if(avoid_src(*itr, src_mtime_i))
 			return;
 		const long int& src_mtime = itr->metadatas.at(src_mtime_i).mtime;
 		const long int& dest_mtime = itr->metadatas.at(dest_index).mtime;
@@ -91,8 +94,10 @@ namespace resume {
 		struct syncstt syncstat = lunas::copy(src, dest, type);
 #endif // REMOTE_ENABLED
 		register_sync(syncstat, dest_index, type);
-		if(syncstat.code == 1)
+		if(syncstat.code == 1){
 			itr->metadatas.at(dest_index).mtime = itr->metadatas.at(src_mtime_i).mtime;
+			itr->metadatas.at(dest_index).type = itr->metadatas.at(src_mtime_i).type;
+		}
 	}
 
 	void init(){

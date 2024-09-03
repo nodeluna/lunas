@@ -97,11 +97,11 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	for(const auto& metadata : file.metadatas){
 		if(src_mtime_i == dest_index)
 			goto end;
-		if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
+		else if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
 			goto end;
-		if(metadata.mtime != NON_EXISTENT && metadata.type == DIRECTORY)
+		else if(metadata.mtime != NON_EXISTENT && metadata.type == DIRECTORY)
 			goto end;
-		if(metadata.mtime != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
+		else if(metadata.mtime != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
 			llog::warn("conflict in types between *" + get_type_name(metadata.type) +"* '" +
 					input_paths.at(dest_index).path + file.name + "' and *" +
 					get_type_name(file.metadatas.at(src_mtime_i).type) + "* '" + src + "'");
@@ -115,6 +115,7 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 			sync = true;
 		else if(metadata.mtime == NON_EXISTENT)
 			sync = true;
+
 		if(sync){
 			size_t src_quick_hash = resume::get_src_hash(src, src_mtime);
 			std::string dest = input_paths.at(dest_index).path + file.name + "." + std::to_string(src_quick_hash) + ".ls.part";
@@ -131,10 +132,18 @@ end:
 	}
 }
 
+bool avoid_src(const struct path& file, const unsigned long int& src_mtime_i){
+	if(src_mtime_i == std::numeric_limits<unsigned long int>::max())
+		return true;
+	else if(file.metadatas.at(src_mtime_i).mtime == NON_EXISTENT)
+		return true;
+	return false;
+}
+
 void syncing(){
 	for(const auto& file : content){
 		unsigned long int src_mtime_i = get_src(file);
-		if(src_mtime_i == std::numeric_limits<unsigned long int>::max() || file.metadatas.at(src_mtime_i).mtime == NON_EXISTENT)
+		if(avoid_src(file, src_mtime_i))
 			continue;
 		updating(file, src_mtime_i);
 	}
@@ -173,7 +182,6 @@ void free_rsessions(){
 #endif // REMOTE_ENABLED
 
 void diff_input_paths(void){
-	size_t out = 0, in = 0;
 	auto print_and_exit = [&](const std::string& path1, const std::string& path2){
 				llog::error("input paths are the same");
 				llog::error(path1);
@@ -182,23 +190,25 @@ void diff_input_paths(void){
 				exit(1);
 	};
 
+	size_t out = 0, in = 0;
 	for(const auto& path1 : input_paths){
+		in = 0;
 		for(const auto& path2 : input_paths){
 			if(out == in)
-				continue;
+				goto end;
 			else if((path1.remote && !path2.remote) || (!path1.remote && path2.remote))
-				continue;
+				goto end;
 
-			if(!path1.remote && !path2.remote && path1.path == path2.path){
+			if(!path1.remote && !path2.remote && path1.path == path2.path)
 				print_and_exit(path1.path, path2.path);
-			}
 			else if(path1.remote && path2.remote && path1.path == path2.path){
 				std::string hostname1 = path1.ip.substr(0, path1.ip.find(":"));
-				std::string hostname2 = path1.ip.substr(0, path2.ip.find(":"));
+				std::string hostname2 = path2.ip.substr(0, path2.ip.find(":"));
 				if(hostname1 == hostname2){
 					print_and_exit(path1.ip, path2.ip);
 				}
 			}
+end:
 			in++;
 		}
 		out++;
