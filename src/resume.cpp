@@ -61,27 +61,26 @@ namespace resume {
 	}
 
 	void sync(std::set<path>::iterator& itr, const struct path& lspart, const unsigned long int& dest_index){
-		if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
-			return;
 		unsigned long int src_mtime_i = get_src(*itr);
 		if(avoid_src(*itr, src_mtime_i))
 			return;
 		const long int& src_mtime = itr->metadatas.at(src_mtime_i).mtime;
-		const long int& dest_mtime = itr->metadatas.at(dest_index).mtime;
 
 		std::string src = input_paths.at(src_mtime_i).path + itr->name;
 		std::string dest = input_paths.at(dest_index).path + lspart.name;
 		const short& type = lspart.metadatas.at(dest_index).type;
 
-		if(src_mtime == dest_mtime || (type == DIRECTORY && dest_mtime != NON_EXISTENT)){
+		int avoid = avoid_dest(*itr, lspart.metadatas.at(dest_index), src_mtime_i, dest_index);
+		if(avoid == SAME_MTIME || avoid == EXISTING_DIR){
 			llog::print("file already exists '" + dest + "', removing temp file");
 			resume::unlink(input_paths.at(dest_index).sftp, dest, type);
 			return;
-		}
+		}else if(avoid == NOT_DEST || avoid == SAME_INPUT_PATH)
+			return;
 
 		size_t src_hash = resume::get_src_hash(src, src_mtime);
 		size_t dest_hash = std::stoul(resume::get_dest_hash(lspart.name, src_hash));
-		if(src_hash != dest_hash){
+		if(src_hash != dest_hash || avoid == TYPE_CONFLICT){
 			llog::error("orphaned file '" + dest + "', its source has been modified. removing it");
 			resume::unlink(input_paths.at(dest_index).sftp, dest, type);
 			return;

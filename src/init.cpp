@@ -87,6 +87,26 @@ void register_sync(const struct syncstat& syncstat, const unsigned long int& des
 	base::syncing_counter++;
 }
 
+int avoid_dest(const struct path& file, const struct metadata& metadata, const size_t& src_mtime_i, const size_t& dest_index){
+	const std::string src = input_paths.at(src_mtime_i).path + file.name;
+	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
+	if(src_mtime_i == dest_index)
+		return SAME_INPUT_PATH;
+	else if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
+		return NOT_DEST;
+	else if(metadata.mtime != NON_EXISTENT && metadata.type == DIRECTORY)
+		return EXISTING_DIR;
+	else if(metadata.mtime != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
+		const std::string dest = input_paths.at(dest_index).path + file.name;
+		llog::warn("conflict in types between *" + get_type_name(metadata.type) +"* '" + dest + "' and *" +
+				get_type_name(file.metadatas.at(src_mtime_i).type) + "* '" + src + "'");
+		llog::warn("not syncing them");
+		return TYPE_CONFLICT;
+	}else if(src_mtime == metadata.mtime)
+		return SAME_MTIME;
+	return OK_DEST;
+}
+
 void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
 	const short& type = file.metadatas.at(src_mtime_i).type;
@@ -95,19 +115,8 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	unsigned long int dest_index = 0;
 	bool sync = false;
 	for(const auto& metadata : file.metadatas){
-		if(src_mtime_i == dest_index)
+		if(avoid_dest(file, metadata, src_mtime_i, dest_index) != OK_DEST)
 			goto end;
-		else if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
-			goto end;
-		else if(metadata.mtime != NON_EXISTENT && metadata.type == DIRECTORY)
-			goto end;
-		else if(metadata.mtime != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
-			llog::warn("conflict in types between *" + get_type_name(metadata.type) +"* '" +
-					input_paths.at(dest_index).path + file.name + "' and *" +
-					get_type_name(file.metadatas.at(src_mtime_i).type) + "* '" + src + "'");
-			llog::warn("not syncing them");
-			goto end;
-		}
 
 		if(options::update && src_mtime > metadata.mtime)
 			sync = true;
