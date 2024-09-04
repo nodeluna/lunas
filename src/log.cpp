@@ -16,6 +16,11 @@ namespace llog{
 		std::cerr << options::color_error << "-[X] " << msg << options::reset_color << "\n";
 	}
 
+	void error_exit(const std::string& msg, const int& code){
+		std::cerr << options::color_error << "-[X] " << msg << options::reset_color << "\n";
+		exit(code);
+	}
+
 	void warn(const std::string& msg) noexcept{
 		std::cerr << options::color_error << "-[!!] " << msg << options::reset_color << "\n";
 	}

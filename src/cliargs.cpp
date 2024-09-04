@@ -1,13 +1,56 @@
 #include <cctype>
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
+#include <functional>
 #include <algorithm>
 #include "cliargs.h"
 #include "config.h"
 #include "log.h"
 #include "about.h"
 #include "path_parsing.h"
+#include "config_handler.h"
+
+
+std::unordered_map<std::string, std::function<int(std::string)>> onoff_options = {
+	{"-R",			config_filler::resume		},
+	{"--resume",		config_filler::resume		},
+	{"-mkdir",		config_filler::mkdir		},
+	{"--make-directory",	config_filler::mkdir		},
+	{"-q",			config_filler::quiet		},
+	{"--quiet",		config_filler::quiet		},
+	{"-v",			config_filler::verbose		},
+	{"--verbose",		config_filler::verbose		},
+	{"-P",			config_filler::progress		},
+	{"--progress",		config_filler::progress		},
+	{"-dr",			config_filler::dry_run		},
+	{"--dry-run",		config_filler::dry_run		},
+	{"-u",			config_filler::update		},
+	{"--update",		config_filler::update		},
+	{"-rb",			config_filler::rollback		},
+	{"--rollback",		config_filler::rollback		},
+	{"-L",			config_filler::follow_symlink	},
+	{"--dereference",	config_filler::follow_symlink	},
+	{"-F",			config_filler::fsync		},
+	{"--fsync",		config_filler::fsync		},
+#ifdef REMOTE_ENABLED
+	{"-C",			config_filler::compression	},
+	{"--compression",	config_filler::compression	},
+#endif // REMOTE_ENABLED
+};
+
+std::unordered_map<std::string, std::function<void(void)>> info = {
+	{"-h",			lunas_info::help		},
+	{"--help",		lunas_info::help		},
+	{"--author",		lunas_info::author		},
+	{"-V",			lunas_info::version		},
+	{"--version",		lunas_info::version		},
+	{"--license",		lunas_info::license		},
+};
+
+
 
 bool is_num(const std::string& x){
     return std::all_of(x.begin(), x.end(), [](char c){
@@ -24,6 +67,16 @@ void next_arg_exists(const int& argc, const char* argv[], int i){
 		llog::error(std::string("invalid argument '") + argv[i+1] + std::string("' for option '") + argv[i] + std::string("', exiting"));
                 exit(1);
         }
+}
+
+int arg_exist(const char* argv[], const int& argc, int i){
+        if((argc-1) == i){
+                return -1;
+        }
+        if(argv[i+1][0] == '-'){
+                return -1;
+        }
+        return 0;
 }
 
 void fill_local_path(const std::string& argument, const short& srcdest){
@@ -100,64 +153,39 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	}else if(option == "-rd" || option == "-rdest" || option == "--remote-destination"){
 		next_arg_exists(argc, argv, index);
 		fill_remote_path(argc, argv, index, DEST);
-	}else if(option == "--compression" || option == "-C"){
-		options::compression = true;
 	}else if(option == "--compression-level" || option == "-CL"){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
-		if(is_num(argument) == false){
-			llog::error("argument '" + argument + "' for option '" + option + "' isn't a number");
-			exit(1);
-		}
+		if(is_num(argument) == false)
+			llog::error_exit("argument '" + argument + "' for option '" + option + "' isn't a number", EXIT_FAILURE);
+
 		int level = std::stoi(argument);
-		if(level > 9 || level <= 0){
-			llog::error("compression level must be between 1-9. provided level '" + argument + "'");
-			exit(1);
-		}
+		if(level > 9 || level <= 0)
+			llog::error_exit("compression level must be between 1-9. provided level '" + argument + "'", EXIT_FAILURE);
 		options::compression = level;
 		index++;
 #endif // REMOTE_ENABLED
-	}else if(option == "-u" || option == "--update"){
-		options::update = true;
-		options::rollback = false;
-	}else if(option == "-rb" || option == "--rollback"){
-		options::update = false;
-		options::rollback = true;
-	}else if(option == "--dry-run" || option == "-dr"){
-		llog::print("--> dry run is on\n");
-		options::dry_run = true;
-	}else if(option == "--make-directory" || option == "-mkdir"){
-		options::mkdir = true;
-	}else if(option == "--resume" || option == "-R"){
-		options::resume = true;
-	}else if(option == "--progress" || option == "-P"){
-		options::progress_bar = true;
-	}else if(option == "--verbose" || option == "-v"){
-		options::verbose = true;
-	}else if(option == "--quiet" || option == "-q"){
-		options::quiet = true;
-	}else if(option == "--fsync" || option == "-F"){
-		options::fsync = true;
-	}else if(option == "--dereference" || option == "-L"){
-		options::follow_symlink = true;
+	}else if(auto itr = onoff_options.find(option); itr != onoff_options.end()){
+		int ok = arg_exist(argv, argc, index);
+		std::string argument;
+		if(ok == -1)
+			argument = "on";
+		else{
+			argument = argv[index+1];
+			index++;
+		}
+		ok = itr->second(argument);
+		if(ok != 0)
+			llog::error_exit("wrong argument '" + argument + "' for on/off option '" + option + "'", EXIT_FAILURE);
 	}else if(option == "--exclude" || option == "-x"){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
 		os::pop_seperator(argument);
 		options::exclude.insert(argument);
 		index++;
-	}else if(option == "--author"){
-		llog::print(about::author);
-		exit(0);
-	}else if(option == "--version" ||  option == "-V"){
-		llog::print(about::version);
-		exit(0);
-	}else if(option == "--license"){
-		llog::print(about::license);
-	}else if(option == "--help" || option == "-h"){
-		llog::print(about::help);
-		exit(0);
-	}else{
+	}else if(auto itr = info.find(option); itr != info.end())
+		itr->second();
+	else{
 		llog::error("option '" + option + "' wasn't recognized, read the man page");
 		exit(1);
 	}

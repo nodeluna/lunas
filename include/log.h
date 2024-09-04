@@ -16,6 +16,8 @@
 namespace llog{
 	void error(const std::string& msg) noexcept;
 
+	void error_exit(const std::string& msg, const int& code);
+
 	void warn(const std::string& msg) noexcept;
 
 	void print(const std::string& msg) noexcept;
