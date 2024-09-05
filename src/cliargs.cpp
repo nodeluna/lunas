@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
-#include <functional>
 #include <algorithm>
 #include "cliargs.h"
 #include "config.h"
@@ -12,43 +11,7 @@
 #include "about.h"
 #include "path_parsing.h"
 #include "config_handler.h"
-
-
-std::unordered_map<std::string, std::function<int(std::string)>> onoff_options = {
-	{"-R",			config_filler::resume		},
-	{"--resume",		config_filler::resume		},
-	{"-mkdir",		config_filler::mkdir		},
-	{"--make-directory",	config_filler::mkdir		},
-	{"-q",			config_filler::quiet		},
-	{"--quiet",		config_filler::quiet		},
-	{"-v",			config_filler::verbose		},
-	{"--verbose",		config_filler::verbose		},
-	{"-P",			config_filler::progress		},
-	{"--progress",		config_filler::progress		},
-	{"-dr",			config_filler::dry_run		},
-	{"--dry-run",		config_filler::dry_run		},
-	{"-u",			config_filler::update		},
-	{"--update",		config_filler::update		},
-	{"-rb",			config_filler::rollback		},
-	{"--rollback",		config_filler::rollback		},
-	{"-L",			config_filler::follow_symlink	},
-	{"--dereference",	config_filler::follow_symlink	},
-	{"-F",			config_filler::fsync		},
-	{"--fsync",		config_filler::fsync		},
-#ifdef REMOTE_ENABLED
-	{"-C",			config_filler::compression	},
-	{"--compression",	config_filler::compression	},
-#endif // REMOTE_ENABLED
-};
-
-std::unordered_map<std::string, std::function<void(void)>> info = {
-	{"-h",			lunas_info::help		},
-	{"--help",		lunas_info::help		},
-	{"--author",		lunas_info::author		},
-	{"-V",			lunas_info::version		},
-	{"--version",		lunas_info::version		},
-	{"--license",		lunas_info::license		},
-};
+#include "config_manager.h"
 
 
 
@@ -128,7 +91,12 @@ void fill_remote_path(const int& argc, const char* argv[], int& index, const sho
 
 int fillopts(const int& argc, const char* argv[], int& index){
 	std::string option = argv[index];
-	if(option == "-p" || option == "--path"){
+	if(option == "-c" || option == "--config"){
+		next_arg_exists(argc, argv, index);
+		std::string argument = argv[index+1];
+		config_manager::preset(argument);
+		index++;
+	}else if(option == "-p" || option == "--path"){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
 		fill_local_path(argument, SRCDEST);
@@ -165,7 +133,7 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		options::compression = level;
 		index++;
 #endif // REMOTE_ENABLED
-	}else if(auto itr = onoff_options.find(option); itr != onoff_options.end()){
+	}else if(auto itr1 = onoff_options.find(option); itr1 != onoff_options.end()){
 		int ok = arg_exist(argv, argc, index);
 		std::string argument;
 		if(ok == -1)
@@ -174,7 +142,7 @@ int fillopts(const int& argc, const char* argv[], int& index){
 			argument = argv[index+1];
 			index++;
 		}
-		ok = itr->second(argument);
+		ok = itr1->second(argument);
 		if(ok != 0)
 			llog::error_exit("wrong argument '" + argument + "' for on/off option '" + option + "'", EXIT_FAILURE);
 	}else if(option == "--exclude" || option == "-x"){
@@ -183,8 +151,8 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		os::pop_seperator(argument);
 		options::exclude.insert(argument);
 		index++;
-	}else if(auto itr = info.find(option); itr != info.end())
-		itr->second();
+	}else if(auto itr2 = info.find(option); itr2 != info.end())
+		itr2->second();
 	else{
 		llog::error("option '" + option + "' wasn't recognized, read the man page");
 		exit(1);
