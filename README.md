@@ -28,6 +28,10 @@
     $ cd ..
     $ rm -rf build
 
+## installation with nix flakes
+
+    $ nix profile install github:nodeluna/lunas
+
 ## dependencies
 
     lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
