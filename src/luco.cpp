@@ -67,6 +67,10 @@ namespace luco {
 		return ldata;
 	}
 
+	const std::string& luco::any_errors(void){
+		return error;
+	}
+
 	std::string luco::read_file(const std::string& config_file){
 		constexpr int BUFFER_SIZE = 262144;
 		std::array<char, BUFFER_SIZE> buffer;
@@ -74,17 +78,23 @@ namespace luco {
 
 		std::fstream conf_file;
 		conf_file.open(config_file, std::ios::in);
-		if(conf_file.is_open() == false)
-			throw std::runtime_error("couldn't open config file '" + config_file + "', " + std::strerror(errno));
+		if(conf_file.is_open() == false){
+			error = "couldn't open config file '" + config_file + "', " + std::strerror(errno);
+			return "";
+		}
 
 		while(conf_file.eof() == false){
 			conf_file.seekg(position);
-			if(conf_file.fail() == true || conf_file.bad() == true)
-				throw std::runtime_error("error reading config file '" + config_file + "', " + std::strerror(errno));
+			if(conf_file.fail() == true || conf_file.bad() == true){
+				error = "error reading config file '" + config_file + "', " + std::strerror(errno);
+				break;
+			}
 
 			conf_file.read(buffer.data(), BUFFER_SIZE);
-			if(conf_file.bad() == true)
-				throw std::runtime_error("error reading config file '" + config_file + "', " + std::strerror(errno));
+			if(conf_file.bad() == true){
+				error = "error reading config file '" + config_file + "', " + std::strerror(errno);
+				break;
+			}
 
 			position += conf_file.gcount();
 			data.append(buffer.data(), conf_file.gcount());
@@ -201,7 +211,7 @@ namespace luco {
 		return parent_nest.substr(0, i);
 	}
 
-	void luco::error(const std::string& err, const int& code){
+	void luco::strerror(const std::string& err, const int& code){
 		if(code == -1){
 			llog::error(err);
 			exit(1);
@@ -222,22 +232,22 @@ namespace luco {
 			if(tokentype == token_type::NEST_NAME){
 				std::string nest_name = reg_nest(data, fnechar);
 				if(nest_name.empty())
-					luco::error("formatting error: more than one nest name is provided: " + std::to_string(line_number), -1);
+					luco::strerror("formatting error: more than one nest name is provided: " + std::to_string(line_number), -1);
 				ldata.insert(std::make_pair(parent_nest + nest_name, ""));
 				nest_stack.push({nest_name.find("::") != nest_name.npos ? nest_name.substr(0, nest_name.size() - 2) : nest_name, line_number});
 				parent_nest = parent_nest + nest_name;
 			}else if(tokentype == token_type::OPTION_VALUE){
 				std::pair<std::string, std::string> pair = reg_optval(data, fnechar);
 				if(pair.first.empty())
-					luco::error("empty option '' line: " + std::to_string(line_number), -1);
+					luco::strerror("empty option '' line: " + std::to_string(line_number), -1);
 				else if(pair.second.empty())
-					luco::error("empty option '" + pair.first + "' line: " + std::to_string(line_number), -1);
+					luco::strerror("empty option '" + pair.first + "' line: " + std::to_string(line_number), -1);
 				ldata.insert(std::make_pair(parent_nest + pair.first, pair.second));
 			}else if(tokentype == token_type::END_NEST){
 				nest_stack.pop();
 				parent_nest = pop_parent_nest(parent_nest);
 			}else if(tokentype == token_type::UNKNOWN)
-				luco::error("formatting error: missing seperator line: " + std::to_string(line_number), -1);
+				luco::strerror("formatting error: missing seperator line: " + std::to_string(line_number), -1);
 
 			i = lstring::get_next_line(data, fnechar) - 1;
 end:

@@ -10,27 +10,25 @@
 
 
 namespace config_filler {
-	int lpath_srcdest(const std::string& data){
+	void fill_local_path(const std::string& argument, const short& srcdest){
 		struct input_path local_path;
-		local_path.path = parse_path::absolute(data);
-		local_path.srcdest = SRCDEST;
+		local_path.path = parse_path::absolute(argument);
+		local_path.srcdest = srcdest;
 		input_paths.push_back(std::move(local_path));
+	}
+
+	int lpath_srcdest(const std::string& data){
+		config_filler::fill_local_path(data, SRCDEST);
 		return 0;
 	}
 
 	int lpath_src(const std::string& data){
-		struct input_path local_path;
-		local_path.path = parse_path::absolute(data);
-		local_path.srcdest = SRC;
-		input_paths.push_back(std::move(local_path));
+		config_filler::fill_local_path(data, SRC);
 		return 0;
 	}
 
 	int lpath_dest(const std::string& data){
-		struct input_path local_path;
-		local_path.path = parse_path::absolute(data);
-		local_path.srcdest = DEST;
-		input_paths.push_back(std::move(local_path));
+		config_filler::fill_local_path(data, DEST);
 		return 0;
 	}
 

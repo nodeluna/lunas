@@ -42,13 +42,6 @@ int arg_exist(const char* argv[], const int& argc, int i){
         return 0;
 }
 
-void fill_local_path(const std::string& argument, const short& srcdest){
-	struct input_path local_path;
-	local_path.path = parse_path::absolute(argument);
-	local_path.srcdest = srcdest;
-	input_paths.push_back(std::move(local_path));
-}
-
 #ifdef REMOTE_ENABLED
 void fill_remote_path(const int& argc, const char* argv[], int& index, const short& srcdest){
 	struct input_path remote_path;
@@ -94,7 +87,9 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	if(option == "-c" || option == "--config"){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
-		config_manager::preset(argument);
+		std::optional<std::string> err = config_manager::preset(argument);
+		if(err)
+			llog::error_exit(*err, EXIT_FAILURE);
 		index++;
 	}else if(auto itr0 = lpaths_options.find(option); itr0 != lpaths_options.end()){
 		next_arg_exists(argc, argv, index);

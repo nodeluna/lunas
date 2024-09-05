@@ -19,6 +19,7 @@ namespace luco {
 	class luco {
 		public:
 			explicit						luco(const std::string& path);
+			const std::string&					any_errors(void);
 			const std::multimap<std::string, std::string>&		parse(void);
 			const std::multimap<std::string, std::string>&		get_map(void);
 			std::multimap<std::string, std::string>			preset(const std::string& name);
@@ -30,10 +31,11 @@ namespace luco {
 			virtual std::string					reg_nest(const std::string& data, const size_t& i);
 			virtual std::pair<std::string, std::string>		reg_optval(const std::string& data, const size_t& i);
 			virtual std::string					pop_parent_nest(const std::string& parent_nest);
-			virtual void						error(const std::string& err, const int& code);
+			virtual void						strerror(const std::string& err, const int& code);
 
 		std::multimap<std::string, std::string>				ldata;
 		std::string							data;
+		std::string							error;
 	};
 }
 

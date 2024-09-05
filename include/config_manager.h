@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <functional>
+#include <optional>
 #include "config_handler.h"
 
 #define DEMO_CONFIG "global{\n"\
@@ -99,9 +100,9 @@ namespace config_manager {
 	inline std::string file_name = std::string("lunas.luco");
 	inline std::string config_path = config_dir + file_name;
 
-	int make_demo_config(void);
+	std::optional<std::string> make_demo_config(void);
 
-	void preset(const std::string& name);
+	std::optional<std::string> preset(const std::string& name);
 }
 
 #endif // CONFIG_MANAGER
