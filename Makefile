@@ -9,26 +9,16 @@ HEADER_DIR = include
 MANPAGE_DIR = /usr/share/man/man1
 SRC_DIR = src
 SRCS := $(wildcard src/*.cpp)
-OBJ_BUILD = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
-DEP := $(OBJ_BUILD:.o=.d)
+OBJS := $(addprefix build/, $(notdir $(SRCS:.cpp=.o)))
 pwd = $(shell pwd)
 
 
-building: create_directory symlinks $(OBJ_BUILD) $(TARGET)
+building: create_directory $(OBJS) $(TARGET)
 
-symlinks: 
-ifeq ($(shell test -e $(BUILD_DIR) && echo -n true),true)
-else
-	ln -s $(pwd)/$(SRC_DIR)/*  build/ 
-	ln -s $(pwd)/$(HEADER_DIR)/*  build/ 
-endif
-
--include $(DEP)
-
-%.o: %.cpp
+build/%.o: src/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJ_BUILD)
+$(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $(LIB) $^ -o $@
 
 create_directory:
