@@ -4,6 +4,12 @@
 #include <string>
 
 namespace config_filler {
+	int lpath_srcdest(const std::string& data);
+
+	int lpath_src(const std::string& data);
+
+	int lpath_dest(const std::string& data);
+
 	void exclude(const std::string& data);
 
 	int mkdir(const std::string& data);

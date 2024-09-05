@@ -96,20 +96,10 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		std::string argument = argv[index+1];
 		config_manager::preset(argument);
 		index++;
-	}else if(option == "-p" || option == "--path"){
+	}else if(auto itr0 = lpaths_options.find(option); itr0 != lpaths_options.end()){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
-		fill_local_path(argument, SRCDEST);
-		index++;
-	}else if(option == "-s" || option == "-src" || option == "--source"){
-		next_arg_exists(argc, argv, index);
-		std::string argument = argv[index+1];
-		fill_local_path(argument, SRC);
-		index++;
-	}else if(option == "-d" || option == "-dest" || option == "--destination"){
-		next_arg_exists(argc, argv, index);
-		std::string argument = argv[index+1];
-		fill_local_path(argument, DEST);
+		itr0->second(argument);
 		index++;
 #ifdef REMOTE_ENABLED
 	}else if(option == "-r" || option == "--remote-path"){

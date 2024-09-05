@@ -15,6 +15,8 @@
 	"}\n"\
 	"\n"
 
+
+
 inline std::unordered_map<std::string, std::function<int(std::string)>> onoff_options = {
 	{"-R",			config_filler::resume		},
 	{"--resume",		config_filler::resume		},
@@ -64,6 +66,25 @@ inline std::unordered_map<std::string, std::function<int(std::string)>> onoff_op
 #endif // REMOTE_ENABLED
 };
 
+inline std::unordered_map<std::string, std::function<int(std::string)>> lpaths_options = {
+	{"--path",		config_filler::lpath_srcdest	},
+	{"-p",			config_filler::lpath_srcdest	},
+	{"path",		config_filler::lpath_srcdest	},
+	{"p",			config_filler::lpath_srcdest	},
+	{"--source",		config_filler::lpath_src	},
+	{"-src",		config_filler::lpath_src	},
+	{"-s",			config_filler::lpath_src	},
+	{"source",		config_filler::lpath_src	},
+	{"src",			config_filler::lpath_src	},
+	{"s",			config_filler::lpath_src	},
+	{"--destination",	config_filler::lpath_dest	},
+	{"-dest",		config_filler::lpath_dest	},
+	{"-d",			config_filler::lpath_dest	},
+	{"destination",		config_filler::lpath_dest	},
+	{"dest",		config_filler::lpath_dest	},
+	{"d",			config_filler::lpath_dest	},
+};
+
 inline std::unordered_map<std::string, std::function<void(void)>> info = {
 	{"-h",			lunas_info::help		},
 	{"--help",		lunas_info::help		},
@@ -74,6 +95,10 @@ inline std::unordered_map<std::string, std::function<void(void)>> info = {
 };
 
 namespace config_manager {
+	inline std::string config_dir = std::getenv("HOME") + std::string("/.config/lunas/");
+	inline std::string file_name = std::string("lunas.luco");
+	inline std::string config_path = config_dir + file_name;
+
 	int make_demo_config(void);
 
 	void preset(const std::string& name);

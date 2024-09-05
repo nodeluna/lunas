@@ -5,9 +5,35 @@
 #include "cliargs.h"
 #include "log.h"
 #include "about.h"
+#include "base.h"
+#include "path_parsing.h"
 
 
 namespace config_filler {
+	int lpath_srcdest(const std::string& data){
+		struct input_path local_path;
+		local_path.path = parse_path::absolute(data);
+		local_path.srcdest = SRCDEST;
+		input_paths.push_back(std::move(local_path));
+		return 0;
+	}
+
+	int lpath_src(const std::string& data){
+		struct input_path local_path;
+		local_path.path = parse_path::absolute(data);
+		local_path.srcdest = SRC;
+		input_paths.push_back(std::move(local_path));
+		return 0;
+	}
+
+	int lpath_dest(const std::string& data){
+		struct input_path local_path;
+		local_path.path = parse_path::absolute(data);
+		local_path.srcdest = DEST;
+		input_paths.push_back(std::move(local_path));
+		return 0;
+	}
+
 	int mkdir(const std::string& data){
 		if(data == "on")
 			options::mkdir = true;

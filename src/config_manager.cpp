@@ -15,9 +15,6 @@ namespace fs = std::filesystem;
 
 
 namespace config_manager {
-	std::string config_dir = std::getenv("HOME") + std::string("/.config/lunas/");
-	std::string file_name = std::string("lunas.luco");
-
 	int make_demo_config(void){
 		std::string config_file = config_dir  + file_name;
 		std::error_code ec;
@@ -59,6 +56,8 @@ namespace config_manager {
 			auto itr = onoff_options.find(option.first);
 			if(itr != onoff_options.end()){
 				itr->second(option.second);
+			}else if(auto itr1 = lpaths_options.find(option.first); itr1 != lpaths_options.end()){
+				itr1->second(option.second);
 			}else if(option.first.front() != '#')
 				llog::error_exit("nest '" + name + "': wrong option '" + option.first + "'", EXIT_FAILURE);
 		}
@@ -73,15 +72,11 @@ namespace config_manager {
 		luco::luco nests = luco::luco(config_dir + file_name);
 		nests.parse();
 
-		auto itr = nests.find_preset("global");
-		if(itr == nests.get_map().end())
-			llog::error_exit("preset 'global' doesn't exist", EXIT_FAILURE);
-		itr = nests.find_preset(name);
+		auto itr = nests.find_preset(name);
 		if(itr == nests.get_map().end())
 			llog::error_exit("preset '" + name + "' doesn't exist", EXIT_FAILURE);
 
-		auto global_nest = nests.preset("global");
-		config_manager::config_fill(global_nest, "global");
+		llog::print(":: running preset '" + name + "'");
 
 		auto nest = nests.preset(name);
 		config_manager::config_fill(nest, name);

@@ -10,10 +10,13 @@ MANPAGE_DIR = /usr/share/man/man1
 SRC_DIR = src
 SRCS := $(wildcard src/*.cpp)
 OBJS := $(addprefix build/, $(notdir $(SRCS:.cpp=.o)))
+DEP := $(OBJS:.o=.d)
 pwd = $(shell pwd)
 
 
 building: create_directory $(OBJS) $(TARGET)
+
+-include $(DEP)
 
 build/%.o: src/%.cpp
 	$(CC) $(CFLAGS) -c $< -o $@

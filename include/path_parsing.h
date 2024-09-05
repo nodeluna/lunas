@@ -1,6 +1,7 @@
 #ifndef PATH_PARSING
 #define PATH_PARSING
 
+#include <string>
 
 namespace parse_path{
 	void adjust_relative_path(std::string& path, int& depth);
