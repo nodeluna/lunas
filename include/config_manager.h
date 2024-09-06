@@ -131,6 +131,9 @@ inline std::unordered_map<std::string, std::function<void(void)>> info = {
 	{"-V",			lunas_info::version		},
 	{"--version",		lunas_info::version		},
 	{"--license",		lunas_info::license		},
+	{"meow",		lunas_info::meow		},
+	{"-meow",		lunas_info::meow		},
+	{"--meow",		lunas_info::meow		},
 };
 
 namespace config_manager {

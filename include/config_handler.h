@@ -51,6 +51,8 @@ namespace lunas_info {
 	void license(void);
 
 	void help(void);
+
+	void meow(void);
 }
 
 #endif // CONFIG_HANDLER
