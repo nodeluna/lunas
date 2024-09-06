@@ -151,19 +151,19 @@ bool avoid_src(const struct path& file, const unsigned long int& src_mtime_i){
 
 void syncing(){
 	bool not_begin = false;
-	auto itr = content.begin();
-	for(const auto& file : content){
-		unsigned long int src_mtime_i = get_src(file);
-		if(avoid_src(file, src_mtime_i))
+	for(auto itr = content.begin(); itr != content.end(); ){
+		unsigned long int src_mtime_i = get_src(*itr);
+		if(avoid_src(*itr, src_mtime_i))
 			goto end;
-		updating(file, src_mtime_i);
+		updating(*itr, src_mtime_i);
 
 		if(!options::remove_extra)
-			continue;
+			goto end;
 
-		if(not_begin)
-			content.erase(std::prev(itr));
-		else if(!not_begin)
+		if(not_begin){
+			itr = content.erase(itr);
+			continue;
+		}else
 			not_begin = true;
 end:
 		++itr;
@@ -177,7 +177,7 @@ void remove_extra(){
 		if(!avoid_src(*it, src_mtime_i))
 			continue;
 		size_t i = 0;
-		for(auto& file: it->metadatas){
+		for(const auto& file: it->metadatas){
 			if(file.mtime != NON_EXISTENT && input_paths.at(i).srcdest == DEST){
 				llog::print("! removing extra '" + input_paths.at(i).path + it->name + "', not found in any source");
 				resume::unlink(input_paths.at(i).sftp, input_paths.at(i).path + it->name, file.type);
