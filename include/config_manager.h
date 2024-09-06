@@ -67,6 +67,10 @@ inline std::unordered_map<std::string, std::function<int(std::string)>> onoff_op
 	{"--fsync",		config_filler::fsync		},
 	{"F",			config_filler::fsync		},
 	{"fsync",		config_filler::fsync		},
+	{"--remove-extra",	config_filler::remove_extra	},
+	{"-rmx",		config_filler::remove_extra	},
+	{"remove-extra",	config_filler::remove_extra	},
+	{"rmx",			config_filler::remove_extra	},
 #ifdef REMOTE_ENABLED
 	{"-C",			config_filler::compression	},
 	{"--compression",	config_filler::compression	},

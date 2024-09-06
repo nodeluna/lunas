@@ -150,11 +150,43 @@ bool avoid_src(const struct path& file, const unsigned long int& src_mtime_i){
 }
 
 void syncing(){
+	bool not_begin = false;
+	auto itr = content.begin();
 	for(const auto& file : content){
 		unsigned long int src_mtime_i = get_src(file);
 		if(avoid_src(file, src_mtime_i))
-			continue;
+			goto skip;
 		updating(file, src_mtime_i);
+
+skip:
+		if(!options::remove_extra)
+			continue;
+
+		if(not_begin)
+			content.erase(std::prev(itr));
+		else if(!not_begin)
+			not_begin = true;
+		++itr;
+	}
+}
+
+void remove_extra(){
+	for(auto it = content.rbegin(); it != content.rend(); ++it){
+		unsigned long int src_mtime_i = get_src(*it);
+		if(!avoid_src(*it, src_mtime_i))
+			continue;
+		size_t i = 0;
+		for(auto& file: it->metadatas){
+			if(file.mtime != NON_EXISTENT && input_paths.at(i).srcdest == DEST){
+				llog::print("! removing extra '" + input_paths.at(i).path + it->name + "', not found in any source");
+				resume::unlink(input_paths.at(i).sftp, input_paths.at(i).path + it->name, file.type);
+				if(file.type == DIRECTORY)
+					input_paths.at(i).removed_dirs++;
+				else
+					input_paths.at(i).removed_files++;
+			}
+			i++;
+		}
 	}
 }
 
@@ -230,6 +262,10 @@ void print_stats(){
 		std::string stats = size_units(input_path.synced_size);
 		stats += ", Files: " + std::to_string(input_path.synced_files);
 		stats += ", Dirs: " + std::to_string(input_path.synced_dirs);
+		if(options::remove_extra){
+			stats += ", Removed dirs: " + std::to_string(input_path.removed_dirs);
+			stats += ", Removed files: " + std::to_string(input_path.removed_dirs);
+		}
 		llog::print("total synced to '" + input_path.path + "': " + stats);
 	}
 }
@@ -247,6 +283,8 @@ int init_program(void){
 	else
 		options::resume = false;
 	syncing();
+	if(options::remove_extra)
+		remove_extra();
 #ifdef REMOTE_ENABLED
 	free_rsessions();
 #endif // REMOTE_ENABLED

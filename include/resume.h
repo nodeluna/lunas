@@ -19,6 +19,8 @@ namespace resume {
 
 	std::string get_dest_hash(const std::string& dest, const size_t& src_mtimepath_hash);
 
+	void unlink(const sftp_session& sftp, const std::string& dest, const short& type);
+
 	void sync(std::set<path>::iterator& itr, const struct path& lspart, std::string& dest, const unsigned long int& dest_index);
 
 	void init();

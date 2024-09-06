@@ -38,6 +38,8 @@ namespace config_filler {
 
 	int fsync(const std::string& data);
 
+	int remove_extra(const std::string& data);
+
 	int update(const std::string& data);
 
 	int rollback(const std::string& data);

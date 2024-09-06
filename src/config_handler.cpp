@@ -154,6 +154,16 @@ namespace config_filler {
 		return 0;
 	}
 
+	int remove_extra(const std::string& data){
+		if(data == "on")
+			options::remove_extra = true;
+		else if(data == "off")
+			options::remove_extra = false;
+		else
+			return -1;
+		return 0;
+	}
+
 	int update(const std::string& data){
 		if(data == "on"){
 			options::update = true;
