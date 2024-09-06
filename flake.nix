@@ -34,7 +34,7 @@
                     '';
                 };
                 devShell = with pkgs; mkShell {
-                    buildInputs = with pkgs; [ gcc libssh ];
+                    buildInputs = with pkgs; [ gcc pkg-config libssh ];
                 };
                 }
     );
