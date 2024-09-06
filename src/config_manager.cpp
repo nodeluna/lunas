@@ -73,6 +73,8 @@ namespace config_manager {
 			++it;
 		}
 
+		if(it != nest.begin())
+			--it;
 		if(remote_path.ip.empty())
 			return "remote path for nest'" + name + "' isn't provided";
 
@@ -81,8 +83,7 @@ namespace config_manager {
 
 	std::optional<std::string> config_fill(std::multimap<std::string, std::string>& nest, const std::string& name){
 		for(auto it = nest.begin(); it != nest.end(); ++it){
-			auto itr = onoff_options.find(it->first);
-			if(itr != onoff_options.end()){
+			if(auto itr = onoff_options.find(it->first); itr != onoff_options.end()){
 				itr->second(it->second);
 			}else if(auto itr1 = lpaths_options.find(it->first); itr1 != lpaths_options.end()){
 				itr1->second(it->second);
@@ -96,9 +97,6 @@ namespace config_manager {
 					return std::get<std::string>(remote_path);
 			}else if(it->first.front() != '#')
 				return "nest '" + name + "': wrong option '" + it->first + "'";
-
-			if(it == nest.end())
-				break;
 		}
 
 		return std::nullopt;

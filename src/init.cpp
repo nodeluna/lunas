@@ -155,10 +155,9 @@ void syncing(){
 	for(const auto& file : content){
 		unsigned long int src_mtime_i = get_src(file);
 		if(avoid_src(file, src_mtime_i))
-			goto skip;
+			goto end;
 		updating(file, src_mtime_i);
 
-skip:
 		if(!options::remove_extra)
 			continue;
 
@@ -166,11 +165,13 @@ skip:
 			content.erase(std::prev(itr));
 		else if(!not_begin)
 			not_begin = true;
+end:
 		++itr;
 	}
 }
 
 void remove_extra(){
+	llog::print("");
 	for(auto it = content.rbegin(); it != content.rend(); ++it){
 		unsigned long int src_mtime_i = get_src(*it);
 		if(!avoid_src(*it, src_mtime_i))
