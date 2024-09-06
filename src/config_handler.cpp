@@ -32,6 +32,18 @@ namespace config_filler {
 		return 0;
 	}
 
+	short rpath_srcdest(void){
+		return SRCDEST;
+	}
+
+	short rpath_src(void){
+		return SRC;
+	}
+
+	short rpath_dest(void){
+		return DEST;
+	}
+
 	int mkdir(const std::string& data){
 		if(data == "on")
 			options::mkdir = true;

@@ -43,7 +43,7 @@ int arg_exist(const char* argv[], const int& argc, int i){
 }
 
 #ifdef REMOTE_ENABLED
-void fill_remote_path(const int& argc, const char* argv[], int& index, const short& srcdest){
+struct input_path fill_remote_path(const int& argc, const char* argv[], int& index, const short& srcdest){
 	struct input_path remote_path;
 	remote_path.ip = argv[index+1];
 	remote_path.srcdest = srcdest;
@@ -78,7 +78,8 @@ void fill_remote_path(const int& argc, const char* argv[], int& index, const sho
 			exit(1);
 		}
 	}
-	input_paths.push_back(std::move(remote_path));
+
+	return remote_path;
 }
 #endif // REMOTE_ENABLED
 
@@ -97,15 +98,10 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		itr0->second(argument);
 		index++;
 #ifdef REMOTE_ENABLED
-	}else if(option == "-r" || option == "--remote-path"){
+	}else if(auto itr1 = rpaths_options.find(option); itr1 != rpaths_options.end()){
 		next_arg_exists(argc, argv, index);
-		fill_remote_path(argc, argv, index, SRCDEST);
-	}else if(option == "-rs" || option == "-rsrc" || option == "--remote-source"){
-		next_arg_exists(argc, argv, index);
-		fill_remote_path(argc, argv, index, SRC);
-	}else if(option == "-rd" || option == "-rdest" || option == "--remote-destination"){
-		next_arg_exists(argc, argv, index);
-		fill_remote_path(argc, argv, index, DEST);
+		const short srcdest = itr1->second();
+		input_paths.push_back(fill_remote_path(argc, argv, index, srcdest));
 	}else if(option == "--compression-level" || option == "-CL"){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
@@ -118,7 +114,7 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		options::compression = level;
 		index++;
 #endif // REMOTE_ENABLED
-	}else if(auto itr1 = onoff_options.find(option); itr1 != onoff_options.end()){
+	}else if(auto itr2 = onoff_options.find(option); itr2 != onoff_options.end()){
 		int ok = arg_exist(argv, argc, index);
 		std::string argument;
 		if(ok == -1)
@@ -127,7 +123,7 @@ int fillopts(const int& argc, const char* argv[], int& index){
 			argument = argv[index+1];
 			index++;
 		}
-		ok = itr1->second(argument);
+		ok = itr2->second(argument);
 		if(ok != 0)
 			llog::error_exit("wrong argument '" + argument + "' for on/off option '" + option + "'", EXIT_FAILURE);
 	}else if(option == "--exclude" || option == "-x"){
@@ -136,8 +132,8 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		os::pop_seperator(argument);
 		options::exclude.insert(argument);
 		index++;
-	}else if(auto itr2 = info.find(option); itr2 != info.end())
-		itr2->second();
+	}else if(auto itr3 = info.find(option); itr3 != info.end())
+		itr3->second();
 	else{
 		llog::error("option '" + option + "' wasn't recognized, read the man page");
 		exit(1);

@@ -10,6 +10,12 @@ namespace config_filler {
 
 	int lpath_dest(const std::string& data);
 
+	short rpath_srcdest(void);
+
+	short rpath_src(void);
+
+	short rpath_dest(void);
+
 	void exclude(const std::string& data);
 
 	int mkdir(const std::string& data);

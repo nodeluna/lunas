@@ -14,7 +14,15 @@
 	"\t#progress = on\n"\
 	"\t#update = on\n"\
 	"}\n"\
-	"\n"
+	"luna {\n" \
+	"\tpath = /path/to/dir1\n"\
+	"\tpath = /path/to/dir2\n"\
+	"\tpath = /path/to/dir3\n"\
+	"\tremote {\n"\
+	"\t\tr = user@ip:dir\n"\
+	"\t\tport = 22\n"\
+	"\t}\n"\
+	"}\n"
 
 
 
@@ -84,6 +92,25 @@ inline std::unordered_map<std::string, std::function<int(std::string)>> lpaths_o
 	{"destination",		config_filler::lpath_dest	},
 	{"dest",		config_filler::lpath_dest	},
 	{"d",			config_filler::lpath_dest	},
+};
+
+inline std::unordered_map<std::string, std::function<short(void)>> rpaths_options = {
+	{"--remote-path",	config_filler::rpath_srcdest	},
+	{"-r",			config_filler::rpath_srcdest	},
+	{"remote-path",		config_filler::rpath_srcdest	},
+	{"r",			config_filler::rpath_srcdest	},
+	{"--remote-source",	config_filler::rpath_src	},
+	{"-rsrc",		config_filler::rpath_src	},
+	{"-rs",			config_filler::rpath_src	},
+	{"remote-source",	config_filler::rpath_src	},
+	{"rsrc",		config_filler::rpath_src	},
+	{"rs",			config_filler::rpath_src	},
+	{"--remote-destination",config_filler::rpath_dest	},
+	{"-rdest",		config_filler::rpath_dest	},
+	{"-rd",			config_filler::rpath_dest	},
+	{"remote-destination",	config_filler::rpath_dest	},
+	{"rdest",		config_filler::rpath_dest	},
+	{"rd",			config_filler::rpath_dest	},
 };
 
 inline std::unordered_map<std::string, std::function<void(void)>> info = {
