@@ -113,6 +113,17 @@ inline std::unordered_map<std::string, std::function<short(void)>> rpaths_option
 	{"rd",			config_filler::rpath_dest	},
 };
 
+inline std::unordered_map<std::string, std::function<int(std::string)>> misc_options = {
+	{"--compression-level",	config_filler::compression_level},
+	{"-CL",			config_filler::compression_level},
+	{"compression-level",	config_filler::compression_level},
+	{"CL",			config_filler::compression_level},
+	{"--exclude",		config_filler::exclude		},
+	{"-x",			config_filler::exclude		},
+	{"exclude",		config_filler::exclude		},
+	{"x",			config_filler::exclude		},
+};
+
 inline std::unordered_map<std::string, std::function<void(void)>> info = {
 	{"-h",			lunas_info::help		},
 	{"--help",		lunas_info::help		},

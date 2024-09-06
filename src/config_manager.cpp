@@ -56,7 +56,6 @@ namespace config_manager {
 		size_t nest_size = it->first.find("remote::") + std::string("remote::").size();
 		struct input_path remote_path;
 		remote_path.remote = true;
-		++it;
 		while(it != nest.end() && it->first.find("remote::") != it->first.npos){
 			std::string option = it->first.substr(nest_size, it->first.size());
 			if(auto itr1 = rpaths_options.find(option); itr1 != rpaths_options.end()){
@@ -87,6 +86,8 @@ namespace config_manager {
 				itr->second(it->second);
 			}else if(auto itr1 = lpaths_options.find(it->first); itr1 != lpaths_options.end()){
 				itr1->second(it->second);
+			}else if(auto itr2 = misc_options.find(it->first); itr2 != misc_options.end()){
+				itr2->second(it->second);
 			}else if(it->first.find("remote::") != it->first.npos){
 				auto remote_path = config_manager::fill_remote_path(nest, it, name);
 				if(std::holds_alternative<struct input_path>(remote_path))

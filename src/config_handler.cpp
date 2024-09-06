@@ -7,6 +7,7 @@
 #include "about.h"
 #include "base.h"
 #include "path_parsing.h"
+#include "os.h"
 
 
 namespace config_filler {
@@ -42,6 +43,24 @@ namespace config_filler {
 
 	short rpath_dest(void){
 		return DEST;
+	}
+
+	int compression_level(const std::string& data){
+		if(is_num(data) == false)
+			llog::error_exit("argument '" + data + "' for option compression-level isn't a number", EXIT_FAILURE);
+
+		int level = std::stoi(data);
+		if(level > 9 || level <= 0)
+			llog::error_exit("compression level must be between 1-9. provided level '" + data + "'", EXIT_FAILURE);
+		options::compression = level;
+		return 0;
+	}
+
+	int exclude(const std::string& data){
+		std::string path = data;
+		os::pop_seperator(path);
+		options::exclude.insert(path);
+		return 0;
 	}
 
 	int mkdir(const std::string& data){

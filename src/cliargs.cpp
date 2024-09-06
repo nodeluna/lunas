@@ -102,17 +102,6 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		next_arg_exists(argc, argv, index);
 		const short srcdest = itr1->second();
 		input_paths.push_back(fill_remote_path(argc, argv, index, srcdest));
-	}else if(option == "--compression-level" || option == "-CL"){
-		next_arg_exists(argc, argv, index);
-		std::string argument = argv[index+1];
-		if(is_num(argument) == false)
-			llog::error_exit("argument '" + argument + "' for option '" + option + "' isn't a number", EXIT_FAILURE);
-
-		int level = std::stoi(argument);
-		if(level > 9 || level <= 0)
-			llog::error_exit("compression level must be between 1-9. provided level '" + argument + "'", EXIT_FAILURE);
-		options::compression = level;
-		index++;
 #endif // REMOTE_ENABLED
 	}else if(auto itr2 = onoff_options.find(option); itr2 != onoff_options.end()){
 		int ok = arg_exist(argv, argc, index);
@@ -126,14 +115,13 @@ int fillopts(const int& argc, const char* argv[], int& index){
 		ok = itr2->second(argument);
 		if(ok != 0)
 			llog::error_exit("wrong argument '" + argument + "' for on/off option '" + option + "'", EXIT_FAILURE);
-	}else if(option == "--exclude" || option == "-x"){
+	}else if(auto itr3 = misc_options.find(option); itr3 != misc_options.end()){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
-		os::pop_seperator(argument);
-		options::exclude.insert(argument);
+		itr3->second(argument);
 		index++;
-	}else if(auto itr3 = info.find(option); itr3 != info.end())
-		itr3->second();
+	}else if(auto itr4 = info.find(option); itr4 != info.end())
+		itr4->second();
 	else{
 		llog::error("option '" + option + "' wasn't recognized, read the man page");
 		exit(1);

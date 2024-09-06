@@ -16,7 +16,7 @@ namespace config_filler {
 
 	short rpath_dest(void);
 
-	void exclude(const std::string& data);
+	int exclude(const std::string& data);
 
 	int mkdir(const std::string& data);
 
@@ -34,7 +34,7 @@ namespace config_filler {
 
 	int compression(const std::string& data);
 
-	void compression_level(const std::string& data);
+	int compression_level(const std::string& data);
 
 	int fsync(const std::string& data);
 

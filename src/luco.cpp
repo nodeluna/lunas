@@ -200,7 +200,7 @@ namespace luco {
 				poped = true;
 				i--;
 			}else if(parent_nest[i] == ':' && poped){
-				i--;
+				i++;
 				break;
 			}
 
