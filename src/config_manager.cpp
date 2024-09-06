@@ -12,6 +12,7 @@
 #include "cppfs.h"
 #include "log.h"
 #include "config_manager.h"
+#include "cliargs.h"
 
 namespace fs = std::filesystem;
 
