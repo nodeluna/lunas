@@ -8,7 +8,7 @@
 #include "config_handler.h"
 
 #define DEMO_CONFIG "global{\n"\
-	"\tmkdir = on\n"\
+	"\t#mkdir = on\n"\
 	"\t#compression = on\n"\
 	"\t#resume = on\n"\
 	"\t#progress = on\n"\

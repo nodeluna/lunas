@@ -153,6 +153,75 @@ print the program's author
 print the help statement
 
 
+.SH CONFIG FILE
+.B where presets of certian paths and options to be defined with a preset name.
+.br
+the way to run a preset is with 'lunas -c NAME' after defining this preset in the config file.
+
+.B the syntax of the config file, is a key=value pair seperated with a '='.
+.br
+Each key=value must be on a different line. The preset keys=values are encapsulated with {} and the preset name comes before the { encapsulation.
+
+.B some options can be nested to control relevant options like remote path, which the password and/or the port number can be provided
+.br
+Nested options encapsulate the options inside them with {} similar to the preset name. For remote path the nest name is 'remote'
+
+.B     ------------------------------------------------------
+
+.B inside the file '~/.config/lunas/lunas.luco'
+
+.B     ------------------------------------------------------
+        NAME{
+                path = /path/to/dir
+                remote-path = user@ip:/path/to/dir
+                rdest = user@ip:/path/to/dir
+                dry-run = on
+                #progress = on
+                #verbose = on
+
+                remote{
+                        r = user@ip:/path/to/dir
+                        pw = PASSWORD
+                        port = 22
+                }
+         }
+        luna{
+                path = /path/to/dir
+                d = /path/to/dir2
+                dereference = on
+                update = on
+        }
+    
+.B     ------------------------------------------------------
+
+.B options are similar to cli options. options that toggle things on/off, have a value of <on/off>. commenting things out is done with a # before the option
+
+.B lunas can handle having multiple predefined presets in the config file with different names
+
+.B more paths can be added from the cli to when running a preset, this won't edit the file
+
+        lunas -c preset -p /path/to/dir -dr on
+        lunas -c preset -p /path/to/dir -dr off
+
+.B this command would add /path/to/dir to the to-be-synced paths from the nest
+.br
+and toggle --dry-run 'on' or 'off', this would override what's in the preset only if -dr was after -c option not before it
+
+.B A GLOBAL PRESET. a global preset with the name 'global' can be defined which runs at every cli instance and along with any other preset
+.br
+<on/off> options in other presets and cli options override what's in the global preset.
+
+        global{ # a comment before any preset name hides it
+                #path = /path/to/dir
+                #d = /path/to/dir2
+                mkdir = on
+                update = on
+                resume = on
+                progress = on
+                compression = on
+                compression-level = 9
+        }
+
 
 .SH COPYRIGHT
 copyright © 2024 nodeluna
