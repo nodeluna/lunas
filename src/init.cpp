@@ -265,7 +265,7 @@ void print_stats(){
 		stats += ", Dirs: " + std::to_string(input_path.synced_dirs);
 		if(options::remove_extra){
 			stats += ", Removed dirs: " + std::to_string(input_path.removed_dirs);
-			stats += ", Removed files: " + std::to_string(input_path.removed_dirs);
+			stats += ", Removed files: " + std::to_string(input_path.removed_files);
 		}
 		llog::print("total synced to '" + input_path.path + "': " + stats);
 	}

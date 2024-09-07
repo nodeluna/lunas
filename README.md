@@ -45,7 +45,7 @@
 
 ## usage
 
-    read the --help statement
+    read the man page and/or --help statement
 
 ## files
 
