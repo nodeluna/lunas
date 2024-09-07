@@ -218,6 +218,17 @@ namespace luco {
 		}
 	}
 
+	bool luco::duplicate_nested_nest(std::string& parent_nest, const std::string& nest){
+		auto itr = ldata.find(parent_nest + nest);
+		if(itr != ldata.end() && parent_nest.find("::") != parent_nest.npos){
+			parent_nest += std::to_string(counter) + "_";
+			counter++;
+			return true;
+		}else
+			counter = 2;
+		return false;
+	}
+
 	const std::multimap<std::string, std::string>& luco::parse(){
 		std::stack<std::pair<std::string, size_t>> nest_stack;
 		std::string parent_nest = "";
@@ -233,8 +244,9 @@ namespace luco {
 				std::string nest_name = reg_nest(data, fnechar);
 				if(nest_name.empty())
 					luco::strerror("formatting error: more than one nest name is provided: " + std::to_string(line_number), -1);
-				ldata.insert(std::make_pair(parent_nest + nest_name, ""));
 				nest_stack.push({nest_name.find("::") != nest_name.npos ? nest_name.substr(0, nest_name.size() - 2) : nest_name, line_number});
+				luco::duplicate_nested_nest(parent_nest, nest_name);
+				ldata.insert(std::make_pair(parent_nest + nest_name, ""));
 				parent_nest = parent_nest + nest_name;
 			}else if(tokentype == token_type::OPTION_VALUE){
 				std::pair<std::string, std::string> pair = reg_optval(data, fnechar);

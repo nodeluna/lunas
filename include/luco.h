@@ -32,10 +32,12 @@ namespace luco {
 			virtual std::pair<std::string, std::string>		reg_optval(const std::string& data, const size_t& i);
 			virtual std::string					pop_parent_nest(const std::string& parent_nest);
 			virtual void						strerror(const std::string& err, const int& code);
+			virtual bool						duplicate_nested_nest(std::string& parent_nest, const std::string& nest);
 
 		std::multimap<std::string, std::string>				ldata;
 		std::string							data;
 		std::string							error;
+		unsigned int							counter = 2;
 	};
 }
 

@@ -53,10 +53,11 @@ namespace config_manager {
 
 	std::variant<struct input_path, std::string> fill_remote_path(const std::multimap<std::string, std::string>& nest,
 			std::multimap<std::string, std::string>::iterator& it, const std::string& name){
-		size_t nest_size = it->first.find("remote::") + std::string("remote::").size();
+		std::string option = it->first;
+		size_t nest_size = option.size();
 		struct input_path remote_path;
 		remote_path.remote = true;
-		while(it != nest.end() && it->first.find("remote::") != it->first.npos){
+		while(it != nest.end() && it->first.find(option) != it->first.npos){
 			std::string option = it->first.substr(nest_size, it->first.size());
 			if(auto itr1 = rpaths_options.find(option); itr1 != rpaths_options.end()){
 				if(remote_path.ip.empty() == false)
