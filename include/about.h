@@ -27,6 +27,9 @@ namespace about{
 		"\n"
 		"\x1b[1;31m  usage\n"
 		"	NOT READY!\n\x1b[1;0m"
+		"	lunas -p dir1 -p dir2 -r user@ip:dir3 -rd user2@ip2:dir4 --update --compression --compression-level 9\n"
+		"	lunas -s dir1 -rd user@ip:dir2 --update --compression --compression-level 9\n"
+		"	lunas --config preset_name --update off --compression-level 9\n"
 		"\n"
 		"  options\n"
 		"    [-p, --path] <dir>\n"
@@ -59,7 +62,7 @@ namespace about{
 		"    [-C, --compression]\n"
 		"        enable compression in remote transfer, zlib is used\n"
 		"\n"
-		"    [-CL, --compression-level]\n"
+		"    [-CL, --compression-level] <level>\n"
 		"        chose the compression level, 1-9, 9 being the most efficient but slower\n"
 #else
 		"    [X REMOTE X]\n"

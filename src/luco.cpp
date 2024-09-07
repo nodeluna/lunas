@@ -267,7 +267,8 @@ namespace luco {
 			}else if(tokentype == token_type::END_NEST){
 				if(nest_stack.empty())
 					luco::strerror("formatting error: extra seperator, line: " + std::to_string(line_number), -1);
-				nest_stack.pop();
+				else
+					nest_stack.pop();
 				parent_nest = pop_parent_nest(parent_nest);
 			}else if(tokentype == token_type::UNKNOWN)
 				luco::strerror("formatting error: missing seperator, line: " + std::to_string(line_number), -1);

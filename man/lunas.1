@@ -4,8 +4,42 @@
 .B lunas
 -  A syncing cli tool that can handle more than two directories locally and remotely
 
+.SH SYNOPSIS
+.B lunas [OPTIONS] [PATH OPTIONS [PATHS]]
+.br
+.B lunas [PATH OPTIONS [PATHS]] [OPTIONS]
+.br
+.B lunas [PATH OPTIONS [PATHS]] [ON/OFF OPTIONS] # not providing on or off, defaults to on
+.br
+.B lunas [PATH OPTIONS [PATHS]] [ON/OFF OPTIONS] <on/off>
+.br
+
+.SH DESCRIPTION
+.B lunas 
+is a versatile file syncing tool that is capable of syncing between multiples of local to local, remote to local, local to remote,
+.br 
+and remote to remote directories.
+.br
+
+It can sync two-ways between directories (from A to B and from B to A), unless source and destination options are used. read the OPTIONS section
+.br
+
+By default, lunas only syncs files that do not already exist in destination directories
+.br
+to overwrite older or newer files, --update or --rollback can be used
+.br
+
+For convenient syncing of recurring operations, lunas has a simple-to-use config file. check the 'CONFIG FILE' section for more details
+
 .SH USAGE
 .B NOT READY !
+.br
+
+.B lunas -p dir1 -p dir2 -r user@ip:dir3 -rd user2@ip2:dir4 --update --compression --compression-level 9
+.br
+.B lunas -s dir1 -rd user@ip:dir2 --update --compression --compression-level 9
+.br
+.B lunas --config preset_name --update off --compression-level 9
 
 .SH OPTIONS
 .TP
@@ -58,7 +92,7 @@ path of the remote destination sftp directory. this option can be used many time
 enable compression in remote transfer, zlib is used
 
 .TP
-.B [-CL, --compression-level]
+.B [-CL, --compression-level] <level>
 
 chose the compression level, 1-9, 9 being the most efficient but slower
 
@@ -165,17 +199,22 @@ print the help statement
 
 
 .SH CONFIG FILE
-.B where presets of certian paths and options to be defined with a preset name.
+.B where presets of certain paths and options to be defined with a preset name.
 .br
 the way to run a preset is with 'lunas -c NAME' after defining this preset in the config file.
 
-.B the syntax of the config file, is a key=value pair seperated with a '='.
-.br
-Each key=value must be on a different line. The preset keys=values are encapsulated with {} and the preset name comes before the { encapsulation.
+.B config file syntax
 
-.B some options can be nested to control relevant options like remote path, which the password and/or the port number can be provided
+- presets are defined by encapsulating options and nested options within {}
 .br
-Nested options encapsulate the options inside them with {} similar to the preset name. For remote path the nest name is 'remote'
+- options use a simple key=value pair where each key is seperated from its value with an '=' sign
+.br
+- every key=value option must be on a different line
+.br
+- nested options, such as "remote", are also encapsulated within {} and options inside it are key=value pairs
+.br
+- # commenting lines is done like '# key = value'
+.br
 
 .B     ------------------------------------------------------
 
@@ -205,7 +244,7 @@ Nested options encapsulate the options inside them with {} similar to the preset
     
 .B     ------------------------------------------------------
 
-.B options are similar to cli options. options that toggle things on/off, have a value of <on/off>. commenting things out is done with a # before the option
+.B options are similar to cli options. options that toggle things on/off, have a value of <on/off>
 
 .B lunas can handle having multiple predefined presets in the config file with different names
 
