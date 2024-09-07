@@ -33,6 +33,7 @@ namespace luco {
 			virtual std::string					pop_parent_nest(const std::string& parent_nest);
 			virtual void						strerror(const std::string& err, const int& code);
 			virtual bool						duplicate_nested_nest(std::string& parent_nest, const std::string& nest);
+			virtual bool						duplicate_nest(const std::string& nest_name, const size_t& line_number);
 
 		std::multimap<std::string, std::string>				ldata;
 		std::string							data;

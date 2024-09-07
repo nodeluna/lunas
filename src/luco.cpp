@@ -229,6 +229,14 @@ namespace luco {
 		return false;
 	}
 
+	bool luco::duplicate_nest(const std::string& nest_name, const size_t& line_number){
+		if(auto it = ldata.find(nest_name); it != ldata.end()){
+			luco::strerror("duplicate nest '" + nest_name.substr(0, nest_name.size() - 2) + "' line: " + std::to_string(line_number), -1);
+			return false;
+		}
+		return true;
+	}
+
 	const std::multimap<std::string, std::string>& luco::parse(){
 		std::stack<std::pair<std::string, size_t>> nest_stack;
 		std::string parent_nest = "";
@@ -244,6 +252,7 @@ namespace luco {
 				std::string nest_name = reg_nest(data, fnechar);
 				if(nest_name.empty())
 					luco::strerror("formatting error: more than one nest name is provided: " + std::to_string(line_number), -1);
+				luco::duplicate_nest(nest_name, line_number);
 				nest_stack.push({nest_name.find("::") != nest_name.npos ? nest_name.substr(0, nest_name.size() - 2) : nest_name, line_number});
 				luco::duplicate_nested_nest(parent_nest, nest_name);
 				ldata.insert(std::make_pair(parent_nest + nest_name, ""));
@@ -256,10 +265,12 @@ namespace luco {
 					luco::strerror("empty option '" + pair.first + "' line: " + std::to_string(line_number), -1);
 				ldata.insert(std::make_pair(parent_nest + pair.first, pair.second));
 			}else if(tokentype == token_type::END_NEST){
+				if(nest_stack.empty())
+					luco::strerror("formatting error: extra seperator, line: " + std::to_string(line_number), -1);
 				nest_stack.pop();
 				parent_nest = pop_parent_nest(parent_nest);
 			}else if(tokentype == token_type::UNKNOWN)
-				luco::strerror("formatting error: missing seperator line: " + std::to_string(line_number), -1);
+				luco::strerror("formatting error: missing seperator, line: " + std::to_string(line_number), -1);
 
 			i = lstring::get_next_line(data, fnechar) - 1;
 end:
