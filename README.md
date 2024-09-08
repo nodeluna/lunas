@@ -32,6 +32,9 @@
 
     $ nix profile install github:nodeluna/lunas
 
+    to install lunas without remote syncing, i.e without libssh
+    $ nix profile install github:nodeluna/lunas#local
+
 ## dependencies
 
     lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
