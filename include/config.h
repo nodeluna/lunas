@@ -15,6 +15,7 @@
 
 namespace options{
 	inline std::unordered_set<std::string> exclude;
+	inline std::unordered_set<std::string> exclude_pattern;
 	inline bool quiet = false;
 	inline bool verbose = false;
 	inline bool dry_run = false;

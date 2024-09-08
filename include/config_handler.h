@@ -18,6 +18,8 @@ namespace config_filler {
 
 	int exclude(const std::string& data);
 
+	int exclude_pattern(const std::string& data);
+
 	int mkdir(const std::string& data);
 
 	int progress(const std::string& data);

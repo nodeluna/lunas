@@ -126,6 +126,10 @@ inline std::unordered_map<std::string, std::function<int(std::string)>> misc_opt
 	{"-x",			config_filler::exclude		},
 	{"exclude",		config_filler::exclude		},
 	{"x",			config_filler::exclude		},
+	{"--exclude-pattern",	config_filler::exclude_pattern	},
+	{"-xp",			config_filler::exclude_pattern	},
+	{"exclude-pattern",	config_filler::exclude_pattern	},
+	{"xp",			config_filler::exclude_pattern	},
 };
 
 inline std::unordered_map<std::string, std::function<void(void)>> info = {

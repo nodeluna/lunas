@@ -63,6 +63,13 @@ namespace config_filler {
 		return 0;
 	}
 
+	int exclude_pattern(const std::string& data){
+		std::string path = data;
+		os::pop_seperator(path);
+		options::exclude_pattern.insert(path);
+		return 0;
+	}
+
 	int mkdir(const std::string& data){
 		if(data == "on")
 			options::mkdir = true;
