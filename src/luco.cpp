@@ -116,15 +116,22 @@ namespace luco {
 		if(lstring::is_line_empty(data, start))
 			return token_type::EMPTY_LINE;
 
-		size_t i;
-		if((i = data.find('{', start)) != data.npos && i < endline)
-			return token_type::NEST_NAME;
-		else if((i = data.find('}', start)) != data.npos && i < endline)
-			return token_type::END_NEST;
-		else if((i = data.find('=', start)) != data.npos && i < endline)
-			return token_type::OPTION_VALUE;
-		else
-			return token_type::UNKNOWN;
+		size_t i = data.npos;
+		token_type token = token_type::UNKNOWN;
+		if((i = data.find('{', start)) != data.npos && i < endline && token == token_type::UNKNOWN)
+			token = token_type::NEST_NAME;
+
+		if((i = data.find('=', start)) != data.npos && i < endline && token == token_type::UNKNOWN)
+			token =  token_type::OPTION_VALUE;
+		else if(i != data.npos  && i < endline && token != token_type::UNKNOWN)
+			return token_type::SYNTAX_ERROR_SIGN;
+
+		if((i = data.find('}', start)) != data.npos && i < endline && token == token_type::UNKNOWN)
+			token = token_type::END_NEST;
+		else if(i != data.npos  && i < endline && token != token_type::UNKNOWN)
+			return token_type::SYNTAX_ERROR_CLOSING_BRACKET;
+
+		return token;
 	}
 
 	std::string luco::reg_nest(const std::string& data, const size_t& i){
@@ -272,6 +279,10 @@ namespace luco {
 				parent_nest = pop_parent_nest(parent_nest);
 			}else if(tokentype == token_type::UNKNOWN)
 				luco::strerror("formatting error: missing seperator, line: " + std::to_string(line_number), -1);
+			else if(tokentype == token_type::SYNTAX_ERROR_SIGN)
+				luco::strerror("formatting error: option isn't on its own line, line: " + std::to_string(line_number), -1);
+			else if(tokentype == token_type::SYNTAX_ERROR_CLOSING_BRACKET)
+				luco::strerror("formatting error: closing bracket '}' isn't on its own line, line: " + std::to_string(line_number), -1);
 
 			i = lstring::get_next_line(data, fnechar) - 1;
 end:

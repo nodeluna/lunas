@@ -6,12 +6,12 @@
 
 
 int main(const int argc, const char* argv[]){
-	if(argc == 1){
+	config_manager::preset("global");
+
+	if(argc == 1 && input_paths.size() < 2){
 		llog::print(about::smol_help);
 		exit(1);
 	}
-
-	config_manager::preset("global");
 	cliargs(argc, argv);
 	init_program();
 	return 0;

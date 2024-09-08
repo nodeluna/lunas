@@ -88,6 +88,8 @@ int fillopts(const int& argc, const char* argv[], int& index){
 	if(option == "-c" || option == "--config"){
 		next_arg_exists(argc, argv, index);
 		std::string argument = argv[index+1];
+		if(argument == "global")
+			llog::error_exit("can't use -c global, 'global' preset runs by default if it exists", EXIT_FAILURE);
 		std::optional<std::string> err = config_manager::preset(argument);
 		if(err)
 			llog::error_exit(*err, EXIT_FAILURE);
