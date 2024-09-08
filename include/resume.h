@@ -19,7 +19,11 @@ namespace resume {
 
 	std::string get_dest_hash(const std::string& dest, const size_t& src_mtimepath_hash);
 
+#ifdef REMOTE_ENABLED
 	void unlink(const sftp_session& sftp, const std::string& dest, const short& type);
+#else
+	void unlink(const std::string& dest);
+#endif // REMOTE_ENABLED
 
 	void sync(std::set<path>::iterator& itr, const struct path& lspart, std::string& dest, const unsigned long int& dest_index);
 

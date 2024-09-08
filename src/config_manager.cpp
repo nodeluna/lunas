@@ -51,6 +51,7 @@ namespace config_manager {
 		return std::nullopt;
 	}
 
+#ifdef REMOTE_ENABLED
 	std::variant<struct input_path, std::string> fill_remote_path(const std::multimap<std::string, std::string>& nest,
 			std::multimap<std::string, std::string>::iterator& it, const std::string& name){
 		std::string nest_path = it->first;
@@ -81,6 +82,7 @@ namespace config_manager {
 
 		return remote_path;
 	}
+#endif // REMOTE_ENABLED
 
 	std::optional<std::string> config_fill(std::multimap<std::string, std::string>& nest, const std::string& name){
 		for(auto it = nest.begin(); it != nest.end(); ++it){
@@ -90,13 +92,17 @@ namespace config_manager {
 				itr1->second(it->second);
 			}else if(auto itr2 = misc_options.find(it->first); itr2 != misc_options.end()){
 				itr2->second(it->second);
-			}else if(it->first.find("remote::") != it->first.npos){
+			}
+#ifdef REMOTE_ENABLED
+			else if(it->first.find("remote::") != it->first.npos){
 				auto remote_path = config_manager::fill_remote_path(nest, it, name);
 				if(std::holds_alternative<struct input_path>(remote_path))
 					input_paths.push_back(std::get<struct input_path>(remote_path));
 				else if(std::holds_alternative<struct input_path>(remote_path))
 					return std::get<std::string>(remote_path);
-			}else if(it->first.front() != '#')
+			}
+#endif // REMOTE_ENABLED
+			else if(it->first.front() != '#')
 				return "nest '" + name + "': wrong option '" + it->first + "'";
 		}
 

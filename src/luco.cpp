@@ -116,9 +116,9 @@ namespace luco {
 		if(lstring::is_line_empty(data, start))
 			return token_type::EMPTY_LINE;
 
-		size_t i = data.npos;
+		size_t i;
 		token_type token = token_type::UNKNOWN;
-		if((i = data.find('{', start)) != data.npos && i < endline && token == token_type::UNKNOWN)
+		if((i = data.find('{', start)) != data.npos && i < endline)
 			token = token_type::NEST_NAME;
 
 		if((i = data.find('=', start)) != data.npos && i < endline && token == token_type::UNKNOWN)

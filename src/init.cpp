@@ -180,7 +180,11 @@ void remove_extra(){
 		for(const auto& file: it->metadatas){
 			if(file.type != NON_EXISTENT && input_paths.at(i).srcdest == DEST){
 				llog::print("! removing extra '" + input_paths.at(i).path + it->name + "', not found in any source");
+#ifdef REMOTE_ENABLED
 				resume::unlink(input_paths.at(i).sftp, input_paths.at(i).path + it->name, file.type);
+#else
+				resume::unlink(input_paths.at(i).path + it->name);
+#endif // REMOTE_ENABLED
 				if(file.type == DIRECTORY)
 					input_paths.at(i).removed_dirs++;
 				else
@@ -243,6 +247,7 @@ void diff_input_paths(void){
 
 			if(!path1.remote && !path2.remote && path1.path == path2.path)
 				print_and_exit(path1.path, path2.path);
+#ifdef REMOTE_ENABLED
 			else if(path1.remote && path2.remote && path1.path == path2.path){
 				std::string hostname1 = path1.ip.substr(0, path1.ip.find(":"));
 				std::string hostname2 = path2.ip.substr(0, path2.ip.find(":"));
@@ -250,6 +255,7 @@ void diff_input_paths(void){
 					print_and_exit(path1.ip, path2.ip);
 				}
 			}
+#endif // REMOTE_ENABLED
 end:
 			in++;
 		}

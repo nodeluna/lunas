@@ -46,6 +46,7 @@ namespace resume {
 		return dest.substr(i + 2, std::to_string(src_mtimepath_hash).size());
 	}
 
+#ifdef REMOTE_ENABLED
 	void unlink(const sftp_session& sftp, const std::string& dest, const short& type){
 		if(sftp != nullptr){
 			int rc; 
@@ -54,7 +55,11 @@ namespace resume {
 			else
 				rc = sftp::unlink(sftp, dest);
 			llog::rc(sftp, dest, rc, "couldn't remove orphaned file", NO_EXIT);
-		}else{
+		}else
+#else
+	void unlink(const std::string& dest){
+#endif // REMOTE_ENABLED
+		{
 			std::error_code ec = cppfs::remove(dest);
 			llog::ec(dest, ec, "couldn't remove orphaned file", NO_EXIT);
 		}
@@ -73,7 +78,11 @@ namespace resume {
 		int avoid = avoid_dest(*itr, lspart.metadatas.at(dest_index), src_mtime_i, dest_index);
 		if(avoid == SAME_MTIME || avoid == EXISTING_DIR){
 			llog::print("file already exists '" + dest + "', removing temp file");
+#ifdef REMOTE_ENABLED
 			resume::unlink(input_paths.at(dest_index).sftp, dest, type);
+#else
+			resume::unlink(dest);
+#endif // REMOTE_ENABLED
 			return;
 		}else if(avoid == NOT_DEST || avoid == SAME_INPUT_PATH)
 			return;
@@ -82,15 +91,24 @@ namespace resume {
 		size_t dest_hash = std::stoul(resume::get_dest_hash(lspart.name, src_hash));
 		if(src_hash != dest_hash || avoid == TYPE_CONFLICT){
 			llog::error("orphaned file '" + dest + "', its source has been modified. removing it");
+#ifdef REMOTE_ENABLED
 			resume::unlink(input_paths.at(dest_index).sftp, dest, type);
+#else
+			resume::unlink(dest);
+#endif // REMOTE_ENABLED
 			return;
 		}
 		if(type != REGULAR_FILE)
+#ifdef REMOTE_ENABLED
 			resume::unlink(input_paths.at(dest_index).sftp, dest, type);
+#else
+			resume::unlink(dest);
+#endif // REMOTE_ENABLED
+ 
 #ifdef REMOTE_ENABLED
 		syncstat syncstat = lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, type);
 #else
-		struct syncstt syncstat = lunas::copy(src, dest, type);
+		struct syncstat syncstat = lunas::copy(src, dest, type);
 #endif // REMOTE_ENABLED
 		register_sync(syncstat, dest_index, type);
 		if(syncstat.code == 1){
