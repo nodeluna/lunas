@@ -11,7 +11,7 @@
 #include "raii_sftp.h"
 
 namespace utime{
-	struct time_val get_local(const std::string& path, const short& utime){
+	std::variant<struct time_val, int> get_local(const std::string& path, const short& utime){
 		struct stat stats;
 		struct time_val time_val;
 		struct timespec timespec;
@@ -23,7 +23,7 @@ namespace utime{
 			rv = lstat(path.c_str(), &stats);
 
 		if(rv != 0){
-			return time_val;
+			return -1;
 		}
 
 		switch(utime){
@@ -36,7 +36,8 @@ namespace utime{
 				if(rv == 0){
 					time_val.mtime = timespec.tv_sec;
 					time_val.mtime_nsec = timespec.tv_nsec;
-				}
+				}else
+					return -1;
 				break;
 			case 2:
 				timespec = stats.st_mtim;
@@ -47,7 +48,8 @@ namespace utime{
 				if(rv == 0){
 					time_val.atime = timespec.tv_sec;
 					time_val.atime_nsec = timespec.tv_nsec;
-				}
+				}else
+					return -1;
 				break;
 			case 3:
 				timespec = stats.st_atim;
@@ -87,7 +89,7 @@ namespace utime{
 	}
 
 #ifdef REMOTE_ENABLED
-	struct time_val get_remote(const sftp_session& sftp, const std::string& path, const short& utime){
+	std::variant<struct time_val, int> get_remote(const sftp_session& sftp, const std::string& path, const short& utime){
 		sftp_attributes attributes;
 		raii::sftp::attributes attr_obj = raii::sftp::attributes(&attributes);
 		if(options::follow_symlink)
@@ -96,7 +98,7 @@ namespace utime{
 			attributes = sftp_lstat(sftp, path.c_str());
 		struct time_val time_val;
 		if(attributes == NULL)
-			return time_val;
+			return -1;
 
 		struct timespec timespec;
 		int rv;
@@ -109,7 +111,8 @@ namespace utime{
 				if(rv == 0){
 					time_val.mtime = timespec.tv_sec;
 					time_val.mtime_nsec = timespec.tv_nsec;
-				}
+				}else
+					return -1;
 				break;
 			case 2:
 				time_val.mtime = attributes->mtime;
@@ -119,7 +122,8 @@ namespace utime{
 				if(rv == 0){
 					time_val.atime = timespec.tv_sec;
 					time_val.atime_nsec = timespec.tv_nsec;
-				}
+				}else
+					return -1;
 				break;
 			case 3:
 				time_val.atime = attributes->atime;

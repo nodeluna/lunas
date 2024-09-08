@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cerrno>
 #include <filesystem>
+#include <variant>
 #include "local_attrs.h"
 #include "log.h"
 #include "utimes.h"
@@ -10,13 +11,13 @@
 
 namespace local_attrs {
 	int sync_utimes(const std::string& src, const std::string& dest){
-		struct time_val time_val = utime::get_local(src, UTIMES);
-		if(time_val.mtime == -1){
+		std::variant<struct time_val, int> time_val = utime::get_local(src, UTIMES);
+		if(std::holds_alternative<int>(time_val)){
 			llog::error("couldn't sync utimes of '" + dest + "', " + std::strerror(errno));
 			return 0;
 		}
 
-		int rv = utime::set_local(dest, time_val);
+		int rv = utime::set_local(dest, std::get<struct time_val>(time_val));
 		if(rv != 0){
 			llog::error("couldn't sync utimes of '" + dest + "', " + std::strerror(errno));
 			return 0;

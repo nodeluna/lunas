@@ -19,6 +19,7 @@
 
 #include <string>
 #include <ctime>
+#include <variant>
 
 #define ATIME 1
 #define MTIME 2
@@ -32,11 +33,11 @@ struct time_val{
 };
 
 namespace utime{
-	struct time_val get_local(const std::string& path, const short& utime);
+	std::variant<struct time_val, int> get_local(const std::string& path, const short& utime);
 	int set_local(const std::string& path, const struct time_val& time_val);
 
 #ifdef REMOTE_ENABLED
-	struct time_val get_remote(const sftp_session& sftp, const std::string& path, const short& utime);
+	std::variant<struct time_val, int> get_remote(const sftp_session& sftp, const std::string& path, const short& utime);
 	int set_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val);
 	int sftp_lutimes(const sftp_session& sftp, const std::string& path, const struct time_val& time_val);
 #endif // REMOTE_ENABLED

@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include <set>
+#include <variant>
 #include "base.h"
 #include "fs_local.h"
 #include "file_types.h"
@@ -30,10 +31,10 @@ namespace fs_local {
 					llog::local_error(str_entry, "couldn't get type of", EXIT_FAILURE);
 				metadata.type = type;
 
-				struct time_val time_val = utime::get_local(str_entry, 2);
-				if(time_val.mtime == -1)
+				std::variant<struct time_val, int> time_val = utime::get_local(str_entry, 2);
+				if(std::holds_alternative<int>(time_val))
 					llog::local_error(str_entry, "couldn't get mtime of file", EXIT_FAILURE);
-				metadata.mtime = time_val.mtime;
+				metadata.mtime = std::get<struct time_val>(time_val).mtime;
 
 				if(resume::is_lspart(str_entry)){
 					if(options::resume){

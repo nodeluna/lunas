@@ -94,9 +94,9 @@ int avoid_dest(const struct path& file, const struct metadata& metadata, const s
 		return SAME_INPUT_PATH;
 	else if(condition::is_dest(input_paths.at(dest_index).srcdest) == false)
 		return NOT_DEST;
-	else if(metadata.mtime != NON_EXISTENT && metadata.type == DIRECTORY)
+	else if(metadata.type != NON_EXISTENT && metadata.type == DIRECTORY)
 		return EXISTING_DIR;
-	else if(metadata.mtime != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
+	else if(metadata.type != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
 		const std::string dest = input_paths.at(dest_index).path + file.name;
 		llog::warn("conflict in types between *" + get_type_name(metadata.type) +"* '" + dest + "' and *" +
 				get_type_name(file.metadatas.at(src_mtime_i).type) + "* '" + src + "'");
@@ -122,7 +122,7 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 			sync = true;
 		else if(options::rollback && src_mtime < metadata.mtime)
 			sync = true;
-		else if(metadata.mtime == NON_EXISTENT)
+		else if(metadata.type == NON_EXISTENT)
 			sync = true;
 
 		if(sync){
@@ -144,7 +144,7 @@ end:
 bool avoid_src(const struct path& file, const unsigned long int& src_mtime_i){
 	if(src_mtime_i == std::numeric_limits<unsigned long int>::max())
 		return true;
-	else if(file.metadatas.at(src_mtime_i).mtime == NON_EXISTENT)
+	else if(file.metadatas.at(src_mtime_i).type == NON_EXISTENT)
 		return true;
 	return false;
 }
@@ -178,7 +178,7 @@ void remove_extra(){
 			continue;
 		size_t i = 0;
 		for(const auto& file: it->metadatas){
-			if(file.mtime != NON_EXISTENT && input_paths.at(i).srcdest == DEST){
+			if(file.type != NON_EXISTENT && input_paths.at(i).srcdest == DEST){
 				llog::print("! removing extra '" + input_paths.at(i).path + it->name + "', not found in any source");
 				resume::unlink(input_paths.at(i).sftp, input_paths.at(i).path + it->name, file.type);
 				if(file.type == DIRECTORY)

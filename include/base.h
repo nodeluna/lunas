@@ -16,11 +16,11 @@ namespace base {
 	inline unsigned long int syncing_counter = 1;
 }
 
-#define NON_EXISTENT -1
+#define NON_EXISTENT 0
 
 struct metadata {
-	long int mtime = NON_EXISTENT;
-	short type = -1;
+	long int mtime = 0;
+	short type = NON_EXISTENT;
 };
 
 struct path {
