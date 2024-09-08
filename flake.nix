@@ -19,23 +19,42 @@
                         });
                 };
                 pkgs = import nixpkgs { inherit system; overlays = [ overlay ]; };
-
-                in
-                {
-                defaultPackage = pkgs.stdenv.mkDerivation {
                 pname = "lunas";
                 version = "no-version";
-                src = ./.;
-                buildInputs = with pkgs; [ gcc libssh ];
-                nativeBuildInputs = with pkgs; [ cmake gnumake ];
-                buildPhase = ''
-                    make -j
-                    make install
-                    '';
+                in
+                {
+
+                packages.default = pkgs.stdenv.mkDerivation {
+                    inherit pname;
+                    inherit version;
+                    src = ./.;
+                    buildInputs = with pkgs; [ gcc pkg-config libssh ];
+                    nativeBuildInputs = with pkgs; [ gnumake cmake ];
+                    buildPhase = ''
+                        make -j
+                        make install
+                        '';
                 };
-                devShell = with pkgs; mkShell {
+
+                packages.local = pkgs.stdenv.mkDerivation {
+                    inherit pname;
+                    inherit version;
+                    src = ./.;
+                    buildInputs = with pkgs; [ gcc pkg-config ];
+                    nativeBuildInputs = with pkgs; [ gnumake cmake ];
+                    buildPhase = ''
+                        make local -j
+                        make install
+                        '';
+                };
+
+                devShells.default = with pkgs; mkShell {
                     buildInputs = with pkgs; [ gcc pkg-config libssh ];
                 };
+                devShells.local = with pkgs; mkShell {
+                    buildInputs = with pkgs; [ gcc pkg-config ];
+                };
+
                 }
     );
 }
