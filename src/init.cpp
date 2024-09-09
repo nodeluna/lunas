@@ -64,7 +64,7 @@ unsigned long int get_src(const struct path& file){
 			goto end;
 		if(!options::rollback && src_mtime >= metadata.mtime)
 			goto end;
-		else if(options::rollback && (src_mtime <= metadata.mtime || metadata.type == NON_EXiSTENT))
+		else if(options::rollback && (src_mtime <= metadata.mtime || metadata.type == NON_EXISTENT))
 			goto end;
 
 		src_mtime = metadata.mtime;
