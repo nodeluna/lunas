@@ -122,7 +122,7 @@ namespace resume {
 		for(const auto& lspart : part_files){
 			unsigned long int dest_index = 0;
 			for(const auto& i : lspart.metadatas){
-				if(i.type != -1)
+				if(i.type != NON_EXISTENT)
 					break;
 				dest_index++;
 			}

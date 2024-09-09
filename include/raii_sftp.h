@@ -17,6 +17,8 @@ namespace raii{
 			sftp_session* _sftp;
 			public:
 				explicit session(sftp_session* sftp_);
+				session(const session&) = delete;
+				session& operator=(const session&) = delete;
 				~session();
 		};
 
@@ -24,6 +26,8 @@ namespace raii{
 			ssh_channel* _channel;
 			public:
 				explicit channel(ssh_channel* channel_);
+				channel(const channel&) = delete;
+				channel& operator=(const channel&) = delete;
 				~channel();
 		};
 
@@ -31,6 +35,8 @@ namespace raii{
 			sftp_attributes* _attributes;
 			public:
 				explicit attributes(sftp_attributes* attr);
+				attributes(const attributes&) = delete;
+				attributes& operator=(const attributes&) = delete;
 				~attributes();
 		};
 
@@ -39,6 +45,8 @@ namespace raii{
 			std::string _path;
 			public:
 				explicit dir(sftp_dir* dir, const std::string& path);
+				dir(const dir&) = delete;
+				dir& operator=(const dir&) = delete;
 				~dir();
 		};
 
@@ -47,6 +55,8 @@ namespace raii{
 			std::string _path;
 			public:
 				explicit file(sftp_file* file, const std::string& path);
+				file(const file&) = delete;
+				file& operator=(const file&) = delete;
 				~file();
 		};
 
@@ -54,12 +64,16 @@ namespace raii{
 			char** target;
 			public:
 				explicit link_target(char** target);
+				link_target(const link_target&) = delete;
+				link_target& operator=(const link_target&) = delete;
 				~link_target();
 		};
 		class statvfs_t{
 			sftp_statvfs_t* _partition_stats;
 			public:
 				explicit statvfs_t(sftp_statvfs_t* parition_stats);
+				statvfs_t(const statvfs_t&) = delete;
+				statvfs_t& operator=(const statvfs_t&) = delete;
 				~statvfs_t();
 		};
 	}

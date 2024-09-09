@@ -21,6 +21,7 @@ namespace luco {
 	class luco {
 		public:
 			explicit						luco(const std::string& path);
+			virtual							~luco(){}
 			const std::string&					any_errors(void);
 			const std::multimap<std::string, std::string>&		parse(void);
 			const std::multimap<std::string, std::string>&		get_map(void);
