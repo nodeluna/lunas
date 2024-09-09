@@ -68,8 +68,6 @@ namespace utime{
 	}
 
 	int set_local(const std::string& path, const struct time_val& time_val){
-		if(time_val.atime == -1 && time_val.mtime == -1)
-			return -1;
 		struct timeval times[2];
 		int rv = 0;
 		times[0].tv_sec = time_val.atime;
@@ -139,8 +137,6 @@ namespace utime{
 	}
 
 	int set_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val){
-		if(time_val.atime == -1 && time_val.mtime == -1)
-			return -1;
 		struct timeval times[2];
 		int rv = 0;
 
@@ -154,8 +150,6 @@ namespace utime{
 	}
 
 	int sftp_lutimes(const sftp_session& sftp, const std::string& path, const struct time_val& time_val){
-		if(time_val.mtime == -1)
-			return -1;
 		ssh_channel channel = ssh_channel_new(sftp->session);
 		int rc = ssh_channel_open_session(channel);
 		if(rc != SSH_OK)

@@ -64,7 +64,7 @@ unsigned long int get_src(const struct path& file){
 			goto end;
 		if(!options::rollback && src_mtime >= metadata.mtime)
 			goto end;
-		else if(options::rollback && (src_mtime <= metadata.mtime || metadata.mtime == -1))
+		else if(options::rollback && (src_mtime <= metadata.mtime || metadata.type == NON_EXiSTENT))
 			goto end;
 
 		src_mtime = metadata.mtime;
@@ -200,14 +200,14 @@ void counter(){
 		long int tmp = -1;
 		unsigned long int files_dont_exist = 0;
 		for(const auto& metadata : file.metadatas){
-			if(tmp == -1 && metadata.mtime != -1){
+			if(tmp == -1 && metadata.type != NON_EXISTENT){
 				tmp = metadata.mtime;
 				continue;
 			}
-			if(metadata.mtime != -1 && metadata.mtime != tmp && metadata.type != DIRECTORY){
+			if(metadata.type != NON_EXISTENT && metadata.mtime != tmp && metadata.type != DIRECTORY){
 				base::to_be_synced += file.metadatas.size() - 1 - files_dont_exist;
 				break;
-			}else if(metadata.mtime == -1){
+			}else if(metadata.type == NON_EXISTENT){
 				base::to_be_synced++;
 				files_dont_exist++;
 			}
