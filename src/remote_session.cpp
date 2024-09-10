@@ -251,11 +251,20 @@ namespace rsession {
 			exit(1);
 		}
 		std::string sftp_path = ip.substr(ip.find(":")+1, ip.size());
+		std::expected<std::string, SSH_STATUS> path;
 
-		if(sftp_path.size() > 1 && sftp_path.substr(0, 2) == "~/")
-			sftp_path = sftp::homedir(sftp->session, ip) + sftp_path.substr(2, sftp_path.size());
-		else if(sftp_path.size() > 1 && sftp_path.front() != path_seperator)
-			sftp_path = sftp::homedir(sftp->session, ip) + sftp_path;
+		if(sftp_path.size() > 1 && sftp_path.substr(0, 2) == "~/"){
+			path = sftp::homedir(sftp->session, ip);
+			if(not path)
+				llog::rc(sftp, ip, path.error(), "couldn't get homedir", EXIT_FAILURE);
+			sftp_path = path.value() + sftp_path.substr(2, sftp_path.size());
+
+		}else if(sftp_path.size() > 1 && sftp_path.front() != path_seperator && sftp_path.front() != '.'){
+			path = sftp::homedir(sftp->session, ip);
+			if(not path)
+				llog::rc(sftp, ip, path.error(), "couldn't get homedir", EXIT_FAILURE);
+			sftp_path = path.value() + sftp_path;
+		}
 
 		if(options::follow_symlink){
 			char* full_path = sftp_canonicalize_path(sftp, sftp_path.c_str());
@@ -265,10 +274,12 @@ namespace rsession {
 			}
 		}else if(sftp_path.size() > 2 && sftp_path.substr(0, 3) == "../"){
 			int depth = 0;
-			std::string current_path = sftp::cwd(sftp->session, ip);
-			os::pop_seperator(current_path);
+			auto current_path = sftp::cwd(sftp->session, ip);
+			if(not current_path)
+				llog::rc(sftp, ip, path.error(), "couldn't get cwd", EXIT_FAILURE);
+			os::pop_seperator(current_path.value());
 			parse_path::adjust_relative_path(sftp_path, depth);
-			parse_path::append_to_relative_path(sftp_path, current_path, depth);
+			parse_path::append_to_relative_path(sftp_path, current_path.value(), depth);
 		}
 		sftp_attributes attributes = sftp::attributes(sftp, sftp_path);
 		if(status::remote_type(attributes) == DIRECTORY)

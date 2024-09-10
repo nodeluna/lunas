@@ -6,7 +6,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 file(GLOB SOURCES src/*.cpp)
 add_compile_options(-Wall -Wextra -pedantic -O1)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 add_executable(${PROJECT_NAME} ${SOURCES}) 
 
 if(DISABLE_REMOTE)

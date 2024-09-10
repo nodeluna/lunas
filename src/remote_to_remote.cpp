@@ -215,9 +215,13 @@ fail:
 			return syncstat;
 		}
 
-		std::string target = sftp::readlink(src_sftp->session, src, src);
+		std::expected<std::string, SSH_STATUS> target = sftp::readlink(src_sftp->session, src, src);
+		if(not target){
+			llog::rc(dest_sftp, dest, target.error(), "couldn't get symlink target", NO_EXIT);
+			return syncstat;
+		}
 
-		int rc = sftp::symlink(dest_sftp, target, dest);
+		int rc = sftp::symlink(dest_sftp, target.value(), dest);
 		if(llog::rc(dest_sftp, dest, rc, "couldn't make symlink", NO_EXIT) == false)
 			return syncstat;
 

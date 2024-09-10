@@ -7,6 +7,7 @@
 #include <libssh/sftp.h>
 
 #include <string>
+#include <expected>
 
 typedef int SSH_STATUS;
 
@@ -87,11 +88,11 @@ namespace sftp{
 	int mkdir(const sftp_session& sftp, const std::string& path, const unsigned int& perms);
 	int symlink(const sftp_session& sftp, const std::string& target, const std::string& path);
 	sftp_attributes attributes(const sftp_session& sftp, const std::string& path);
-	std::string cmd(const ssh_session& ssh, const std::string& command, const std::string& ip);
-	std::string readlink(const ssh_session& ssh, const std::string& link, const std::string& ip);
-	bool is_broken_link(const sftp_session& sftp, const std::string& link, const std::string& ip);
-	std::string homedir(const ssh_session& ssh, const std::string& ip);
-	std::string cwd(const ssh_session& ssh, const std::string& ip);
+	std::expected<std::string, SSH_STATUS> cmd(const ssh_session& ssh, const std::string& command, const std::string& ip);
+	std::expected<std::string, SSH_STATUS> readlink(const ssh_session& ssh, const std::string& link, const std::string& ip);
+	std::expected<bool, SSH_STATUS> is_broken_link(const sftp_session& sftp, const std::string& link, const std::string& ip);
+	std::expected<std::string, SSH_STATUS> homedir(const ssh_session& ssh, const std::string& ip);
+	std::expected<std::string, SSH_STATUS> cwd(const ssh_session& ssh, const std::string& ip);
 }
 
 #endif // REMOTE_ENALBED

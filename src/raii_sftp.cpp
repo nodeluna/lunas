@@ -3,6 +3,7 @@
 #ifdef REMOTE_ENABLED
 
 #include <iostream>
+#include <expected>
 #include <libssh/sftp.h>
 #include <fcntl.h>
 #include "raii_sftp.h"
@@ -117,20 +118,20 @@ namespace sftp{
 		return attributes;
 	}
 
-	std::string cmd(const ssh_session& ssh, const std::string& command, const std::string& ip){
+	std::expected<std::string, SSH_STATUS> cmd(const ssh_session& ssh, const std::string& command, const std::string& ip){
 		std::string output;
 		ssh_channel channel = ssh_channel_new(ssh);
 		int rc = ssh_channel_open_session(channel);
 		if(rc != SSH_OK){
 			llog::remote_error_ssh(ssh, ip, "couldn't excute '" + command + "'", NO_EXIT);
-			return "";
+			return std::unexpected(rc);
 		}
 		raii::sftp::channel channel_obj = raii::sftp::channel(&channel);
 
 		rc = ssh_channel_request_exec(channel, command.c_str());
 		if(rc != SSH_OK){
 			llog::remote_error_ssh(ssh, ip, "couldn't excute '" + command + "'", NO_EXIT);
-			return "";
+			return std::unexpected(rc);
 		}
 
 		char buffer[REMOTE_BUFFER_SIZE];
@@ -138,7 +139,7 @@ namespace sftp{
 			int nbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0);
 			if(nbytes < 0){
 				llog::remote_error_ssh(ssh, ip, "error while getting '" + command + "' output", NO_EXIT);
-				return "";
+				return std::unexpected(rc);
 			}
 			if(nbytes == 0)
 				break;
@@ -151,13 +152,16 @@ namespace sftp{
 		return output;
 	}
 
-	std::string readlink(const ssh_session& ssh, const std::string& link, const std::string& ip){
+	std::expected<std::string, SSH_STATUS> readlink(const ssh_session& ssh, const std::string& link, const std::string& ip){
 		return sftp::cmd(ssh, "readlink -f \"" + link + "\"", ip);
 	}
 
-	bool is_broken_link(const sftp_session& sftp, const std::string& link, const std::string& ip){
-		std::string target = sftp::readlink(sftp->session, link, ip);
-		sftp_attributes attributes = sftp::attributes(sftp, target);
+	std::expected<bool, SSH_STATUS>  is_broken_link(const sftp_session& sftp, const std::string& link, const std::string& ip){
+		auto target = sftp::readlink(sftp->session, link, ip);
+		if(not target)
+			return std::unexpected(target.error());
+
+		sftp_attributes attributes = sftp::attributes(sftp, target.value());
 		if(attributes != NULL){
 			sftp_attributes_free(attributes);
 			return false;
@@ -166,20 +170,26 @@ namespace sftp{
 		return true;
 	}
 	
-	std::string homedir(const ssh_session& ssh, const std::string& ip){
-		std::string path = sftp::cmd(ssh, "echo $HOME", ip);
-		if(path.empty())
+	std::expected<std::string, SSH_STATUS> homedir(const ssh_session& ssh, const std::string& ip){
+		auto path = sftp::cmd(ssh, "echo $HOME", ip);
+		if(not path){
 			llog::error("couldn't get home directory for '" + ip + "' environment variable is empty");
-		os::append_seperator(path);
-		return path;
+			return std::unexpected(path.error());
+		}
+
+		os::append_seperator(path.value());
+		return path.value();
 	}
 
-	std::string cwd(const ssh_session& ssh, const std::string& ip){
-		std::string path = sftp::cmd(ssh, "pwd", ip);
-		if(path.empty())
+	std::expected<std::string, SSH_STATUS> cwd(const ssh_session& ssh, const std::string& ip){
+		auto path = sftp::cmd(ssh, "pwd", ip);
+		if(not path){
 			llog::error("couldn't get cwd directory for '" + ip + "'");
-		os::append_seperator(path);
-		return path;
+			return std::unexpected(path.error());
+		}
+
+		os::append_seperator(path.value());
+		return path.value();
 	}
 }
 #endif // REMOTE_ENABLED

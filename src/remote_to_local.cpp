@@ -203,8 +203,13 @@ fail:
 		}
 
 		std::error_code ec;
-		std::string target = sftp::readlink(sftp->session, src, src);
-		cppfs::symlink(target, dest, ec);
+		std::expected<std::string, SSH_STATUS> target = sftp::readlink(sftp->session, src, src);
+		if(not target){
+			llog::rc(sftp, src, target.error(), "couldn't get symlink target", NO_EXIT);
+			return syncstat;
+		}
+
+		cppfs::symlink(target.value(), dest, ec);
 		if(llog::ec(dest, ec, "couldn't make symlink", NO_EXIT) == false)
 			return syncstat;
 
