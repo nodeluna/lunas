@@ -33,11 +33,13 @@ struct time_val{
 };
 
 namespace utime{
+	std::variant<struct time_val, int> lget_local(const std::string& path, const short& utime);
 	std::variant<struct time_val, int> get_local(const std::string& path, const short& utime);
 	int set_local(const std::string& path, const struct time_val& time_val);
 
 #ifdef REMOTE_ENABLED
 	std::variant<struct time_val, int> get_remote(const sftp_session& sftp, const std::string& path, const short& utime);
+	std::variant<struct time_val, int> lget_remote(const sftp_session& sftp, const std::string& path, const short& utime);
 	int set_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val);
 	int sftp_lutimes(const sftp_session& sftp, const std::string& path, const struct time_val& time_val);
 #endif // REMOTE_ENABLED

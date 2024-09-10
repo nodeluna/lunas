@@ -2,6 +2,8 @@
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <variant>
+#include <cmath>
 #include "config.h"
 #include "file_types.h"
 #include "log.h"
@@ -18,6 +20,8 @@ std::string get_type_name(const short& type){
 		return "directory";
 	else if(type == SYMLINK)
 		return "symlink";
+	else if(type == BROKEN_SYMLINK)
+		return "broken symlink";
 	else
 		return "special file";
 }
@@ -53,6 +57,24 @@ namespace status{
 			return -1;
 		}
 		return local_types(status);
+	}
+
+	std::variant<bool, std::error_code> is_broken_link(const std::string& path){
+		std::error_code ec;
+		if(not fs::is_symlink(path, ec))
+			return false;
+		if(ec.value() != 0)
+			return ec;
+
+		std::string target = fs::read_symlink(path, ec);
+		if(ec.value() != 0)
+			return ec;
+
+		bool exists = fs::exists(target, ec);
+		if(ec.value() != 0)
+			return ec;
+
+		return not exists;
 	}
 
 #ifdef REMOTE_ENABLED

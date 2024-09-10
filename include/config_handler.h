@@ -32,6 +32,8 @@ namespace config_filler {
 
 	int follow_symlink(const std::string& data);
 
+	int no_broken_link(const std::string& data);
+
 	int resume(const std::string& data);
 
 	int compression(const std::string& data);

@@ -215,12 +215,7 @@ fail:
 			return syncstat;
 		}
 
-		char* target = sftp_readlink(src_sftp, src.c_str());
-		if(target == NULL){
-			llog::error("couldn't read symlink '" + src + "', " + ssh_get_error(src_sftp->session));
-			return syncstat;
-		}
-		raii::sftp::link_target link_obj = raii::sftp::link_target(&target);
+		std::string target = sftp::readlink(src_sftp->session, src, src);
 
 		int rc = sftp::symlink(dest_sftp, target, dest);
 		if(llog::rc(dest_sftp, dest, rc, "couldn't make symlink", NO_EXIT) == false)

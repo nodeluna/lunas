@@ -8,6 +8,7 @@
 
 #include <string>
 
+typedef int SSH_STATUS;
 
 #define REMOTE_BUFFER_SIZE 65536 * 2
 
@@ -87,6 +88,8 @@ namespace sftp{
 	int symlink(const sftp_session& sftp, const std::string& target, const std::string& path);
 	sftp_attributes attributes(const sftp_session& sftp, const std::string& path);
 	std::string cmd(const ssh_session& ssh, const std::string& command, const std::string& ip);
+	std::string readlink(const ssh_session& ssh, const std::string& link, const std::string& ip);
+	bool is_broken_link(const sftp_session& sftp, const std::string& link, const std::string& ip);
 	std::string homedir(const ssh_session& ssh, const std::string& ip);
 	std::string cwd(const ssh_session& ssh, const std::string& ip);
 }

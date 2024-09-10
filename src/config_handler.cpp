@@ -131,6 +131,16 @@ namespace config_filler {
 		return 0;
 	}
 
+	int no_broken_link(const std::string& data){
+		if(data == "on")
+			options::no_broken_symlink = true;
+		else if(data == "off")
+			options::no_broken_symlink = false;
+		else
+			return -1;
+		return 0;
+	}
+
 	int resume(const std::string& data){
 		if(data == "on")
 			options::resume = true;

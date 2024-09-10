@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+//#include <cmath>
 #include <set>
 #include "config.h"
 
@@ -96,7 +97,10 @@ int avoid_dest(const struct path& file, const struct metadata& metadata, const s
 		return NOT_DEST;
 	else if(metadata.type != NON_EXISTENT && metadata.type == DIRECTORY)
 		return EXISTING_DIR;
-	else if(metadata.type != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
+	//else if(options::follow_symlink && metadata.type < 0 && std::abs(metadata.type) == file.metadatas.at(src_mtime_i).type){
+	else if(metadata.type == BROKEN_SYMLINK && file.metadatas.at(src_mtime_i).type == SYMLINK){
+		return OK_DEST;
+	}else if(metadata.type != NON_EXISTENT && (metadata.type != file.metadatas.at(src_mtime_i).type)){
 		const std::string dest = input_paths.at(dest_index).path + file.name;
 		llog::warn("conflict in types between *" + get_type_name(metadata.type) +"* '" + dest + "' and *" +
 				get_type_name(file.metadatas.at(src_mtime_i).type) + "* '" + src + "'");
@@ -145,6 +149,8 @@ bool avoid_src(const struct path& file, const unsigned long int& src_mtime_i){
 	if(src_mtime_i == std::numeric_limits<unsigned long int>::max())
 		return true;
 	else if(file.metadatas.at(src_mtime_i).type == NON_EXISTENT)
+		return true;
+	else if(file.metadatas.at(src_mtime_i).type == BROKEN_SYMLINK)
 		return true;
 	return false;
 }

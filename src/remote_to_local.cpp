@@ -203,8 +203,7 @@ fail:
 		}
 
 		std::error_code ec;
-		char* target = sftp_readlink(sftp, src.c_str());
-		raii::sftp::link_target link_obj = raii::sftp::link_target(&target);
+		std::string target = sftp::readlink(sftp->session, src, src);
 		cppfs::symlink(target, dest, ec);
 		if(llog::ec(dest, ec, "couldn't make symlink", NO_EXIT) == false)
 			return syncstat;

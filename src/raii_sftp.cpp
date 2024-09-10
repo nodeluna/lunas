@@ -150,6 +150,21 @@ namespace sftp{
 
 		return output;
 	}
+
+	std::string readlink(const ssh_session& ssh, const std::string& link, const std::string& ip){
+		return sftp::cmd(ssh, "readlink -f \"" + link + "\"", ip);
+	}
+
+	bool is_broken_link(const sftp_session& sftp, const std::string& link, const std::string& ip){
+		std::string target = sftp::readlink(sftp->session, link, ip);
+		sftp_attributes attributes = sftp::attributes(sftp, target);
+		if(attributes != NULL){
+			sftp_attributes_free(attributes);
+			return false;
+		}
+
+		return true;
+	}
 	
 	std::string homedir(const ssh_session& ssh, const std::string& ip){
 		std::string path = sftp::cmd(ssh, "echo $HOME", ip);
