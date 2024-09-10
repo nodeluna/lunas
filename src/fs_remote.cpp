@@ -100,10 +100,7 @@ namespace fs_remote {
 
 namespace remote_readdir_operations {
 	void type(const struct input_path& remote_path, const sftp_attributes& attributes, struct metadata& metadata, const std::string& full_path){
-		auto broken = sftp::is_broken_link(remote_path.sftp, full_path, remote_path.ip);
-		if(not broken)
-			llog::rc(remote_path.sftp, full_path, broken.error(), "couldn't check symlink", EXIT_FAILURE);
-		if(options::no_broken_symlink && attributes->type == SYMLINK && broken.value()){
+		if(options::no_broken_symlink && attributes->type == SYMLINK && sftp::is_broken_link(remote_path.sftp, full_path, remote_path.ip).value_or(false)){
 			metadata.type = BROKEN_SYMLINK;
 		}else if(options::follow_symlink){
 			metadata.type = status::remote_type2(remote_path.sftp, full_path, true);
