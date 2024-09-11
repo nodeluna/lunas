@@ -3,6 +3,7 @@
 
 #include <filesystem>
 #include <string>
+#include <expected>
 #include "config.h"
 
 #ifdef REMOTE_ENABLED
@@ -12,7 +13,7 @@
 
 namespace permissions{
 	bool is_local_readable(const std::string& path);
-	std::filesystem::perms get_local(const std::string& path, std::error_code& ec);
+	std::expected<std::filesystem::perms, std::error_code> get_local(const std::string& path);
 	std::error_code set_local(const std::string& path, std::filesystem::perms permissions);
 
 #ifdef REMOTE_ENABLED

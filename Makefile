@@ -13,6 +13,9 @@ OBJS := $(addprefix build/, $(notdir $(SRCS:.cpp=.o)))
 DEP := $(OBJS:.o=.d)
 pwd = $(shell pwd)
 
+ifneq ($(findstring clang++, $(CC)),)
+	CFLAGS += $(CLAGS) -D__cpp_concepts=202002L -Wno-builtin-macro-redefined -Wno-macro-redefined
+endif
 
 building: create_directory $(OBJS) $(TARGET)
 
@@ -70,7 +73,7 @@ local: local_options building
 cppcheck:
 	$(info :: running static code analysis)
 	$(info  )
-	cppcheck --cppcheck-build-dir=build --std=c++20 --check-level=exhaustive --suppress=unreadVariable --suppress=missingIncludeSystem --enable=all -I $(HEADER_DIR) $(SRC_DIR)
+	cppcheck --cppcheck-build-dir=build --std=c++23 --check-level=exhaustive --suppress=unreadVariable --suppress=missingIncludeSystem --enable=all -I $(HEADER_DIR) $(SRC_DIR)
 
 asan: create_directory
 	$(info :: compiling with asan)

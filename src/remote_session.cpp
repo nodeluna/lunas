@@ -122,7 +122,7 @@ namespace rsession {
 			default:
 				return "unknown method";
 		}
-		return "unknown method: " + method;
+		return "unknown method: " + std::to_string(method);
 	}
 
 	int auth_list(const ssh_session& ssh, const std::string& ip, const std::string& pw){

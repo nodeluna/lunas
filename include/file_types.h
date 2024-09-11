@@ -10,7 +10,7 @@
 
 #include <string>
 #include <filesystem>
-#include <variant>
+#include <expected>
 #include "log.h"
 #include "config.h"
 
@@ -23,7 +23,7 @@ namespace status{
 
 	short int local_type(const std::string& path, const bool& cerr);
 
-	std::variant<bool, std::error_code> is_broken_link(const std::string& path);
+	std::expected<bool, std::error_code> is_broken_link(const std::string& path);
 #ifdef REMOTE_ENABLED
 	short int remote_type(const sftp_attributes& attributes);
 

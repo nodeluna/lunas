@@ -2,7 +2,7 @@
 #include <vector>
 #include <string>
 #include <filesystem>
-#include <variant>
+#include <expected>
 #include <cmath>
 #include "config.h"
 #include "file_types.h"
@@ -59,20 +59,20 @@ namespace status{
 		return local_types(status);
 	}
 
-	std::variant<bool, std::error_code> is_broken_link(const std::string& path){
+	std::expected<bool, std::error_code> is_broken_link(const std::string& path){
 		std::error_code ec;
 		if(not fs::is_symlink(path, ec))
 			return false;
 		if(ec.value() != 0)
-			return ec;
+			return std::unexpected(ec);
 
 		std::string target = fs::read_symlink(path, ec);
 		if(ec.value() != 0)
-			return ec;
+			return std::unexpected(ec);
 
 		bool exists = fs::exists(target, ec);
 		if(ec.value() != 0)
-			return ec;
+			return std::unexpected(ec);
 
 		return not exists;
 	}

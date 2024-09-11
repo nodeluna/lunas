@@ -161,9 +161,9 @@ namespace sftp{
 		if(not target)
 			return std::unexpected(target.error());
 
-		sftp_attributes attributes = sftp::attributes(sftp, target.value());
-		if(attributes != NULL){
-			sftp_attributes_free(attributes);
+		sftp_attributes attrs = sftp::attributes(sftp, target.value());
+		if(attrs != NULL){
+			sftp_attributes_free(attrs);
 			return false;
 		}
 

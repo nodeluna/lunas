@@ -5,6 +5,7 @@
 #include <string>
 #include <cstring>
 #include <fcntl.h>
+#include <expected>
 #include <libssh/sftp.h>
 #include "fs_remote.h"
 #include "base.h"
@@ -59,6 +60,7 @@ namespace fs_remote {
 
 			if(remote_readdir_operations::lspart(remote_path, metadata, full_path, relative_path, file_name, index_path))
 				continue;
+
 			remote_readdir_operations::insert(metadata, relative_path, index_path);
 			}
 
@@ -112,11 +114,11 @@ namespace remote_readdir_operations {
 
 	void mtime(const struct input_path& remote_path, const sftp_attributes& attributes, struct metadata& metadata, const std::string& full_path){
 		if(options::follow_symlink && metadata.type == SYMLINK){
-			auto utime = utime::get_remote(remote_path.sftp, full_path, 2);
-			if(std::holds_alternative<int>(utime))
-				llog::rc(remote_path.sftp, full_path, std::get<int>(utime), "couldn't get mtime", EXIT_FAILURE);
+			std::expected<struct time_val, int> utime = utime::get_remote(remote_path.sftp, full_path, 2);
+			if(not utime)
+				llog::rc(remote_path.sftp, full_path, utime.error(), "couldn't get mtime", EXIT_FAILURE);
 			else
-				metadata.mtime = std::get<struct time_val>(utime).mtime;
+				metadata.mtime = utime.value().mtime;
 		}else
 			metadata.mtime = attributes->mtime;
 	}

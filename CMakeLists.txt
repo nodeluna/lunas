@@ -5,8 +5,13 @@ project(lunas)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 file(GLOB SOURCES src/*.cpp)
-add_compile_options(-Wall -Wextra -pedantic -O1)
 set(CMAKE_CXX_STANDARD 23)
+add_compile_options(-Wall -Wextra -pedantic -O1)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	add_compile_options(-D__cpp_concepts=202002L -Wno-builtin-macro-redefined -Wno-macro-redefined)
+endif()
+
 add_executable(${PROJECT_NAME} ${SOURCES}) 
 
 if(DISABLE_REMOTE)

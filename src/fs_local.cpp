@@ -1,4 +1,5 @@
 #include <cerrno>
+
 #include <cstdlib>
 #include <exception>
 #include <filesystem>
@@ -6,6 +7,7 @@
 #include <iostream>
 #include <set>
 #include <variant>
+#include <expected>
 #include "base.h"
 #include "fs_local.h"
 #include "file_types.h"
@@ -89,10 +91,10 @@ namespace fs_local {
 namespace local_readdir_operations {
 	void type(struct metadata& metadata, const std::string& str_entry){
 		if(options::no_broken_symlink){
-			std::variant<bool, std::error_code> broken = status::is_broken_link(str_entry);
-			if(std::holds_alternative<std::error_code>(broken))
+			std::expected<bool, std::error_code> broken = status::is_broken_link(str_entry);
+			if(not broken.has_value())
 				llog::local_error(str_entry, "couldn't check link", EXIT_FAILURE);
-			else if(std::get<bool>(broken)){
+			else if(broken.value()){
 				metadata.type = BROKEN_SYMLINK;
 				return;
 			}
@@ -104,16 +106,18 @@ namespace local_readdir_operations {
 	}
 
 	void mtime(struct metadata& metadata, const std::string& str_entry){
-		std::variant<struct time_val, int> time_val;
-		if(options::no_broken_symlink && metadata.type == BROKEN_SYMLINK)
-			time_val = utime::lget_local(str_entry, 2);
-		else
-			time_val = utime::get_local(str_entry, 2);
+		if(options::no_broken_symlink && metadata.type == BROKEN_SYMLINK){
+			std::expected<struct time_val, int> time_val = utime::lget_local(str_entry, 2);
+			if(not time_val)
+				llog::local_error(str_entry, "couldn't get mtime of file", EXIT_FAILURE);
+			metadata.mtime = time_val.value().mtime;
+		}else{
+			std::expected<struct time_val, int> time_val = utime::get_local(str_entry, 2);
+			if(not time_val)
+				llog::local_error(str_entry, "couldn't get mtime of file", EXIT_FAILURE);
+			metadata.mtime = time_val.value().mtime;
+		}
 
-		if(std::holds_alternative<int>(time_val))
-			llog::local_error(str_entry, "couldn't get mtime of file", EXIT_FAILURE);
-		else
-			metadata.mtime = std::get<struct time_val>(time_val).mtime;
 	}
 
 	bool lspart(const struct input_path& local_path, const struct metadata& metadata, const std::string& str_entry, const size_t& path_index){

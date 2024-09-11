@@ -57,7 +57,6 @@ namespace local_to_remote {
 			return syncstat;
 		}
 
-		std::error_code ec;
 		int access_type;
 		if(options::resume){
 			sftp_attributes attrs = sftp_stat(sftp, dest.c_str());
@@ -72,11 +71,13 @@ namespace local_to_remote {
 		}else
 			access_type = O_WRONLY | O_CREAT | O_TRUNC;
 
-		unsigned int perms = (unsigned int)permissions::get_local(src, ec);
-		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT) == false)
+		std::expected<std::filesystem::perms, std::error_code> perms = permissions::get_local(src);
+		if(not perms){
+			llog::ec(src, perms.error(), "couldn't get file permissions", NO_EXIT);
 			return syncstat;
+		}
 
-		sftp_file dest_file = sftp_open(sftp, dest.c_str(), access_type, perms);
+		sftp_file dest_file = sftp_open(sftp, dest.c_str(), access_type, (unsigned int)perms.value());
 		if(dest_file == NULL){
 			llog::error("couldn't open dest '" + dest + "', " + ssh_get_error(sftp->session));
 			return syncstat;
@@ -169,12 +170,13 @@ fail:
 			return syncstat;
 		}
 
-		std::error_code ec;
-		unsigned int perms = (unsigned int)permissions::get_local(src, ec);
-		if(llog::ec(src, ec, "couldn't get file permissions", NO_EXIT) == false)
+		std::expected<std::filesystem::perms, std::error_code> perms = permissions::get_local(src);
+		if(not perms){
+			llog::ec(src, perms.error(), "couldn't get file permissions", NO_EXIT);
 			return syncstat;
+		}
 
-		int rc = sftp::mkdir(sftp, dest, perms);
+		int rc = sftp::mkdir(sftp, dest, (unsigned int)perms.value());
 		if(llog::rc(sftp, dest, rc, "couldn't make directory", NO_EXIT) == false)
 			return syncstat;
 

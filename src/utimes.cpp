@@ -5,6 +5,7 @@
 #endif // REMOTE_ENABLED
        
 #include <string>
+#include <expected>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include "utimes.h"
@@ -56,23 +57,23 @@ namespace utime{
 	}
 
 
-	std::variant<struct time_val, int> lget_local(const std::string& path, const short& utime){
+	std::expected<struct time_val, int> lget_local(const std::string& path, const short& utime){
 		struct stat stats;
 		struct time_val time_val;
 		int rv = 0;
 
 		rv = lstat(path.c_str(), &stats);
 		if(rv != 0)
-			return -1;
+			return std::unexpected(-1);
 
 		rv = switch_fill_local(time_val, stats, utime);
 		if(rv != 0)
-			return -1;
+			return std::unexpected(-1);
 
 		return time_val;
 	}
 
-	std::variant<struct time_val, int> get_local(const std::string& path, const short& utime){
+	std::expected<struct time_val, int> get_local(const std::string& path, const short& utime){
 		struct stat stats;
 		struct time_val time_val;
 		int rv = 0;
@@ -83,11 +84,11 @@ namespace utime{
 			rv = lstat(path.c_str(), &stats);
 
 		if(rv != 0)
-			return -1;
+			return std::unexpected(-1);
 
 		rv = switch_fill_local(time_val, stats, utime);
 		if(rv != 0)
-			return -1;
+			return std::unexpected(-1);
 
 		return time_val;
 	}
@@ -151,7 +152,7 @@ namespace utime{
 		return 0;
 	}
 
-	std::variant<struct time_val, int> lget_remote(const sftp_session& sftp, const std::string& path, const short& utime){
+	/*std::variant<struct time_val, int> lget_remote(const sftp_session& sftp, const std::string& path, const short& utime){
 		sftp_attributes attributes;
 		raii::sftp::attributes attr_obj = raii::sftp::attributes(&attributes);
 		attributes = sftp_lstat(sftp, path.c_str());
@@ -165,9 +166,9 @@ namespace utime{
 			return -1;
 
 		return time_val;
-	}
+	}*/
 
-	std::variant<struct time_val, int> get_remote(const sftp_session& sftp, const std::string& path, const short& utime){
+	std::expected<struct time_val, int> get_remote(const sftp_session& sftp, const std::string& path, const short& utime){
 		sftp_attributes attributes;
 		raii::sftp::attributes attr_obj = raii::sftp::attributes(&attributes);
 		if(options::follow_symlink)
@@ -176,11 +177,11 @@ namespace utime{
 			attributes = sftp_lstat(sftp, path.c_str());
 		struct time_val time_val;
 		if(attributes == NULL)
-			return -1;
+			return std::unexpected(-1);
 
 		int rv = switch_fill_remote(attributes, time_val, utime);
 		if(rv != 0)
-			return -1;
+			return std::unexpected(-1);
 
 		return time_val;
 	}
