@@ -67,7 +67,7 @@ namespace resume {
 
 	void sync(std::set<path>::iterator& itr, const struct path& lspart, const unsigned long int& dest_index){
 		unsigned long int src_mtime_i = get_src(*itr);
-		if(avoid_src(*itr, src_mtime_i))
+		if(avoid_src(*itr, src_mtime_i) != OK_SRC)
 			return;
 		const long int& src_mtime = itr->metadatas.at(src_mtime_i).mtime;
 

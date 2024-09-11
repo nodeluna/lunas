@@ -5,7 +5,6 @@
 #include <string>
 #include <cstring>
 #include <cerrno>
-#include <variant>
 #include <libssh/sftp.h>
 #include "remote_attrs.h"
 #include "utimes.h"

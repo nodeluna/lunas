@@ -12,13 +12,17 @@
 #define TYPE_CONFLICT 4
 #define SAME_MTIME 5
 
+#define OK_SRC 0
+#define NO_SRC 1
+#define BROKEN_SRC 2
+
 unsigned long int get_src(const struct path& file);
 
 void register_sync(const struct syncstat& syncstat, const unsigned long int& dest_index, const short& type);
 
 void fill_base(void);
 
-bool avoid_src(const struct path& file, const unsigned long int& src_mtime_i);
+int avoid_src(const struct path& file, const unsigned long int& src_mtime_i);
 
 int avoid_dest(const struct path& file, const struct metadata& metadata, const size_t& src_mtime_i, const size_t& dest_index);
 

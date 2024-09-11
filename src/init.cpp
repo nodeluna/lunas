@@ -145,32 +145,31 @@ end:
 	}
 }
 
-bool avoid_src(const struct path& file, const unsigned long int& src_mtime_i){
+int avoid_src(const struct path& file, const unsigned long int& src_mtime_i){
 	if(src_mtime_i == std::numeric_limits<unsigned long int>::max())
-		return true;
+		return NO_SRC;
 	else if(file.metadatas.at(src_mtime_i).type == NON_EXISTENT)
-		return true;
+		return NO_SRC;
 	else if(file.metadatas.at(src_mtime_i).type == BROKEN_SYMLINK)
-		return true;
-	return false;
+		return BROKEN_SRC;
+	return OK_SRC;
 }
 
 void syncing(){
-	bool not_begin = false;
 	for(auto itr = content.begin(); itr != content.end(); ){
 		unsigned long int src_mtime_i = get_src(*itr);
-		if(avoid_src(*itr, src_mtime_i))
+		if(avoid_src(*itr, src_mtime_i) == NO_SRC)
 			goto end;
+		else if(avoid_src(*itr, src_mtime_i) == BROKEN_SRC)
+			goto avoid;
+
 		updating(*itr, src_mtime_i);
 
 		if(!options::remove_extra)
 			goto end;
-
-		if(not_begin){
-			itr = content.erase(itr);
-			continue;
-		}else
-			not_begin = true;
+avoid:
+		itr = content.erase(itr);
+		continue;
 end:
 		++itr;
 	}

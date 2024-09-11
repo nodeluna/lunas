@@ -4,7 +4,7 @@
 #include <fstream>
 #include <filesystem>
 #include <optional>
-#include <variant>
+#include <expected>
 #include <cstdlib>
 #include <cstring>
 #include <cerrno>
@@ -52,7 +52,7 @@ namespace config_manager {
 	}
 
 #ifdef REMOTE_ENABLED
-	std::variant<struct input_path, std::string> fill_remote_path(const std::multimap<std::string, std::string>& nest,
+	std::expected<struct input_path, std::string> fill_remote_path(const std::multimap<std::string, std::string>& nest,
 			std::multimap<std::string, std::string>::iterator& it, const std::string& name){
 		std::string nest_path = it->first;
 		size_t nest_size = nest_path.size();
@@ -62,14 +62,14 @@ namespace config_manager {
 			std::string option = it->first.substr(nest_size, it->first.size());
 			if(auto itr1 = rpaths_options.find(option); itr1 != rpaths_options.end()){
 				if(remote_path.ip.empty() == false)
-					return "remote path for nest'" + name + "' provided twice";
+					return std::unexpected("remote path for nest'" + name + "' provided twice");
 				remote_path.srcdest = itr1->second();
 				remote_path.ip = it->second;
 			}else if(option == "N" || option == "port"){
 				if(is_num(it->second))
 					remote_path.port = std::stoi(it->second);
 				else
-					return "nest '" + name + "': port '" + it->second + "' isn't a valid number";
+					return std::unexpected("nest '" + name + "': port '" + it->second + "' isn't a valid number");
 			}else if(option == "pw" || option == "password")
 				remote_path.password = it->second;
 			++it;
@@ -78,7 +78,7 @@ namespace config_manager {
 		if(it != nest.begin())
 			--it;
 		if(remote_path.ip.empty())
-			return "remote path for nest'" + name + "' isn't provided";
+			return std::unexpected("remote path for nest'" + name + "' isn't provided");
 
 		return remote_path;
 	}
@@ -96,10 +96,10 @@ namespace config_manager {
 #ifdef REMOTE_ENABLED
 			else if(it->first.find("remote::") != it->first.npos){
 				auto remote_path = config_manager::fill_remote_path(nest, it, name);
-				if(std::holds_alternative<struct input_path>(remote_path))
-					input_paths.push_back(std::get<struct input_path>(remote_path));
-				else if(std::holds_alternative<struct input_path>(remote_path))
-					return std::get<std::string>(remote_path);
+				if(remote_path)
+					input_paths.push_back(remote_path.value());
+				else
+					return remote_path.error();
 			}
 #endif // REMOTE_ENABLED
 			else if(it->first.front() != '#')

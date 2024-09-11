@@ -1,12 +1,10 @@
 #include <cerrno>
-
 #include <cstdlib>
 #include <exception>
 #include <filesystem>
 #include <string>
 #include <iostream>
 #include <set>
-#include <variant>
 #include <expected>
 #include "base.h"
 #include "fs_local.h"
