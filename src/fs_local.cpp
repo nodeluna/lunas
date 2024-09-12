@@ -32,9 +32,9 @@ namespace local_readdir_operations {
 }
 
 namespace fs_local {
-	int readdir(const struct input_path& local_path, const unsigned long int& path_index){
+	int readdir(const struct input_path& local_path, const std::string& dir_path, const unsigned long int& path_index){
 		try {
-			for(const auto& entry : fs::recursive_directory_iterator(local_path.path, fs::directory_options::skip_permission_denied)){
+			for(const auto& entry : fs::directory_iterator(dir_path)){
 				std::string str_entry = entry.path().string();
 				if(utils::exclude(str_entry, local_path.path))
 						continue;
@@ -49,6 +49,9 @@ namespace fs_local {
 				str_entry = str_entry.substr(local_path.path.size(), str_entry.size());
 
 				local_readdir_operations::insert(metadata, str_entry, path_index);
+
+				if(metadata.type == DIRECTORY)
+					readdir(local_path, entry.path().string(), path_index);
 			}
 		}catch(const std::exception& e){
 			llog::warn("some files/directories were missed\n");
@@ -84,7 +87,7 @@ namespace fs_local {
 			exit(1);
 		}
 
-		return fs_local::readdir(local_path, path_index);
+		return fs_local::readdir(local_path, local_path.path, path_index);
 	}
 
 	std::expected<std::uintmax_t, std::error_code> available_space(struct input_path& local_path){

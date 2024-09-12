@@ -65,7 +65,7 @@ namespace fs_remote {
 			remote_readdir_operations::insert(metadata, relative_path, index_path);
 			}
 
-			if(status::remote_type(attributes) == DIRECTORY){
+			if(metadata.type == DIRECTORY){
 				attr_obj.reset();
 				os::append_seperator(full_path);
 				readdir(remote_path, full_path, index_path);
