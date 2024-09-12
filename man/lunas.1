@@ -138,6 +138,16 @@ follow symlinks. sync the target the symlink is pointing to instead of the symli
 don't sync broken symlinks 
 
 .TP
+.B [-ms, --minimum-space] <sizeUnit>
+
+prevent a partition from filling up by setting a threshold to prevent syncing files to it once it's reached. default is 1GiB
+.br
+possible units are kib, mib, gib, tib, pib. a number without a unit is considered bytes
+
+        example: -p dir -p dir2 -ms 0.5Tib
+        example: -p dir -p dir2 -ms 100mib
+
+.TP
 .B [-R, --resume]
 
 resume interrupted file transfer. enabled by default

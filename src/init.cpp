@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <filesystem>
 #include <limits>
 #include <iostream>
@@ -23,6 +24,7 @@
 #include "copy.h"
 #include "size_units.h"
 #include "resume.h"
+#include "partition.h"
 
 
 #ifdef REMOTE_ENABLED
@@ -41,11 +43,21 @@ void fill_base(void){
 	unsigned long int index_path = 0;
 	for(auto& i : input_paths){
 		llog::print("--> reading directory " + input_paths.at(index_path).path);
-		if(i.remote == false)
+		if(i.remote == false){
 			fs_local::list_tree(i, index_path);
+			auto space = fs_local::available_space(i);
+			if(not space)
+				llog::ec(i.path, space.error(), "couldn't get available space", EXIT_FAILURE);
+			i.available_space = space.value();
+		}
 #ifdef REMOTE_ENABLED
-		else
+		else{
 			fs_remote::list_tree(i, index_path);
+			auto space = fs_remote::available_space(i);
+			if(not space)
+				llog::rc(i.sftp, i.path, space.error(), "couldn't get available space", EXIT_FAILURE);
+			i.available_space = space.value();
+		}
 #endif // REMOTE_ENABLED
 		index_path++;
 	}
@@ -53,21 +65,23 @@ void fill_base(void){
 }
 
 unsigned long int get_src(const struct path& file){
-	long int src_mtime = -2;
+	long int src_mtime;
 	unsigned long int src_mtime_i = std::numeric_limits<unsigned long int>::max();
 	unsigned long int i = 0;
 
-	if(options::rollback)
-		src_mtime = std::numeric_limits<long int>::max();
-
+	bool first = true;
 	for(const auto& metadata : file.metadatas){
-		if(condition::is_src(input_paths.at(i).srcdest) == false)
+		if(not condition::is_src(input_paths.at(i).srcdest) || metadata.type == NON_EXISTENT)
 			goto end;
-		if(!options::rollback && src_mtime >= metadata.mtime)
+		if(first){
+			first = false;
+			goto assign;
+		}else if(!options::rollback && src_mtime >= metadata.mtime)
 			goto end;
-		else if(options::rollback && (src_mtime <= metadata.mtime || metadata.type == NON_EXISTENT))
+		else if(options::rollback && src_mtime <= metadata.mtime)
 			goto end;
 
+assign:
 		src_mtime = metadata.mtime;
 		src_mtime_i = i;
 end:
@@ -81,11 +95,65 @@ void register_sync(const struct syncstat& syncstat, const unsigned long int& des
 	if(syncstat.code == 0)
 		return;
 	input_paths.at(dest_index).synced_size += syncstat.copied_size;
+	input_paths.at(dest_index).available_space -= syncstat.copied_size;
 	if(type == DIRECTORY)
 		input_paths.at(dest_index).synced_dirs++;
 	else
 		input_paths.at(dest_index).synced_files++;
 	base::syncing_counter++;
+}
+
+#ifdef REMOTE_ENABLED
+std::expected<std::uintmax_t, int> file_size(const sftp_session& sftp, const std::string& path, const short& type){
+	if(type != REGULAR_FILE)
+		return 0;
+	if(sftp != nullptr){
+		auto size = sftp::file_size(sftp, path);
+		if(not size){
+			llog::rc(sftp, path, size.error(), "couldn't get file size", NO_EXIT);
+			return std::unexpected(-1);
+		}
+		return size.value();
+	}else
+#else
+std::expected<std::uintmax_t, int> file_size(const std::string& path, const short& type){
+	if(type != REGULAR_FILE)
+		return 0;
+#endif // REMOTE_ENABLED
+	{
+		auto size = cppfs::file_size(path);
+		if(not size){
+			llog::ec(path, size.error(), "couldn't get file size", NO_EXIT);
+			return std::unexpected(-1);
+		}
+		return size.value();
+	}
+}
+
+bool check_partition_available_space(const struct input_path& input_path, const std::uintmax_t& size){
+	if(partition::getting_full(input_path.available_space, size))
+		return false;
+	return true;
+}
+
+bool is_there_space_left(const size_t& src_mtime_i, const size_t& dest_index, const std::string& src, const short& type){
+#ifdef REMOTE_ENABLED
+		auto size = file_size(input_paths.at(src_mtime_i).sftp, src, type);
+		if(not size)
+			return false;
+		else if(not check_partition_available_space(input_paths.at(dest_index), size.value())){
+			return false;
+		}
+#else
+		auto& _ = src_mtime_i;
+		auto size = file_size(src, type);
+		if(not size)
+			return false;
+		else if(not check_partition_available_space(input_paths.at(dest_index), size.value()))
+			return false;
+#endif // REMOTE_ENABLED
+       
+		return true;
 }
 
 int avoid_dest(const struct path& file, const struct metadata& metadata, const size_t& src_mtime_i, const size_t& dest_index){
@@ -108,6 +176,8 @@ int avoid_dest(const struct path& file, const struct metadata& metadata, const s
 		return TYPE_CONFLICT;
 	}else if(src_mtime == metadata.mtime)
 		return SAME_MTIME;
+	else if(not is_there_space_left(src_mtime_i, dest_index, src, file.metadatas.at(src_mtime_i).type))
+		return NO_SPACE_LEFT;
 	return OK_DEST;
 }
 
@@ -119,7 +189,11 @@ void updating(const struct path& file, const unsigned long int& src_mtime_i){
 	unsigned long int dest_index = 0;
 	bool sync = false;
 	for(const auto& metadata : file.metadatas){
-		if(avoid_dest(file, metadata, src_mtime_i, dest_index) != OK_DEST)
+		if(avoid_dest(file, metadata, src_mtime_i, dest_index) == NO_SPACE_LEFT){
+			llog::error("can't sync '" + input_paths.at(dest_index).path + file.name + "' partition getting full. available space left: " +
+					size_units(input_paths.at(dest_index).available_space));
+			goto end;
+		}else if(avoid_dest(file, metadata, src_mtime_i, dest_index) != OK_DEST)
 			goto end;
 
 		if(options::update && src_mtime > metadata.mtime)

@@ -6,6 +6,23 @@
 namespace fs = std::filesystem;
 
 namespace parse_path{
+	std::string get_file_or_dir_name(const std::string& path){
+		if(path.empty())
+			return {};
+		else if(path.rfind(path_seperator) == path.npos)
+			return path;
+
+		return path.substr(path.rfind(path_seperator) + 1, path.length());
+	}
+
+	std::string get_lower_dir_level(std::string path){
+		if(path.rfind(path_seperator) == path.npos)
+			return path;
+		os::pop_seperator(path);
+		path.resize(path.length() - get_file_or_dir_name(path).length());
+		return path;
+	}
+
 	void adjust_relative_path(std::string& path, int& depth){
 		if(path.size() < 3)
 			return;

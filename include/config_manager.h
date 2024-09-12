@@ -134,6 +134,10 @@ inline std::unordered_map<std::string, std::function<int(std::string)>> misc_opt
 	{"-xp",			config_filler::exclude_pattern	},
 	{"exclude-pattern",	config_filler::exclude_pattern	},
 	{"xp",			config_filler::exclude_pattern	},
+	{"--minimum-space",	config_filler::minimum_space	},
+	{"-ms",			config_filler::minimum_space	},
+	{"minimum-space",	config_filler::minimum_space	},
+	{"ms",			config_filler::minimum_space	},
 };
 
 inline std::unordered_map<std::string, std::function<void(void)>> info = {

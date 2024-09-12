@@ -17,6 +17,7 @@
 #include "raii_sftp.h"
 #include "cliargs.h"
 #include "file_types.h"
+#include "size_units.h"
 
 
 
@@ -96,6 +97,10 @@ namespace resume {
 #else
 			resume::unlink(dest);
 #endif // REMOTE_ENABLED
+			return;
+		}else if(avoid == NO_SPACE_LEFT){
+			llog::error("can't resume '" + dest + "' partition getting full. available space left: " +
+					size_units(input_paths.at(dest_index).available_space));
 			return;
 		}
 		if(type != REGULAR_FILE)

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <unordered_set>
+#include <cstdint>
 #include "os.h"
 
 #if (!defined(DISABLE_REMOTE))
@@ -32,6 +33,7 @@ namespace options{
 	inline bool checksum = false;
 	inline bool compression = false;
 	inline int compression_level = 5;
+	inline std::uintmax_t minimum_space = 1073741824;
 	inline std::string color_error = "\x1b[1;31m";
 	inline std::string reset_color = "\x1b[0m";
 }

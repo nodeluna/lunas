@@ -29,6 +29,8 @@ inline std::vector<input_path> input_paths;
 
 bool is_num(const std::string& x);
 
+bool is_num_decimal(const std::string& x);
+
 void next_arg_exists(const int& argc, const char* argv[], int i);
 
 int fillopts(const int& argc, const char* argv[], int& index);

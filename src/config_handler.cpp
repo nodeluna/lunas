@@ -1,3 +1,4 @@
+#include <cctype>
 #include <string>
 #include <iostream>
 #include "config_handler.h"
@@ -53,6 +54,58 @@ namespace config_filler {
 		if(level > 9 || level <= 0)
 			llog::error_exit("compression level must be between 1-9. provided level '" + data + "'", EXIT_FAILURE);
 		options::compression = level;
+		return 0;
+	}
+
+	int minimum_space(const std::string& data){
+		constexpr std::uintmax_t KiB = 1024;
+		constexpr std::uintmax_t MiB = 1024 * KiB;
+		constexpr std::uintmax_t GiB = 1024 * MiB;
+		constexpr std::uintmax_t TiB = 1024 * GiB;
+		constexpr std::uintmax_t PiB = 1024 * TiB;
+		std::string temp = data;
+
+		std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c){
+				return std::tolower(c);
+				});
+		if(temp.find("kib") != data.npos)
+			temp.resize(temp.find("kib"));
+		else if(temp.find("mib") != temp.npos)
+			temp.resize(temp.find("mib"));
+		else if(temp.find("gib") != temp.npos)
+			temp.resize(temp.find("gib"));
+		else if(temp.find("tib") != temp.npos)
+			temp.resize(temp.find("tib"));
+		else if(temp.find("pib") != temp.npos)
+			temp.resize(temp.find("pib"));
+		else
+			temp = data;
+
+		if(is_num_decimal(temp) == false)
+			llog::error_exit("argument '" + data + "' for option minimum-space isn't valid", EXIT_FAILURE);
+
+		double num = std::stod(data);
+		std::uintmax_t minimum_space = 0;
+
+		temp = data;
+		std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c){
+				return std::tolower(c);
+				});
+
+		if(temp.find("kib") != data.npos)
+			minimum_space = num * KiB;
+		else if(temp.find("mib") != temp.npos)
+			minimum_space = num * MiB;
+		else if(temp.find("gib") != temp.npos)
+			minimum_space = num * GiB;
+		else if(temp.find("tib") != temp.npos)
+			minimum_space = num * TiB;
+		else if(temp.find("pib") != temp.npos)
+			minimum_space = num * PiB;
+		else 
+			minimum_space = num;
+
+		options::minimum_space = minimum_space;
 		return 0;
 	}
 

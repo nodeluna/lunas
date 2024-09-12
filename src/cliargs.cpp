@@ -21,6 +21,19 @@ bool is_num(const std::string& x){
 	    });
 }
 
+bool is_num_decimal(const std::string& x){
+	bool has_decimal = false;
+	return std::all_of(x.begin(), x.end(), [&](char c){
+			if(std::isdigit(c))
+			    return true;
+			else if(c == '.' && not has_decimal){
+			    has_decimal = true;
+			    return true;
+			}else
+			    return false;
+	    });
+}
+
 void next_arg_exists(const int& argc, const char* argv[], int i){
         if((argc-1) == i){
 		llog::error(std::string("argument for option '") + argv[i] + std::string("' wasn't provided, exiting"));

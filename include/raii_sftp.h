@@ -8,6 +8,7 @@
 
 #include <string>
 #include <expected>
+#include <cstdint>
 
 typedef int SSH_STATUS;
 
@@ -93,6 +94,7 @@ namespace sftp{
 	std::expected<bool, SSH_STATUS> is_broken_link(const sftp_session& sftp, const std::string& link, const std::string& ip);
 	std::expected<std::string, SSH_STATUS> homedir(const ssh_session& ssh, const std::string& ip);
 	std::expected<std::string, SSH_STATUS> cwd(const ssh_session& ssh, const std::string& ip);
+	std::expected<std::uintmax_t, SSH_STATUS> file_size(const sftp_session& sftp, const std::string& path);
 }
 
 #endif // REMOTE_ENALBED

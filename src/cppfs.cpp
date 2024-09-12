@@ -1,5 +1,6 @@
 #include <filesystem>
 #include <string>
+#include <expected>
 #include "config.h"
 
 namespace cppfs{
@@ -43,5 +44,13 @@ namespace cppfs{
 	void symlink(const std::string& target, const std::string& dest, std::error_code& ec){
 		if(options::dry_run == false)
 			std::filesystem::create_symlink(target, dest, ec);
+	}
+
+	std::expected<std::uintmax_t, std::error_code> file_size(const std::string& path){
+		std::error_code ec;
+		std::uintmax_t size = std::filesystem::file_size(path, ec);
+		if(ec.value() != 0)
+			return std::unexpected(ec);
+		return size;
 	}
 }

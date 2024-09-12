@@ -40,6 +40,8 @@ namespace config_filler {
 
 	int compression_level(const std::string& data);
 
+	int minimum_space(const std::string& data);
+
 	int fsync(const std::string& data);
 
 	int remove_extra(const std::string& data);

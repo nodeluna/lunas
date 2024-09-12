@@ -16,6 +16,8 @@
 #include "resume.h"
 #include "exclude.h"
 #include "permissions.h"
+#include "path_parsing.h"
+
 
 namespace fs = std::filesystem;
 
@@ -83,6 +85,28 @@ namespace fs_local {
 		}
 
 		return fs_local::readdir(local_path, path_index);
+	}
+
+	std::expected<std::uintmax_t, std::error_code> available_space(struct input_path& local_path){
+		std::error_code ec;
+		if(fs::exists(local_path.path, ec) == false){
+			if(fs::exists(parse_path::get_lower_dir_level(local_path.path), ec) == false){
+				ec = std::make_error_code(std::errc::no_such_file_or_directory);
+				return std::unexpected(ec);
+			}
+			if(ec.value() != 0)
+				return std::unexpected(ec);
+			fs::space_info availabe_space = fs::space(parse_path::get_lower_dir_level(local_path.path), ec);
+			if(ec.value() != 0)
+				return std::unexpected(ec);
+			return availabe_space.available;
+		}
+		if(ec.value() != 0)
+			return std::unexpected(ec);
+		fs::space_info availabe_space = fs::space(local_path.path, ec);
+		if(ec.value() != 0)
+			return std::unexpected(ec);
+		return availabe_space.available;
 	}
 }
 

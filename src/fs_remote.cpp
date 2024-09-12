@@ -14,6 +14,7 @@
 #include "resume.h"
 #include "exclude.h"
 #include "utimes.h"
+#include "path_parsing.h"
 
 namespace remote_readdir_operations {
 	void type(const struct input_path& remote_path, const sftp_attributes& attributes, struct metadata& metadata, const std::string& full_path);
@@ -97,6 +98,23 @@ namespace fs_remote {
 		attr_obj.reset();
 
 		fs_remote::readdir(remote_path, remote_path.path, index_path);
+	}
+
+ 
+	std::expected<std::uintmax_t, SSH_STATUS> available_space(const struct input_path& remote_path){
+		sftp_statvfs_t partition_stats = sftp_statvfs(remote_path.sftp, remote_path.path.c_str());
+		if(partition_stats == NULL){
+			partition_stats = sftp_statvfs(remote_path.sftp, parse_path::get_lower_dir_level(remote_path.path).c_str());
+			if(partition_stats == NULL)
+				return std::unexpected(sftp_get_error(remote_path.sftp));
+
+			std::uintmax_t space = partition_stats->f_bavail * partition_stats->f_frsize;
+			sftp_statvfs_free(partition_stats);
+			return space;
+		}
+		std::uintmax_t space = partition_stats->f_bavail * partition_stats->f_frsize;
+		sftp_statvfs_free(partition_stats);
+		return space;
 	}
 }
 

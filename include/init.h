@@ -11,6 +11,7 @@
 #define EXISTING_DIR 3
 #define TYPE_CONFLICT 4
 #define SAME_MTIME 5
+#define NO_SPACE_LEFT 6
 
 #define OK_SRC 0
 #define NO_SRC 1

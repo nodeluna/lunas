@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <expected>
+#include <cstdint>
 #include <libssh/sftp.h>
 #include <fcntl.h>
 #include "raii_sftp.h"
@@ -190,6 +191,15 @@ namespace sftp{
 
 		os::append_seperator(path.value());
 		return path.value();
+	}
+
+	std::expected<std::uintmax_t, SSH_STATUS> file_size(const sftp_session& sftp, const std::string& path){
+		sftp_attributes attrs = sftp::attributes(sftp, path);
+		if(attrs == NULL)
+			return std::unexpected(sftp_get_error(sftp));
+		std::uintmax_t size = attrs->size;
+		sftp_attributes_free(attrs);
+		return size;
 	}
 }
 #endif // REMOTE_ENABLED
