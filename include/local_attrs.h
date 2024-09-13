@@ -6,6 +6,7 @@
 namespace local_attrs {
 	int sync_utimes(const std::string& src, const std::string& dest);
 	int sync_permissions(const std::string& src, const std::string& dest);
+	bool sync_ownership(const std::string& src, const std::string& dest);
 }
 
 #endif // LOCAL_ATTRS

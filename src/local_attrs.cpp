@@ -8,6 +8,8 @@
 #include "log.h"
 #include "utimes.h"
 #include "permissions.h"
+#include "ownership.h"
+
 
 namespace local_attrs {
 	int sync_utimes(const std::string& src, const std::string& dest){
@@ -37,5 +39,29 @@ namespace local_attrs {
 		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT) == false)
 			return 0;
 		return 1;
+	}
+
+	bool sync_ownership(const std::string& src, const std::string& dest){
+		if(not options::attributes_uid && not options::attributes_gid)
+			return true;
+
+		std::expected<struct own, std::error_code> own = ownership::get_local(src);
+		if(not own){
+			llog::ec(src, own.error(), "couldn't get file ownership", NO_EXIT); 
+			return false;
+		}
+
+		if(not options::attributes_uid)
+			own.value().uid = -1;
+		if(not options::attributes_gid)
+			own.value().gid = -1;
+
+		std::optional<std::error_code> err = ownership::set_local(dest, own.value());
+		if(err){
+			llog::ec(src, *err, "couldn't set file ownership", NO_EXIT); 
+			return false;
+		}
+
+		return true;
 	}
 }

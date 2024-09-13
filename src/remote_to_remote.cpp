@@ -7,6 +7,7 @@
 #include <queue>
 #include <fcntl.h>
 #include "remote_copy.h"
+#include "remote_attrs.h"
 #include "remote_to_remote.h"
 #include "file_types.h"
 #include "log.h"
@@ -15,6 +16,7 @@
 #include "cliargs.h"
 #include "permissions.h"
 #include "progress.h"
+#include "resume.h"
 
 
 namespace remote_to_remote {
@@ -81,6 +83,10 @@ namespace remote_to_remote {
 			return syncstat;
 		}
 		raii::sftp::file file_obj_dest = raii::sftp::file(&dest_file, dest);
+
+		if(not remote_attrs::sync_ownership(src, dest, src_sftp, dest_sftp)){
+			return syncstat;
+		}
 
 		sftp_limits_t limit = sftp_limits(dest_sftp);
 		std::uint64_t buffer_size = limit->max_write_length;
@@ -204,6 +210,11 @@ fail:
 		if(llog::rc(dest_sftp, dest, rc, "couldn't make directory", NO_EXIT) == false)
 			return syncstat;
 
+		if(not remote_attrs::sync_ownership(src, dest, src_sftp, dest_sftp)){
+			resume::unlink(dest_sftp, dest, DIRECTORY);
+			return syncstat;
+		}
+
 		syncstat.code = 1;
 		return syncstat;
 	}
@@ -224,6 +235,11 @@ fail:
 		int rc = sftp::symlink(dest_sftp, target.value(), dest);
 		if(llog::rc(dest_sftp, dest, rc, "couldn't make symlink", NO_EXIT) == false)
 			return syncstat;
+
+		if(not remote_attrs::sync_ownership(src, dest, src_sftp, dest_sftp)){
+			resume::unlink(dest_sftp, dest, SYMLINK);
+			return syncstat;
+		}
 
 		syncstat.code = 1;
 		return syncstat;

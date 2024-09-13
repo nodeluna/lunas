@@ -32,6 +32,10 @@ namespace options{
 	inline bool rollback = false;
 	inline bool checksum = false;
 	inline bool compression = false;
+	inline bool attributes_uid = false;
+	inline bool attributes_gid = false;
+	inline bool attributes_mtime = true;
+	inline bool attributes_atime = false;
 	inline int compression_level = 5;
 	inline std::uintmax_t minimum_space = 1073741824;
 	inline std::string color_error = "\x1b[1;31m";

@@ -110,6 +110,8 @@ namespace local_to_local {
 
 		if(local_attrs::sync_permissions(src, dest) != 1)
 			return syncstat;
+		else if(not local_attrs::sync_ownership(src, dest))
+			return syncstat;
 
 		int max_requests = 5, requests_sent = 0, bytes_written;
 		const std::uint64_t buffer_size = LOCAL_BUFFER_SIZE;
@@ -184,6 +186,9 @@ fail:
 		if(rv != 1){
 			cppfs::remove(dest);
 			return syncstat;
+		}else if(not local_attrs::sync_ownership(src, dest)){
+			cppfs::remove(dest);
+			return syncstat;
 		}
 		syncstat.code = 1;
 		return syncstat;
@@ -203,6 +208,11 @@ fail:
 		cppfs::symlink(target, dest, ec);
 		if(llog::ec(dest, ec, "couldn't make symlink", NO_EXIT) == false)
 			return syncstat;
+
+		if(not local_attrs::sync_ownership(src, dest)){
+			cppfs::remove(dest);
+			return syncstat;
+		}
 		syncstat.code = 1;
 		return syncstat;
 	}

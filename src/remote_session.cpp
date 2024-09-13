@@ -245,6 +245,7 @@ namespace rsession {
 
 		return sftp;
 	}
+
 	std::string absolute_path(const sftp_session& sftp, const std::string& ip){
 		if(ip.find(':') == ip.npos || ip.back() == ':'){
 			llog::error("hostname: " + ip + " doesn't include an input path");

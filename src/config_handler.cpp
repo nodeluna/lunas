@@ -214,6 +214,47 @@ namespace config_filler {
 		return 0;
 	}
 
+	int attributes(const std::string& data){
+		std::string temp;
+		for(size_t index = 0; index < data.size(); index++){
+			if(data[index] != ',')
+				temp += data[index];
+
+			if(temp == "own" && (data[index] == ',' || index == (data.size() - 1))){
+				options::attributes_uid = true;
+				options::attributes_gid = true;
+				temp = "";
+			}else if(temp == "uid" && (data[index] == ',' || index == (data.size() - 1))){
+				options::attributes_uid = true;
+				temp = "";
+			}else if(temp == "gid" && (data[index] == ',' || index == (data.size() - 1))){
+				options::attributes_gid = true;
+				temp = "";
+			}else if(temp == "atime" && (data[index] == ',' || index == (data.size()-1))){
+				options::attributes_atime = true;
+				temp = "";
+			}else if(temp == "mtime" && (data[index] == ',' || index == (data.size()-1))){
+				options::attributes_mtime = true;
+				temp = "";
+			}else if(temp == "utimes" && (data[index] == ',' || index == (data.size()-1))){
+				options::attributes_atime = true;
+				options::attributes_mtime = true;
+				temp = "";
+			}else if(temp == "a" && (data[index] == ',' || index == (data.size()-1))){
+				options::attributes_atime = true;
+				options::attributes_mtime = true;
+				options::attributes_uid = true;
+				options::attributes_gid = true;
+				temp = "";
+			}else if(data[index] == ',' || (index == data.size()-1)){
+				llog::error("invalid argument '" + temp + "' for option --attributes");
+				llog::error("valid arguments: --attributes atime,mtime,utimes,uid,gid,own,a");
+				exit(1);
+			}
+		}
+		return 0;
+	}
+
 	int fsync(const std::string& data){
 		if(data == "on")
 			options::fsync = true;

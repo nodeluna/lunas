@@ -22,6 +22,7 @@
 #include "permissions.h"
 #include "remote_attrs.h"
 #include "progress.h"
+#include "resume.h"
 
 
 namespace remote_to_local {
@@ -91,6 +92,8 @@ namespace remote_to_local {
 
 		ec = permissions::set_local(dest, perms);
 		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT) == false)
+			return syncstat;
+		else if(not remote_attrs::sync_ownership(src, dest, sftp, nullptr))
 			return syncstat;
 
 		sftp_limits_t limit = sftp_limits(sftp);
@@ -189,6 +192,9 @@ fail:
 		if(llog::ec(dest, ec, "couldn't set file permissions", NO_EXIT) == false){
 			cppfs::remove(dest);
 			return syncstat;
+		}else if(not remote_attrs::sync_ownership(src, dest, sftp, nullptr)){
+			resume::unlink(sftp, dest, DIRECTORY);
+			return syncstat;
 		}
 
 		syncstat.code = 1;
@@ -212,6 +218,11 @@ fail:
 		cppfs::symlink(target.value(), dest, ec);
 		if(llog::ec(dest, ec, "couldn't make symlink", NO_EXIT) == false)
 			return syncstat;
+
+		if(not remote_attrs::sync_ownership(src, dest, sftp, nullptr)){
+			resume::unlink(sftp, dest, SYMLINK);
+			return syncstat;
+		}
 
 		syncstat.code = 1;
 		return syncstat;

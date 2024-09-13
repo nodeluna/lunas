@@ -138,6 +138,10 @@ inline std::unordered_map<std::string, std::function<int(std::string)>> misc_opt
 	{"-ms",			config_filler::minimum_space	},
 	{"minimum-space",	config_filler::minimum_space	},
 	{"ms",			config_filler::minimum_space	},
+	{"--attributes",	config_filler::attributes	},
+	{"-a",			config_filler::attributes	},
+	{"attributes",		config_filler::attributes	},
+	{"a",			config_filler::attributes	},
 };
 
 inline std::unordered_map<std::string, std::function<void(void)>> info = {
