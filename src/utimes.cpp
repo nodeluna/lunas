@@ -6,6 +6,8 @@
        
 #include <string>
 #include <expected>
+#include <optional>
+#include <system_error>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include "utimes.h"
@@ -93,7 +95,7 @@ namespace utime{
 		return time_val;
 	}
 
-	int set_local(const std::string& path, const struct time_val& time_val){
+	std::optional<std::error_code> set_local(const std::string& path, const struct time_val& time_val){
 		struct timeval times[2];
 		int rv = 0;
 		times[0].tv_sec = time_val.atime;
@@ -109,7 +111,10 @@ namespace utime{
 			rv = utimes(path.c_str(), times);
 #endif // LUTIMES_EXISTS
 
-		return rv;
+		if(rv != 0)
+			return std::make_error_code((std::errc) errno);
+
+		return std::nullopt;
 	}
 
 #ifdef REMOTE_ENABLED
@@ -186,34 +191,33 @@ namespace utime{
 		return time_val;
 	}
 
-	int set_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val){
-		struct timeval times[2];
-		int rv = 0;
+	std::optional<SSH_STATUS> set_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val){
+		struct sftp_attributes_struct attributes;
+		attributes.flags = SSH_FILEXFER_ATTR_ACMODTIME;
+		attributes.atime = time_val.atime;
+		attributes.atime_nseconds = time_val.atime_nsec;
+		attributes.mtime = time_val.mtime;
+		attributes.mtime_nseconds = time_val.mtime_nsec;
 
-		times[0].tv_sec = time_val.atime;
-		times[0].tv_usec = time_val.atime_nsec / 1000;
-		times[1].tv_sec = time_val.mtime;
-		times[1].tv_usec = time_val.mtime_nsec / 1000;
-		rv = sftp_utimes(sftp, path.c_str(), times);
-
-		return rv;
-	}
-
-	int sftp_lutimes(const sftp_session& sftp, const std::string& path, const struct time_val& time_val){
-		ssh_channel channel = ssh_channel_new(sftp->session);
-		int rc = ssh_channel_open_session(channel);
+		int rc = sftp_setstat(sftp, path.c_str(), &attributes);
 		if(rc != SSH_OK)
 			return rc;
-		raii::sftp::channel channel_obj = raii::sftp::channel(&channel);
+			
+		return std::nullopt;
+	}
+	std::optional<SSH_STATUS> lset_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val){
+		struct sftp_attributes_struct attributes;
+		attributes.flags = SSH_FILEXFER_ATTR_ACMODTIME;
+		attributes.atime = time_val.atime;
+		attributes.atime_nseconds = time_val.atime_nsec;
+		attributes.mtime = time_val.mtime;
+		attributes.mtime_nseconds = time_val.mtime_nsec;
 
-		std::string command = std::string("touch -h -m --date=@") + std::to_string(time_val.mtime) + std::string(".") 
-			+ std::to_string(time_val.mtime_nsec) + std::string(" ")+ path;
-		rc = ssh_channel_request_exec(channel, command.c_str());
+		int rc = sftp_lsetstat(sftp, path.c_str(), &attributes);
 		if(rc != SSH_OK)
 			return rc;
-
-		return rc;
+			
+		return std::nullopt;
 	}
-
 #endif // REMOTE_ENABLED
 }

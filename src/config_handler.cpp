@@ -1,6 +1,8 @@
 #include <cctype>
+#include <functional>
 #include <string>
 #include <iostream>
+#include <unordered_map>
 #include "config_handler.h"
 #include "config.h"
 #include "cliargs.h"
@@ -214,39 +216,128 @@ namespace config_filler {
 		return 0;
 	}
 
+	int attributes_uid(const std::string& data){
+		if(data == "on")
+			options::attributes_uid = true;
+		else if(data == "off")
+			options::attributes_uid = false;
+		else
+			return -1;
+		return 0;
+	}
+
+	int attributes_gid(const std::string& data){
+		if(data == "on")
+			options::attributes_gid = true;
+		else if(data == "off")
+			options::attributes_gid = false;
+		else
+			return -1;
+		return 0;
+	}
+
+	int attributes_own(const std::string& data){
+		if(data == "on"){
+			options::attributes_uid = true;
+			options::attributes_gid = true;
+		}else if(data == "off"){
+			options::attributes_uid = false;
+			options::attributes_gid = false;
+		}else
+			return -1;
+		return 0;
+	}
+
+	int attributes_atime(const std::string& data){
+		if(data == "on")
+			options::attributes_atime = true;
+		else if(data == "off")
+			options::attributes_atime = false;
+		else
+			return -1;
+		return 0;
+	}
+
+	int attributes_mtime(const std::string& data){
+		if(data == "on")
+			options::attributes_mtime = true;
+		else if(data == "off")
+			options::attributes_mtime = false;
+		else
+			return -1;
+		return 0;
+	}
+
+	int attributes_utimes(const std::string& data){
+		if(data == "on"){
+			options::attributes_atime = true;
+			options::attributes_mtime = true;
+		}else if(data == "off"){
+			options::attributes_atime = false;
+			options::attributes_mtime = false;
+		}else
+			return -1;
+		return 0;
+	}
+
+	int attributes_all(const std::string& data){
+		if(data == "on"){
+			options::attributes_atime = true;
+			options::attributes_mtime = true;
+			options::attributes_uid = true;
+			options::attributes_gid = true;
+		}else if(data == "off"){
+			options::attributes_atime = false;
+			options::attributes_mtime = false;
+			options::attributes_uid = false;
+			options::attributes_gid = false;
+		}else
+			return -1;
+		return 0;
+	}
+
 	int attributes(const std::string& data){
 		std::string temp;
-		for(size_t index = 0; index < data.size(); index++){
-			if(data[index] != ',')
-				temp += data[index];
+		std::unordered_map<std::string, std::function<int(const std::string&)>> attributes_options = {
+			{"own",		config_filler::attributes_own	},
+			{"uid",		config_filler::attributes_uid	},
+			{"gid", 	config_filler::attributes_gid	},
+			{"atime",	config_filler::attributes_atime	},
+			{"mtime", 	config_filler::attributes_mtime	},
+			{"utimes", 	config_filler::attributes_utimes},
+			{"all",		config_filler::attributes_all	},
+		};
 
-			if(temp == "own" && (data[index] == ',' || index == (data.size() - 1))){
-				options::attributes_uid = true;
-				options::attributes_gid = true;
+		for(auto it = data.begin(); not data.empty() && it != data.end(); ++it){
+			if(*it != ',' && *it != '='){
+				temp += *it;
+				if(std::next(it) != data.end())
+					continue;
+			}
+
+			auto itr = attributes_options.find(temp);
+			if(itr != attributes_options.end()){
 				temp = "";
-			}else if(temp == "uid" && (data[index] == ',' || index == (data.size() - 1))){
-				options::attributes_uid = true;
-				temp = "";
-			}else if(temp == "gid" && (data[index] == ',' || index == (data.size() - 1))){
-				options::attributes_gid = true;
-				temp = "";
-			}else if(temp == "atime" && (data[index] == ',' || index == (data.size()-1))){
-				options::attributes_atime = true;
-				temp = "";
-			}else if(temp == "mtime" && (data[index] == ',' || index == (data.size()-1))){
-				options::attributes_mtime = true;
-				temp = "";
-			}else if(temp == "utimes" && (data[index] == ',' || index == (data.size()-1))){
-				options::attributes_atime = true;
-				options::attributes_mtime = true;
-				temp = "";
-			}else if(temp == "a" && (data[index] == ',' || index == (data.size()-1))){
-				options::attributes_atime = true;
-				options::attributes_mtime = true;
-				options::attributes_uid = true;
-				options::attributes_gid = true;
-				temp = "";
-			}else if(data[index] == ',' || (index == data.size()-1)){
+				if(*it == ',')
+					itr->second("on");
+				else if(*it == '='){
+					std::string arg;
+					bool found_seperator = false;
+					std::for_each(++it, data.end(), [&](const char c){
+							if(c != '=' && c != ',' && not found_seperator){
+								if(std::next(it) != data.end())
+									++it;
+								arg += c;
+							}else
+								found_seperator = true;
+							});
+					if(itr->second(arg) != 0){
+						llog::error("invalid argument '" + arg + "' for option --attributes " + itr->first + "=" + arg);
+						llog::error("valid arguments: --attributes " + itr->first + "=on/off");
+						exit(1);
+					}
+				}
+			}else{
 				llog::error("invalid argument '" + temp + "' for option --attributes");
 				llog::error("valid arguments: --attributes atime,mtime,utimes,uid,gid,own,a");
 				exit(1);

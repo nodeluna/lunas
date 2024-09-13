@@ -133,6 +133,26 @@ synchronize the copied file with the filesystem
 follow symlinks. sync the target the symlink is pointing to instead of the symlink itself
 
 .TP
+.B [-a, --attributes] <own,gid=off,uid=on,utimes,atime,mtime,all>
+   
+sync file attributes. own, ownership, is for uid and gid. utimes is for atime and mtime. all is for all attributes
+.br
+mtime is enabled by default, to disable it --attributes mtime=off
+.br
+--attributes own # ON
+.br
+--attributes own=on # ON
+.br
+--attributes own=off # OFF
+
+        example: -r user@ip:/path/to/dir port=NUMBER -a all,mtime=off
+        example: -r user@ip:/path/to/dir -a uid,gid,atime=on
+
+--attributes all,mtime=off # this turns every attributes on then mtime off
+.br
+--attributes mtime=off,all # this turns mtime off, then every attributes on INCLUDING mtime
+
+.TP
 .B [-B, --no-broken-link]
 
 don't sync broken symlinks 

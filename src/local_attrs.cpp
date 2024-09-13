@@ -12,19 +12,29 @@
 
 
 namespace local_attrs {
-	int sync_utimes(const std::string& src, const std::string& dest){
-		std::expected<struct time_val, int> time_val = utime::get_local(src, UTIMES);
+	bool sync_utimes(const std::string& src, const std::string& dest){
+		if(not options::attributes_atime && not options::attributes_mtime)
+			return true;
+
+		short utime = 0;
+		if(options::attributes_atime)
+			utime += ATIME;
+		if(options::attributes_mtime)
+			utime += MTIME;
+
+		std::expected<struct time_val, int> time_val = utime::get_local(src, utime);
 		if(not time_val){
-			llog::error("couldn't sync utimes of '" + dest + "', " + std::strerror(errno));
-			return 0;
+			llog::error("couldn't get utimes of '" + src + "', " + std::strerror(errno));
+			return false;
 		}
 
-		int rv = utime::set_local(dest, time_val.value());
-		if(rv != 0){
-			llog::error("couldn't sync utimes of '" + dest + "', " + std::strerror(errno));
-			return 0;
+		auto err = utime::set_local(dest, time_val.value());
+		if(err){
+			llog::ec(dest, *err, "couldn't sync utimes of '", NO_EXIT);
+			return false;
 		}
-		return 1;
+
+		return true;
 	}
 
 	int sync_permissions(const std::string& src, const std::string& dest){

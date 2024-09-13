@@ -15,11 +15,14 @@
 
 #ifdef REMOTE_ENABLED
 #include <libssh/sftp.h>
+#include "raii_sftp.h"
 #endif // REMOTE_ENABLED
 
 #include <string>
 #include <ctime>
 #include <expected>
+#include <optional>
+#include <system_error>
 
 #define ATIME 1
 #define MTIME 2
@@ -35,13 +38,13 @@ struct time_val{
 namespace utime{
 	std::expected<struct time_val, int> lget_local(const std::string& path, const short& utime);
 	std::expected<struct time_val, int> get_local(const std::string& path, const short& utime);
-	int set_local(const std::string& path, const struct time_val& time_val);
+	std::optional<std::error_code> set_local(const std::string& path, const struct time_val& time_val);
 
 #ifdef REMOTE_ENABLED
 	std::expected<struct time_val, int> get_remote(const sftp_session& sftp, const std::string& path, const short& utime);
 	std::expected<struct time_val, int> lget_remote(const sftp_session& sftp, const std::string& path, const short& utime);
-	int set_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val);
-	int sftp_lutimes(const sftp_session& sftp, const std::string& path, const struct time_val& time_val);
+	std::optional<SSH_STATUS> set_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val);
+	std::optional<SSH_STATUS> lset_remote(const sftp_session& sftp, const std::string& path, const struct time_val& time_val);
 #endif // REMOTE_ENABLED
 }
 

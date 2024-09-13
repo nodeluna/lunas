@@ -16,38 +16,50 @@
 
 
 namespace remote_attrs {
-	int sync_utimes(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp, const short& type){
+	bool sync_utimes(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp, const short& type){
+		if(not options::attributes_atime && not options::attributes_mtime)
+			return true;
+
+		short utime = 0;
+		if(options::attributes_atime)
+			utime += ATIME;
+		if(options::attributes_mtime)
+			utime += MTIME;
+
 		std::expected<struct time_val, int> time_val;
 		if(src_sftp != nullptr){
-			time_val = utime::get_remote(src_sftp, src, UTIMES);
+			time_val = utime::get_remote(src_sftp, src, utime);
 			if(not time_val){
-				llog::error("couldn't sync utimes of '" + dest + "', " + ssh_get_error(src_sftp->session));
-				return 0;
+				llog::error("couldn't get utimes of '" + dest + "', " + ssh_get_error(src_sftp->session));
+				return false;
 			}
 		}else{
-			time_val = utime::get_local(src, UTIMES);
+			time_val = utime::get_local(src, utime);
 			if(not time_val){
-				llog::error("couldn't sync utimes of '" + dest + "', " + std::strerror(errno));
-				return 0;
+				llog::error("couldn't get utimes of '" + dest + "', " + std::strerror(errno));
+				return false;
 			}
 		}
 
 		if(dest_sftp != nullptr){
-			int rc = SSH_OK;
+			std::optional<SSH_STATUS> err;
 			if(type == SYMLINK)
-				rc = utime::sftp_lutimes(dest_sftp, dest, time_val.value());
+				err = utime::lset_remote(dest_sftp, dest, time_val.value());
 			else
-				rc = utime::set_remote(dest_sftp, dest, time_val.value());
-			if(llog::rc(dest_sftp, dest, rc, "couldn't sync utimes", NO_EXIT) == false)
-				return 0;
+				err = utime::set_remote(dest_sftp, dest, time_val.value());
+			if(err){
+				llog::rc(dest_sftp, dest, *err, "couldn't sync utimes", NO_EXIT);
+				return false;
+			}
 		}else{
-			int rv = utime::set_local(dest, time_val.value());
-			if(rv != 0){
-				llog::error("couldn't sync utimes of '" + dest + "', " + std::strerror(errno));
-				return 0;
+			auto err = utime::set_local(dest, time_val.value());
+			if(err){
+				llog::ec(dest, *err, "couldn't sync utimes", NO_EXIT);
+				return false;
 			}
 		}
-		return 1;
+
+		return true;
 	}
 
 	bool sync_ownership(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp){
