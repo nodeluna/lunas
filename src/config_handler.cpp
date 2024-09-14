@@ -339,7 +339,7 @@ namespace config_filler {
 				}
 			}else{
 				llog::error("invalid argument '" + temp + "' for option --attributes");
-				llog::error("valid arguments: --attributes atime,mtime,utimes,uid,gid,own,a");
+				llog::error("valid arguments: --attributes atime,mtime,utimes,uid,gid,own,all");
 				exit(1);
 			}
 		}

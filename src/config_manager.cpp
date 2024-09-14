@@ -94,7 +94,13 @@ namespace config_manager {
 				itr2->second(it->second);
 			}
 #ifdef REMOTE_ENABLED
-			else if(it->first.find("remote::") != it->first.npos){
+			else if(auto itr3 = rpaths_options.find(it->first); itr3 != rpaths_options.end()){
+				struct input_path remote_path;
+				remote_path.path = it->second;
+				remote_path.srcdest = itr3->second();
+				remote_path.remote = true;
+				input_paths.push_back(remote_path);
+			}else if(it->first.find("remote::") != it->first.npos && it->first.front() != '#'){
 				auto remote_path = config_manager::fill_remote_path(nest, it, name);
 				if(remote_path)
 					input_paths.push_back(remote_path.value());

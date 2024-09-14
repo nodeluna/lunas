@@ -13,6 +13,8 @@
 	"\t#resume = on\n"\
 	"\t#progress = on\n"\
 	"\t#update = on\n"\
+	"\t#minimum-space = 1gib\n"\
+	"\t#attributes = mtime\n"\
 	"}\n"\
 	"luna {\n" \
 	"\tpath = /path/to/dir1\n"\

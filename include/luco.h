@@ -5,6 +5,8 @@
 #include <map>
 
 namespace luco {
+	constexpr char newline = '\n';
+
 	enum class token_type {
 		NEST_NAME,
 		OPTION_VALUE,
@@ -15,6 +17,7 @@ namespace luco {
 		EMPTY_LINE,
 		SYNTAX_ERROR_SIGN,
 		SYNTAX_ERROR_CLOSING_BRACKET,
+		COMMENT,
 		UNKNOWN
 	};
 

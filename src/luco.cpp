@@ -24,7 +24,7 @@ namespace lstring{
 
 	bool is_line_empty(const std::string& string, const size_t& start){
 		for(size_t index = start; index < string.size() ; index++){
-			if(string[index] == '\n')
+			if(string[index] == luco::newline)
 				return true;
 			else if(string[index] != ' ' && string[index] != '\t')
 				return false;
@@ -35,10 +35,38 @@ namespace lstring{
 
 	size_t get_next_line(const std::string& data, const size_t& start){
 		for(size_t index = start; index < data.size() ; index++){
-			if(data[index] == '\n')
+			if(data[index] == luco::newline)
 				return index + 1;
 		}
-		return std::numeric_limits<size_t>::max();
+		return data.size();
+	}
+
+	bool is_comment(const std::string& data, const size_t& start){
+		for(size_t index = start; index < data.size() ; index++){
+			if(data[index] == '#')
+				return true;
+			else if(data[index] == ' ' || data[index] == '\t')
+				continue;
+			else
+				return false;
+		}
+
+		return false;
+	}
+
+	void strip(std::string& data){
+		if(data.empty())
+			return;
+
+		for(size_t i = data.size() - 1; ; i--){
+			if(data[i] == ' ' || data[i] == '\t')
+				data.pop_back();
+			else
+				break;
+
+			if(i == 0)
+				break;
+		}
 	}
 }
 
@@ -109,12 +137,14 @@ namespace luco {
 	}
 
 	token_type luco::get_token_type(const std::string& data, const size_t& start){
-		size_t endline = data.find('\n', start);
+		size_t endline = data.find(newline, start);
 		if(endline == data.npos)
 			endline = data.size() - 1;
 
 		if(lstring::is_line_empty(data, start))
 			return token_type::EMPTY_LINE;
+		else if(lstring::is_comment(data, start))
+			return token_type::COMMENT;
 
 		size_t i;
 		token_type token = token_type::UNKNOWN;
@@ -135,13 +165,13 @@ namespace luco {
 	}
 
 	std::string luco::reg_nest(const std::string& data, const size_t& i){
-		size_t newline = data.find('\n', i);
-		if(newline == data.npos)
-			newline = data.size() - 1;
+		size_t endline = data.find(newline, i);
+		if(endline == data.npos)
+			endline = data.size() - 1;
 
 		std::string temp;
 		bool word_break = false;
-		for(size_t j = i; j < newline; j++){
+		for(size_t j = i; j < endline; j++){
 			if(data[j] == '{')
 				break;
 			else if((data[j] == ' ' || data[j] == '\t') && !word_break){
@@ -158,40 +188,33 @@ namespace luco {
 	}
 
 	std::pair<std::string, std::string> luco::reg_optval(const std::string& data, const size_t& i){
-		size_t newline = data.find('\n', i);
-		if(newline == data.npos)
-			newline = data.size() - 1;
+		size_t endline = data.find(newline, i);
+		if(endline == data.npos)
+			endline = data.size() - 1;
 		std::string option, value;
-		bool word_break = false;
+
 		size_t j = i;
-		for(; j < newline; j++){
+		bool first_char = false;
+		for(; j < endline; j++){
 			if(data[j] == '=')
 				break;
-			else if((data[j] == ' ' || data[j] == '\t') && !word_break){
-				word_break = true;
+			else if((data[j] == ' ' || data[j] == '\t') && not first_char)
 				continue;
-			}else if((data[j] == ' ' || data[j] == '\t') && word_break){
-				return std::make_pair<std::string, std::string>("", "");
-			}
 			option += data[j];
+			first_char = true;
 		}
 
-		bool first_char = false;
-		word_break = false;
-
-		for(size_t k = j + 1; k < newline; k++){
-			if(data[k] == '=')
-				break;
-			else if((data[k] == ' ' || data[k] == '\t') && !word_break){
-				if(first_char)
-					word_break = true;
+		first_char = false;
+		for(size_t k = j + 1; k < endline; k++){
+			if((data[k] == ' ' || data[k] == '\t') && not first_char)
 				continue;
-			}else if((data[k] == ' ' || data[k] == '\t') && word_break)
-				return std::make_pair(option, "");
 			
 			value += data[k];
 			first_char = true;
 		}
+
+		lstring::strip(option);
+		lstring::strip(value);
 
 		return std::make_pair(option, value);
 	}
@@ -251,7 +274,7 @@ namespace luco {
 
 		for(size_t i = 0; i < data.size(); i++){
 			token_type tokentype = luco::get_token_type(data, i);
-			if(tokentype == token_type::EMPTY_LINE)
+			if(tokentype == token_type::EMPTY_LINE || tokentype == token_type::COMMENT)
 				goto end;
 			fnechar = lstring::first_non_empty_char(data, i);
 

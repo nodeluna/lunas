@@ -9,7 +9,7 @@ namespace about{
 		"\n  -> nodeluna - nodeluna@proton.me"
 		"\n  -> https://github.com/nodeluna\n";
 
-	inline std::string version = "\n  -> lunas --- ";
+	inline std::string version = "\n  -> lunas 2.0 ";
 
 	inline std::string license = 
 		"\n  -> GPLv3+\n"
@@ -25,8 +25,7 @@ namespace about{
 		"       | | | || | | ' \\  / _` | (_-< \n"
 		"       |_|  \\_,_| |_||_| \\__,_| /__/\n"
 		"\n"
-		"\x1b[1;31m  usage\n"
-		"	NOT READY!\n\x1b[1;0m"
+		"  usage\n"
 		"	lunas -p dir1 -p dir2 -r user@ip:dir3 -rd user2@ip2:dir4 --update --compression --compression-level 9\n"
 		"	lunas -s dir1 -rd user@ip:dir2 --update --compression --compression-level 9\n"
 		"	lunas --config preset_name --update off --compression-level 9\n"
@@ -134,10 +133,7 @@ namespace about{
 		"        print the program's license\n"
 		"\n"
 		"    [-h, --help]\n"
-		"        print this help statement\n"
-		"\n"
-		"\x1b[1;31m  usage\n"
-		"	NOT READY!\n\x1b[1;0m";
+		"        print this help statement\n";
 
 	inline std::string smol_help ="  -> A syncing cli tool that can handle more than two directories locally and remotely\n"
 		"        _\n"
@@ -145,8 +141,10 @@ namespace about{
 		"       | | | || | | ' \\  / _` | (_-< \n"
 		"       |_|  \\_,_| |_||_| \\__,_| /__/\n"
 		"\n"
-		"\x1b[1;31m  usage\n"
-		"	NOT READY!\n\x1b[1;0m"
+		"  usage\n"
+		"	lunas -p dir1 -p dir2 -r user@ip:dir3 -rd user2@ip2:dir4 --update --compression --compression-level 9\n"
+		"	lunas -s dir1 -rd user@ip:dir2 --update --compression --compression-level 9\n"
+		"	lunas --config preset_name --update off --compression-level 9\n"
 		"\n"
 		"  options\n"
 		"    [-p, --path] <dir>\n"
@@ -181,10 +179,7 @@ namespace about{
 #endif // REMOTE_ENABLED
 		"\n"
 		"    [-h, --help]\n"
-		"\x1b[1;31m        to print the full help statement for more options and information\x1b[0m\n"
-		"\n"
-		"\x1b[1;31m  usage\n"
-		"	NOT READY!\x1b[1;0m";
+		"\x1b[1;31m        to print the full help statement for more options and information\x1b[0m\n";
 }
 
 #endif // ABOUT
