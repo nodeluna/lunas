@@ -96,7 +96,7 @@ namespace config_manager {
 #ifdef REMOTE_ENABLED
 			else if(auto itr3 = rpaths_options.find(it->first); itr3 != rpaths_options.end()){
 				struct input_path remote_path;
-				remote_path.path = it->second;
+				remote_path.ip = it->second;
 				remote_path.srcdest = itr3->second();
 				remote_path.remote = true;
 				input_paths.push_back(remote_path);
