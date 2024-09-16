@@ -131,6 +131,28 @@ synchronize the copied file with the filesystem
 follow symlinks. sync the target the symlink is pointing to instead of the symlink itself
 
 .TP
+.B [-B, --no-broken-link]
+
+don't sync broken symlinks 
+
+.TP
+.B [-P, --progress]
+
+enable progress bar for copied files
+
+-> this option is ON by Default. --progress off to disable it
+
+.TP
+.B [-v, --verbose]
+
+print the source of which files/dirs were copied from not just the destination
+
+.TP
+.B [-q, --quiet]
+
+disable print statements and only print errors
+
+.TP
 .B [-a, --attributes] <own,gid=off,uid=on,utimes,atime,mtime,all>
    
 sync file attributes. own, ownership, is for uid and gid. utimes is for atime and mtime. all is for all attributes
@@ -149,11 +171,6 @@ mtime is enabled by default, to disable it --attributes mtime=off
 --attributes all,mtime=off # this turns every attributes on then mtime off
 .br
 --attributes mtime=off,all # this turns mtime off, then every attributes on INCLUDING mtime
-
-.TP
-.B [-B, --no-broken-link]
-
-don't sync broken symlinks 
 
 .TP
 .B [-ms, --minimum-space] <sizeUnit>
@@ -184,6 +201,8 @@ if 'file' and 'file.HASH.ls.part' both exists at destination and 'file' has the 
 
 if "-R, --resume off" is used, then file.HASH.ls.part is removed regardless
 
+-> this option is ON by Default. --resume off to disable it
+
 .TP
 .B [-rmx, --remove-extra]
 
@@ -206,29 +225,25 @@ check mtime of files and re-sync the file if mtime wasn't the same. this option 
         example:  -p /path/to/dir -p /path/to/dir2 -p /path/to/dir3 -r user@ip:/path/to/dir4 port=NUMBER pw=PASSWORD -u
 
 .TP
-.B [-P, --progress]
-
-enable progress bar for copied files
-
-.TP
-.B [-v, --verbose]
-
-print the source of which files/dirs were copied from not just the destination
-
-.TP
-.B [-q, --quiet]
-
-disable print statements and only print errors
-
-.TP
 .B [-dr, --dry-run]
 
 outputs what would be synced without actually syncing them
 
 .TP
+.B [-V, --version]
+
+print the program's version
+
+.TP
 .B [--author]
 
 print the program's author
+
+.TP
+.B
+[--license]
+
+print the program's license
 
 .TP
 .B [-h, --help]

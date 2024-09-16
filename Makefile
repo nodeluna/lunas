@@ -96,3 +96,5 @@ clean-test:
 	$(info )
 	cd test && \
 	rm -r random*
+format:
+	clang-format -i src/* include/*

@@ -108,6 +108,8 @@ namespace config_manager {
 					return remote_path.error();
 			}
 #endif // REMOTE_ENABLED
+			else if(auto itr4 = info.find(it->first); itr4 != info.end())
+				itr4->second();
 			else if(it->first.front() != '#')
 				return "nest '" + name + "': wrong option '" + it->first + "'";
 		}

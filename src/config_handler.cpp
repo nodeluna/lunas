@@ -411,7 +411,8 @@ namespace lunas_info {
 		exit(0);
 	}
 	void meow(void){
+		llog::print("");
 		llog::print("  ~-~ MeooOOoooooOOOooowwwwwW ~-~");
-		exit(0);
+		llog::print("");
 	}
 }
