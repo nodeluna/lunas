@@ -12,24 +12,6 @@
 #include "remote_session.h"
 
 
-#define SSH_AUTH_METHOD_PUBLICKEY_COMBO_1 (SSH_AUTH_METHOD_PUBLICKEY)
-#define SSH_AUTH_METHOD_PUBLICKEY_COMBO_2 (SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_HOSTBASED)
-#define SSH_AUTH_METHOD_PUBLICKEY_COMBO_3 (SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE)
-#define SSH_AUTH_METHOD_PUBLICKEY_COMBO_4 (SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_GSSAPI_MIC) 
-#define SSH_AUTH_METHOD_PUBLICKEY_COMBO_5 (SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE | SSH_AUTH_METHOD_GSSAPI_MIC)
-#define SSH_AUTH_METHOD_PUBLICKEY_COMBO_6 (SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE | SSH_AUTH_METHOD_HOSTBASED)
-#define SSH_AUTH_METHOD_PUBLICKEY_COMBO_7 (SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_GSSAPI_MIC | SSH_AUTH_METHOD_HOSTBASED)
-#define SSH_AUTH_METHOD_PUBLICKEY_COMBO_8 (SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE | SSH_AUTH_METHOD_HOSTBASED | SSH_AUTH_METHOD_GSSAPI_MIC)
-
-#define SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_1 (SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY)
-#define SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_2 (SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_HOSTBASED)
-#define SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_3 (SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE)
-#define SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_4 (SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_GSSAPI_MIC)
-#define SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_5 (SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE | SSH_AUTH_METHOD_GSSAPI_MIC)
-#define SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_6 (SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_GSSAPI_MIC | SSH_AUTH_METHOD_HOSTBASED)
-#define SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_7 (SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE |SSH_AUTH_METHOD_HOSTBASED)
-#define SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_8 (SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE |SSH_AUTH_METHOD_HOSTBASED | SSH_AUTH_METHOD_GSSAPI_MIC)
-
 namespace rsession {
 	int verify_publickey(const ssh_session& ssh, const std::string& ip){
 		ssh_known_hosts_e response = ssh_session_is_known_server(ssh);
@@ -96,33 +78,15 @@ namespace rsession {
 	}
 
 	std::string auth_method(const int& method){
-		switch(method){
-			case SSH_AUTH_METHOD_NONE:
-				return "none";
-			case SSH_AUTH_METHOD_PASSWORD:
-				return "password";
-			case SSH_AUTH_METHOD_PUBLICKEY:
-				return "publickey";
-			case SSH_AUTH_METHOD_HOSTBASED:
-				return "hostbased";
-			case SSH_AUTH_METHOD_INTERACTIVE:
-				return "keyboard-interactive";
-			case SSH_AUTH_METHOD_GSSAPI_MIC:
-				return "gssapi-mic";
-			case SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY:
-				return "publickey, password";
-			case SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_INTERACTIVE:
-				return "password, keyboard-interactive";
-			case SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE:
-				return "publickey, keyboard-interactive";
-			case SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE:
-				return "publickey, password, keyboard-interactive";
-			case SSH_AUTH_METHOD_PASSWORD | SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_INTERACTIVE | SSH_AUTH_METHOD_GSSAPI_MIC:
-				return "publickey, password, keyboard-interactive, gssapi-mic";
-			default:
-				return "unknown method";
-		}
-		return "unknown method: " + std::to_string(method);
+		std::string method_str;
+		if(method & SSH_AUTH_METHOD_HOSTBASED)
+			method_str += "hostbased, ";
+		if(method & SSH_AUTH_METHOD_INTERACTIVE)
+			method_str += "keyboard-interactive, ";
+		if(method & SSH_AUTH_METHOD_GSSAPI_MIC)
+			method_str +=  "gssapi-mic";
+
+		return method_str;
 	}
 
 	int auth_list(const ssh_session& ssh, const std::string& ip, const std::string& pw){
@@ -131,53 +95,26 @@ namespace rsession {
 			return rc;
 
 		int method = ssh_userauth_list(ssh, NULL);
-		switch(method){
-			case SSH_AUTH_METHOD_NONE:
-				rc = rsession::auth_none(ssh);
-				break;
-			case SSH_AUTH_METHOD_PUBLICKEY_COMBO_1:
-			case SSH_AUTH_METHOD_PUBLICKEY_COMBO_2:
-			case SSH_AUTH_METHOD_PUBLICKEY_COMBO_3:
-			case SSH_AUTH_METHOD_PUBLICKEY_COMBO_4:
-			case SSH_AUTH_METHOD_PUBLICKEY_COMBO_5:
-			case SSH_AUTH_METHOD_PUBLICKEY_COMBO_6:
-			case SSH_AUTH_METHOD_PUBLICKEY_COMBO_7:
-			case SSH_AUTH_METHOD_PUBLICKEY_COMBO_8:
-				rc = rsession::auth_publickey(ssh, NULL);
-				if(rc == SSH_AUTH_DENIED)
-					rc = rsession::auth_publickey_passphrase(ssh, ip, pw);
-				break;
-			case SSH_AUTH_METHOD_PASSWORD:
-				rc = rsession::auth_password(ssh, ip, pw);
-				break;
-			case SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_1: 
-			case SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_2:
-			case SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_3:
-			case SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_4:
-			case SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_5:
-			case SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_6:
-			case SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_7:
-			case SSH_AUTH_METHOD_PW_PUBLICKEY_COMBO_8:				
-				rc = rsession::auth_publickey(ssh, NULL);
-				if(rc == SSH_AUTH_SUCCESS)
-					return rc;
-				else if(rc == SSH_AUTH_DENIED){
-					rc = rsession::auth_publickey_passphrase(ssh, ip, pw);
-					if(rc == SSH_AUTH_SUCCESS)
-						break;
-					llog::error(ssh_get_error(ssh));
-				}
-				rc = rsession::auth_password(ssh, ip, pw);
-				break;
-			default:
-				llog::error("unsupported auth method for '" + ip + "', " + rsession::auth_method(method));
-				llog::error(ssh_get_error(ssh));
-				llog::error("exiting...");
-				exit(1);
+		if(rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_NONE)
+			rc = rsession::auth_none(ssh);
+
+		if(rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PUBLICKEY){
+			rc = rsession::auth_publickey(ssh, NULL);
+			if(rc == SSH_AUTH_DENIED)
+				rc = rsession::auth_publickey_passphrase(ssh, ip, pw);
 		}
+
+		if(rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PASSWORD)
+			rc = rsession::auth_password(ssh, ip, pw);
 
 		if(rc == SSH_AUTH_SUCCESS)
 			return rc;
+		else if(method & SSH_AUTH_METHOD_INTERACTIVE || method & SSH_AUTH_METHOD_GSSAPI_MIC || method & SSH_AUTH_METHOD_HOSTBASED){
+			llog::error("unsupported auth method for '" + ip + "', " + rsession::auth_method(method));
+			llog::error(ssh_get_error(ssh));
+			llog::error("exiting...");
+			exit(1);
+		}
 
 		return SSH_AUTH_ERROR;
 	}
