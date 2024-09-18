@@ -31,7 +31,7 @@
     $ nix profile install github:nodeluna/lunas
 
     to install lunas without remote syncing, i.e without libssh
-    $ nix profile install github:nodeluna/lunas#local
+    $ nix profile install github:nodeluna/lunas#lunas-local
 
 ## dependencies
 
