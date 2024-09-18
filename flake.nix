@@ -24,7 +24,7 @@
                 in
                 {
 
-                packages.default = pkgs.stdenv.mkDerivation {
+                packages.lunas = pkgs.stdenv.mkDerivation {
                     inherit pname;
                     inherit version;
                     src = ./.;
@@ -36,9 +36,9 @@
                         '';
                 };
 
-                packages.local = pkgs.stdenv.mkDerivation {
+                packages.lunas-local = pkgs.stdenv.mkDerivation {
                     inherit pname;
-                    inherit version;
+                    version = "local-" + version;
                     src = ./.;
                     buildInputs = with pkgs; [ gcc pkg-config ];
                     nativeBuildInputs = with pkgs; [ gnumake cmake ];
@@ -47,14 +47,15 @@
                         make install
                         '';
                 };
+                packages.default = self.packages.${system}.lunas;
 
-                devShells.default = with pkgs; mkShell {
+                devShells.lunas = with pkgs; mkShell {
                     buildInputs = with pkgs; [ gcc pkg-config libssh ];
                 };
-                devShells.local = with pkgs; mkShell {
+                devShells.lunas-local = with pkgs; mkShell {
                     buildInputs = with pkgs; [ gcc pkg-config ];
                 };
-
+                devShells.default = self.devShells.${system}.lunas;
                 }
     );
 }
