@@ -9,7 +9,7 @@ int main(const int argc, const char* argv[]){
 	config_manager::preset("global");
 
 	cliargs(argc, argv);
-	if(argc == 1 || input_paths.size() < 2){
+	if(input_paths.size() < 2){
 		llog::print(about::smol_help);
 		exit(1);
 	}

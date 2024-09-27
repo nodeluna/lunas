@@ -90,11 +90,11 @@ run-test:
 	$(info :: running unit tests)
 	$(info )
 	cd test && \
-	go run simple_syncing.go
+	make
 clean-test:
 	$(info :: cleaning unit test files)
 	$(info )
 	cd test && \
-	rm -r random*
+	go run clean.go
 format:
 	clang-format -i src/* include/*

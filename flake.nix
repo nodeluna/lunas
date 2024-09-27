@@ -20,7 +20,7 @@
                 };
                 pkgs = import nixpkgs { inherit system; overlays = [ overlay ]; };
                 pname = "lunas";
-                version = "2.0.3";
+                version = "2.0.4";
                 in
                 {
 

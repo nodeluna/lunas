@@ -32,7 +32,7 @@ install(
 )
 
 install(
-	FILES man/${PROJECT_NAME}.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/${PROJECT_NAME}.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1
 )
 
 add_custom_target("uninstall"
