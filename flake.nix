@@ -20,7 +20,7 @@
                 };
                 pkgs = import nixpkgs { inherit system; overlays = [ overlay ]; };
                 pname = "lunas";
-                version = "2.0.4";
+                version = "2.0.5";
                 in
                 {
 
@@ -31,7 +31,7 @@
                     buildInputs = with pkgs; [ gcc pkg-config libssh ];
                     nativeBuildInputs = with pkgs; [ gnumake cmake ];
                     buildPhase = ''
-                        make -j
+                        make -j8
                         make install
                         '';
                 };
@@ -43,17 +43,17 @@
                     buildInputs = with pkgs; [ gcc pkg-config ];
                     nativeBuildInputs = with pkgs; [ gnumake cmake ];
                     buildPhase = ''
-                        make local -j
+                        make local -j8
                         make install
                         '';
                 };
                 packages.default = self.packages.${system}.lunas;
 
                 devShells.lunas = with pkgs; mkShell {
-                    buildInputs = with pkgs; [ gcc pkg-config libssh ];
+                    buildInputs = with pkgs; [ gcc pkg-config libssh go ];
                 };
                 devShells.lunas-local = with pkgs; mkShell {
-                    buildInputs = with pkgs; [ gcc pkg-config ];
+                    buildInputs = with pkgs; [ gcc pkg-config go ];
                 };
                 devShells.default = self.devShells.${system}.lunas;
                 }

@@ -9,7 +9,9 @@ import (
 func main() {
 	running_path := "./running"
 	files, err := os.ReadDir(running_path)
-	if err != nil {
+	if os.IsNotExist(err) {
+		return
+	} else if err != nil {
 		log.Fatal(err)
 	}
 

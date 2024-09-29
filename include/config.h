@@ -9,6 +9,9 @@
 
 #if (!defined(DISABLE_REMOTE))
 	#define REMOTE_ENABLED
+	#define LOCAL_ONLY false 
+#else
+	#define LOCAL_ONLY true
 #endif
 #if (!defined(DISABLE_CHECKSUM))
 	#define CHECKSUM_ENABLED

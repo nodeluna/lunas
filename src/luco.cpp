@@ -30,15 +30,19 @@ namespace lstring{
 				return false;
 		}
 
-		return false;
+		return true;
 	}
 
-	size_t get_next_line(const std::string& data, const size_t& start){
+	size_t get_end_line(const std::string& data, const size_t& start){
+		if(data.empty())
+			return 0;
+
 		for(size_t index = start; index < data.size() ; index++){
 			if(data[index] == luco::newline)
-				return index + 1;
+				return index;
 		}
-		return data.size();
+
+		return data.size() - 1;
 	}
 
 	bool is_comment(const std::string& data, const size_t& start){
@@ -274,8 +278,12 @@ namespace luco {
 
 		for(size_t i = 0; i < data.size(); i++){
 			token_type tokentype = luco::get_token_type(data, i);
-			if(tokentype == token_type::EMPTY_LINE || tokentype == token_type::COMMENT)
+			if(tokentype == token_type::EMPTY_LINE)
 				goto end;
+			if(tokentype == token_type::COMMENT){
+				i = lstring::get_end_line(data, i);
+				goto end;
+			}
 			fnechar = lstring::first_non_empty_char(data, i);
 
 			if(tokentype == token_type::NEST_NAME){
@@ -307,7 +315,7 @@ namespace luco {
 			else if(tokentype == token_type::SYNTAX_ERROR_CLOSING_BRACKET)
 				luco::strerror("formatting error: closing bracket '}' isn't on its own line, line: " + std::to_string(line_number), -1);
 
-			i = lstring::get_next_line(data, fnechar) - 1;
+			i = lstring::get_end_line(data, fnechar);
 end:
 			line_number++;
 		}
