@@ -7,18 +7,18 @@
 namespace luco {
 	constexpr char newline = '\n';
 
-	enum class token_type {
-		NEST_NAME,
-		OPTION_VALUE,
-		OPTION,
-		VALUE,
-		NEST,
-		END_NEST,
-		EMPTY_LINE,
-		SYNTAX_ERROR_SIGN,
-		SYNTAX_ERROR_CLOSING_BRACKET,
-		COMMENT,
-		UNKNOWN
+	enum token_type {
+		NEST_NAME = 1 << 0,
+		OPTION_VALUE = 1 << 1,
+		OPTION = 1 << 2,
+		VALUE = 1 << 3,
+		NEST = 1 << 4,
+		END_NEST = 1 << 5,
+		EMPTY_LINE = 1 << 6,
+		SYNTAX_ERROR_SIGN = 1 << 7,
+		SYNTAX_ERROR_CLOSING_BRACKET = 1 << 8,
+		COMMENT = 1 << 9,
+		UNKNOWN = 1 << 10 
 	};
 
 	class luco {
@@ -33,7 +33,7 @@ namespace luco {
 
 		protected:
 			virtual std::string					read_file(const std::string& path);
-			virtual token_type					get_token_type(const std::string& data, const size_t& i);
+			virtual size_t						get_token_type(const std::string& data, const size_t& i);
 			virtual std::string					reg_nest(const std::string& data, const size_t& i);
 			virtual std::pair<std::string, std::string>		reg_optval(const std::string& data, const size_t& i);
 			virtual std::string					pop_parent_nest(const std::string& parent_nest);
