@@ -262,13 +262,13 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
 .br
 - options use a simple key=value pair where each key is seperated from its value with an '=' sign
 .br
-- 'nest {' must be on its own line
-.br
-- every key=value option must be on a different line
-.br
-- closing '}' must be on its own line
+- every key=value option must be on a different line or ended with a ';' if there's an option after it, option = value; option2 = value2;
 .br
 - nested options, such as "remote", are also encapsulated within {} and options inside it are key=value pairs
+.br
+- the ending bracket '}' must have a ';' after it, if something comes after it on the same line like an option or another preset/nest 
+.br
+- the ';' can be escaped with '\\;'
 .br
 - # commenting lines is done like '# key = value'
 .br
@@ -282,12 +282,14 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
                 path = /path/to/dir
                 remote-path = user@ip:/path/to/dir
                 rdest = user@ip:/path/to/dir
-                dry-run = on
+                dry-run = on ; mkdir = on; update = on
                 #progress = on
                 #verbose = on
 
-                remote{
-                        r = user@ip:/path/to/dir
+                remote{ r = user@ip:/path/to/dir; port = 22 }; remote { ..... }
+
+                remote {
+                        r = user@ip:/path/to/dir2
                         pw = PASSWORD
                         port = 22
                 }
@@ -295,8 +297,7 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
         luna{
                 path = /path/to/dir
                 d = /path/to/dir2
-                dereference = on
-                update = on
+                dereference = on ; update = on
         }
     
 .B     ------------------------------------------------------

@@ -87,7 +87,8 @@ namespace config_manager {
 	std::optional<std::string> config_fill(std::multimap<std::string, std::string>& nest, const std::string& name){
 		for(auto it = nest.begin(); it != nest.end(); ++it){
 			if(auto itr = onoff_options.find(it->first); itr != onoff_options.end()){
-				itr->second(it->second);
+				if(itr->second(it->second) != 0)
+					llog::error_exit("wrong value '" + it->second + "' for on/off option '" + it->first + "'", EXIT_FAILURE);
 			}else if(auto itr1 = lpaths_options.find(it->first); itr1 != lpaths_options.end()){
 				itr1->second(it->second);
 			}else if(auto itr2 = misc_options.find(it->first); itr2 != misc_options.end()){

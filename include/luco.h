@@ -3,9 +3,11 @@
 
 #include <string>
 #include <map>
+#include <expected>
 
 namespace luco {
 	constexpr char newline = '\n';
+	constexpr char newline2 = ';';
 
 	enum token_type {
 		NEST_NAME = 1 << 0,
@@ -34,8 +36,8 @@ namespace luco {
 		protected:
 			virtual std::string					read_file(const std::string& path);
 			virtual size_t						get_token_type(const std::string& data, const size_t& i);
-			virtual std::string					reg_nest(const std::string& data, const size_t& i);
-			virtual std::pair<std::string, std::string>		reg_optval(const std::string& data, const size_t& i);
+			virtual std::expected<std::string, std::string>		reg_nest(const std::string& data, size_t& i);
+			virtual std::pair<std::string, std::string>		reg_optval(const std::string& data, size_t& i);
 			virtual std::string					pop_parent_nest(const std::string& parent_nest);
 			virtual void						strerror(const std::string& err, const int& code);
 			virtual bool						duplicate_nested_nest(std::string& parent_nest, const std::string& nest);
@@ -45,6 +47,7 @@ namespace luco {
 		std::string							data;
 		std::string							error;
 		unsigned int							counter = 2;
+		size_t								line_number = 1;
 	};
 }
 

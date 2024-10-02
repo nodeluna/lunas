@@ -1,4 +1,6 @@
 #include <string>
+#include <expected>
+#include <exception>
 #include <array>
 #include <map>
 #include <fstream>
@@ -9,7 +11,6 @@
 #include <limits>
 #include "luco.h"
 #include "log.h"
-
 
 namespace lstring{
 	size_t first_non_empty_char(const std::string& data, const size_t& start){
@@ -24,7 +25,7 @@ namespace lstring{
 
 	bool is_line_empty(const std::string& string, const size_t& start){
 		for(size_t index = start; index < string.size() ; index++){
-			if(string[index] == luco::newline)
+			if(string[index] == luco::newline || string[index] == luco::newline2)
 				return true;
 			else if(string[index] != ' ' && string[index] != '\t')
 				return false;
@@ -33,16 +34,23 @@ namespace lstring{
 		return true;
 	}
 
-	size_t get_end_line(const std::string& data, const size_t& start){
+	size_t get_end_line(const std::string& data, const size_t& start, size_t& line_number){
 		if(data.empty())
 			return 0;
 
-		for(size_t index = start; index < data.size() ; index++){
-			if(data[index] == luco::newline)
-				return index;
+		size_t index = start;
+		for(;index < data.size() ; index++){
+			if(data[index] == luco::newline){
+				line_number++;
+				break;
+			}else if(data[index] == luco::newline2 && (index > 0 && data[index-1] != '\\'))
+				break;
+			else if(data[index] == '}')
+				break;
+
 		}
 
-		return data.size() - 1;
+		return index;
 	}
 
 	bool is_comment(const std::string& data, const size_t& start){
@@ -72,6 +80,22 @@ namespace lstring{
 				break;
 		}
 	}
+	
+	size_t endline(const std::string& data, const size_t& start){
+		if(data.empty())
+			return 0;
+
+		size_t index = start;
+		for(; index < data.size() ; index++){
+			if(data[index] == luco::newline)
+				break;
+			else if(data[index] == luco::newline2 && (index > 0 && data[index-1] != '\\'))
+				break;
+		}
+
+		return index;
+	}
+
 }
 
 
@@ -133,49 +157,33 @@ namespace luco {
 		}
 
 		conf_file.close();
-		if(conf_file.is_open() == true){
+		if(conf_file.is_open() == true)
 			llog::warn("couldn't close config file '" + config_file + "', " + std::strerror(errno));
-		}
 
 		return data;
 	}
 
 	size_t luco::get_token_type(const std::string& data, const size_t& start){
-		size_t endline = data.find(newline, start);
-		if(endline == data.npos)
-			endline = data.size() - 1;
-
-		size_t i;
-		size_t token = 0;
+		size_t endline = lstring::endline(data, start);
 
 		if(lstring::is_line_empty(data, start))
 			return token_type::EMPTY_LINE;
-		else if(lstring::is_comment(data, start)){
-			token |= token_type::COMMENT;
-			if((i = data.find('{', start)) != data.npos && i < endline)
-				token |= token_type::NEST_NAME;
-			if((i = data.find('}', start)) != data.npos && i < endline)
-				token |= token_type::END_NEST;
-			if((i = data.find('=', start)) != data.npos && i < endline)
-				token |= token_type::OPTION_VALUE;
 
-			return token;
-		}
+		size_t token = 0;
+
+		if(lstring::is_comment(data, start))
+			token |= token_type::COMMENT;
+
+		size_t i;
 
 		if((i = data.find('{', start)) != data.npos && i < endline)
 			token |= token_type::NEST_NAME;
 
-		if((i = data.find('=', start)) != data.npos && i < endline){
-			if(token != 0)
-				token |= token_type::SYNTAX_ERROR_SIGN;
+		if((i = data.find('=', start)) != data.npos && i < endline)
 			token |= token_type::OPTION_VALUE;
-		}
 
-		if((i = data.find('}', start)) != data.npos && i < endline){
-			if(token != 0)
-				token |= token_type::SYNTAX_ERROR_CLOSING_BRACKET;
+		if((i = data.find('}', start)) != data.npos && i < endline)
 			token |= token_type::END_NEST;
-		}
 
 		if(token == 0)
 			token |= token_type::UNKNOWN;
@@ -183,52 +191,59 @@ namespace luco {
 		return token;
 	}
 
-	std::string luco::reg_nest(const std::string& data, const size_t& i){
-		size_t endline = data.find(newline, i);
-		if(endline == data.npos)
-			endline = data.size() - 1;
+	std::expected<std::string, std::string> luco::reg_nest(const std::string& data, size_t& i){
+		size_t endline = lstring::endline(data, i);
 
 		std::string temp;
-		bool word_break = false;
-		for(size_t j = i; j < endline; j++){
-			if(data[j] == '{')
+		bool spaces_begin = true, spaces_end = false;
+		for(size_t& j = i; j < endline; j++){
+			if(data[j] == '{'){
+				j++;
 				break;
-			else if((data[j] == ' ' || data[j] == '\t') && !word_break){
-				word_break = true;
+			}else if((data[j] == ' ' || data[j] == '\t') && spaces_begin)
 				continue;
-			}else if((data[j] == ' ' || data[j] == '\t') && word_break){
-				return "";
-			}
+			else if((data[j] == ' ' || data[j] == '\t') && not spaces_begin){
+				spaces_end = true;
+				continue;
+			}else if((data[j] != ' ' && data[j] != '\t') && spaces_end)
+				return std::unexpected("nests name can't have empty spaces");
+			else if(data[j] == '\\' && data[j+1] == ';')
+				continue;
 
 			temp += data[j];
+			spaces_begin = false;
 		}
 
-		return temp + "::";
+		return temp.append("::");
 	}
 
-	std::pair<std::string, std::string> luco::reg_optval(const std::string& data, const size_t& i){
-		size_t endline = data.find(newline, i);
-		if(endline == data.npos)
-			endline = data.size() - 1;
+	std::pair<std::string, std::string> luco::reg_optval(const std::string& data, size_t& i){
+		size_t endline = lstring::endline(data, i);
 		std::string option, value;
 
-		size_t j = i;
 		bool first_char = false;
-		for(; j < endline; j++){
-			if(data[j] == '=')
+		for(; i < endline; i++){
+			if(data[i] == '='){
+				i++;
 				break;
-			else if((data[j] == ' ' || data[j] == '\t') && not first_char)
+			}else if((data[i] == ' ' || data[i] == '\t') && not first_char)
 				continue;
-			option += data[j];
+			if(data[i] == '\\' && data[i+1] == ';')
+				continue;
+			option += data[i];
 			first_char = true;
 		}
 
 		first_char = false;
-		for(size_t k = j + 1; k < endline; k++){
-			if((data[k] == ' ' || data[k] == '\t') && not first_char)
+		for(; i < endline; i++){
+			if(data[i] == '}')
+				break;
+			else if((data[i] == ' ' || data[i] == '\t') && not first_char)
+				continue;
+			else if(data[i] == '\\' && data[i+1] == ';')
 				continue;
 			
-			value += data[k];
+			value += data[i];
 			first_char = true;
 		}
 
@@ -289,60 +304,59 @@ namespace luco {
 	const std::multimap<std::string, std::string>& luco::parse(){
 		std::stack<std::pair<std::string, size_t>> nest_stack;
 		std::string parent_nest = "";
-		size_t line_number = 1, fnechar;
 		bool skipping_nest = false;
 
 		for(size_t i = 0; i < data.size(); i++){
-			fnechar = lstring::first_non_empty_char(data, i);
-
+			i = lstring::first_non_empty_char(data, i);
 			size_t tokentype = luco::get_token_type(data, i);
 
 			if(tokentype & token_type::COMMENT || skipping_nest){
 				if(tokentype & token_type::NEST_NAME){
 					skipping_nest = true;
-					std::string nest_name = reg_nest(data, fnechar);
-					nest_stack.push({nest_name.find("::") != nest_name.npos ? nest_name.substr(0, nest_name.size() - 2)
-							: nest_name, line_number});
+					auto nest_name = reg_nest(data, i);
+					std::string nest_val = nest_name ? nest_name.value() : nest_name.error();
+					nest_stack.push({nest_val.find("::") != nest_val.npos ? nest_val.substr(0, nest_val.size() - 2)
+							: nest_val, line_number});
 				}
 				if(tokentype & token_type::END_NEST){
 					skipping_nest = false;
 					nest_stack.pop();
 				}
-			}else if(tokentype == token_type::NEST_NAME){
-				std::string nest_name = reg_nest(data, fnechar);
-				if(nest_name.empty())
-					luco::strerror("formatting error: more than one nest name is provided: " + std::to_string(line_number), -1);
-				luco::duplicate_nest(nest_name, line_number);
+				goto end;
+			}
+			if(tokentype & token_type::NEST_NAME){
+				auto nest_name = reg_nest(data, i);
+				if(not nest_name)
+					luco::strerror("formatting error: " + nest_name.error() + ": " + std::to_string(line_number), -1);
+				luco::duplicate_nest(nest_name.value(), line_number);
 
-				nest_stack.push({nest_name.find("::") != nest_name.npos ? nest_name.substr(0, nest_name.size() - 2)
-						: nest_name, line_number});
+				nest_stack.push({nest_name.value().find("::") != nest_name.value().npos ?
+						nest_name.value().substr(0, nest_name.value().size() - 2)
+						: nest_name.value(), line_number});
 
-				luco::duplicate_nested_nest(parent_nest, nest_name);
-				ldata.insert(std::make_pair(parent_nest + nest_name, ""));
-				parent_nest = parent_nest + nest_name;
-
-			}else if(tokentype == token_type::OPTION_VALUE){
-				std::pair<std::string, std::string> pair = reg_optval(data, fnechar);
+				luco::duplicate_nested_nest(parent_nest, nest_name.value());
+				ldata.insert(std::make_pair(parent_nest + nest_name.value(), ""));
+				parent_nest = parent_nest + nest_name.value();
+			}
+			if(tokentype & token_type::OPTION_VALUE){
+				std::pair<std::string, std::string> pair = reg_optval(data, i);
 				if(pair.first.empty())
 					luco::strerror("empty option '' line: " + std::to_string(line_number), -1);
 				else if(pair.second.empty())
 					luco::strerror("empty option '" + pair.first + "' line: " + std::to_string(line_number), -1);
 				ldata.insert(std::make_pair(parent_nest + pair.first, pair.second));
-			}else if(tokentype == token_type::END_NEST){
+			}
+			if(tokentype & token_type::END_NEST){
 				if(nest_stack.empty())
 					luco::strerror("formatting error: extra seperator, line: " + std::to_string(line_number), -1);
 				else
 					nest_stack.pop();
 				parent_nest = pop_parent_nest(parent_nest);
-			}else if(tokentype == token_type::UNKNOWN)
+			}
+			if(tokentype == token_type::UNKNOWN)
 				luco::strerror("formatting error: missing seperator, line: " + std::to_string(line_number), -1);
-			else if(tokentype & token_type::SYNTAX_ERROR_SIGN)
-				luco::strerror("formatting error: option isn't on its own line, line: " + std::to_string(line_number), -1);
-			else if(tokentype & token_type::SYNTAX_ERROR_CLOSING_BRACKET)
-				luco::strerror("formatting error: closing bracket '}' isn't on its own line, line: " + std::to_string(line_number), -1);
-
-			i = lstring::get_end_line(data, fnechar);
-			line_number++;
+end:
+			i = lstring::get_end_line(data, i, line_number);
 		}
 
 		if(!nest_stack.empty()){

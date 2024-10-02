@@ -9,7 +9,7 @@ namespace about{
 		"\n  -> nodeluna - nodeluna@proton.me"
 		"\n  -> https://github.com/nodeluna\n";
 
-	inline std::string version = std::string("\n  -> lunas 2.0.6") + (LOCAL_ONLY ? " (local)" : "");
+	inline std::string version = std::string("\n  -> lunas 2.0.7") + (LOCAL_ONLY ? " (local)" : "");
 
 	inline std::string license = 
 		"\n  -> GPLv3+\n"
