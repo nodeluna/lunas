@@ -14,7 +14,7 @@ DEP := $(OBJS:.o=.d)
 pwd = $(shell pwd)
 
 ifneq ($(findstring clang++, $(CC)),)
-	CFLAGS += $(CLAGS) -D__cpp_concepts=202002L -Wno-builtin-macro-redefined -Wno-macro-redefined
+	CFLAGS += $(CFLAGS) -D__cpp_concepts=202002L -Wno-builtin-macro-redefined -Wno-macro-redefined
 endif
 
 building: create_directory $(OBJS) $(TARGET)
