@@ -25,7 +25,7 @@ namespace resume {
 	void unlink(const std::string& dest);
 #endif // REMOTE_ENABLED
 
-	void sync(std::set<path>::iterator& itr, const struct path& lspart, std::string& dest, const unsigned long int& dest_index);
+	void sync(std::set<base::path>::iterator& itr, const struct base::path& lspart, std::string& dest, const unsigned long int& dest_index);
 
 	void init();
 }

@@ -146,7 +146,7 @@ namespace remote_readdir_operations {
 
 		if(resume::is_lspart(file_name)){
 			if(options::resume)
-				part_files.insert(path(relative_path, metadata, index_path));
+				part_files.insert(base::path(relative_path, metadata, index_path));
 			else{
 				int rc = sftp::unlink(remote_path.sftp, full_path);
 				llog::rc(remote_path.sftp, full_path, rc, "couldn't remove incomplete file.ls.part", NO_EXIT);
@@ -158,11 +158,11 @@ namespace remote_readdir_operations {
 	}
 
 	void insert(const struct metadata& metadata, const std::string& relative_path, const unsigned long int& index_path){
-		auto itr = content.find(path(relative_path, metadata, index_path));
+		auto itr = content.find(base::path(relative_path, metadata, index_path));
 		if(itr != content.end())
 			itr->metadatas[index_path] = metadata;
 		else
-			content.insert(path(relative_path, metadata, index_path));
+			content.insert(base::path(relative_path, metadata, index_path));
 	}
 }
 

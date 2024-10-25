@@ -149,7 +149,7 @@ namespace local_readdir_operations {
 		if(resume::is_lspart(str_entry)){
 			if(options::resume){
 				std::string relative_path = str_entry.substr(local_path.path.size(), str_entry.size());
-				part_files.insert(path(relative_path, metadata, path_index));
+				part_files.insert(base::path(relative_path, metadata, path_index));
 			}else{
 				std::error_code ec = cppfs::remove(str_entry);
 				llog::ec(str_entry, ec, "couldn't remove incomplete file.ls.part", NO_EXIT); 
@@ -161,10 +161,10 @@ namespace local_readdir_operations {
 	}
 	
 	void insert(const struct metadata& metadata, const std::string& str_entry, const size_t& path_index){
-		auto itr = content.find(path(str_entry, metadata, path_index));
+		auto itr = content.find(base::path(str_entry, metadata, path_index));
 		if(itr != content.end())
 			itr->metadatas[path_index] = metadata;
 		else
-			content.insert(path(str_entry, metadata, path_index));
+			content.insert(base::path(str_entry, metadata, path_index));
 	}
 }

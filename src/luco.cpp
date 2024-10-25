@@ -13,16 +13,6 @@
 #include "log.h"
 
 namespace lstring{
-	size_t first_non_empty_char(const std::string& data, const size_t& start){
-		size_t i;
-		for(i = start; i < data.size(); i++){
-			if(data[i] != ' ' && data[i] != '\t')
-				break;
-		}
-
-		return i;
-	}
-
 	bool is_line_empty(const std::string& string, const size_t& start){
 		for(size_t index = start; index < string.size() ; index++){
 			if(string[index] == luco::newline || string[index] == luco::newline2)
@@ -307,7 +297,7 @@ namespace luco {
 		bool skipping_nest = false;
 
 		for(size_t i = 0; i < data.size(); i++){
-			i = lstring::first_non_empty_char(data, i);
+			i = std::min(data.find_first_not_of("\t ", i), data.size() - 1);
 			size_t tokentype = luco::get_token_type(data, i);
 
 			if(tokentype & token_type::COMMENT || skipping_nest){

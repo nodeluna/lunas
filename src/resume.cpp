@@ -66,7 +66,7 @@ namespace resume {
 		}
 	}
 
-	void sync(std::set<path>::iterator& itr, const struct path& lspart, const unsigned long int& dest_index){
+	void sync(std::set<base::path>::iterator& itr, const struct base::path& lspart, const unsigned long int& dest_index){
 		unsigned long int src_mtime_i = get_src(*itr);
 		if(avoid_src(*itr, src_mtime_i) != OK_SRC)
 			return;
@@ -134,7 +134,7 @@ namespace resume {
 
 			std::string dest = lunas::original_dest(lspart.name);
 
-			auto itr = content.find(path(dest, lspart.metadatas.at(0), 0));
+			auto itr = content.find(base::path(dest, lspart.metadatas.at(0), 0));
 			if(itr != content.end())
 				resume::sync(itr, lspart, dest_index);
 			else

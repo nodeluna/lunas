@@ -64,7 +64,7 @@ void fill_base(void){
 	llog::print("");
 }
 
-unsigned long int get_src(const struct path& file){
+unsigned long int get_src(const struct base::path& file){
 	long int src_mtime;
 	unsigned long int src_mtime_i = std::numeric_limits<unsigned long int>::max();
 	unsigned long int i = 0;
@@ -156,7 +156,7 @@ bool is_there_space_left(const size_t& src_mtime_i, const size_t& dest_index, co
 		return true;
 }
 
-int avoid_dest(const struct path& file, const struct metadata& metadata, const size_t& src_mtime_i, const size_t& dest_index){
+int avoid_dest(const struct base::path& file, const struct metadata& metadata, const size_t& src_mtime_i, const size_t& dest_index){
 	const std::string src = input_paths.at(src_mtime_i).path + file.name;
 	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
 	if(src_mtime_i == dest_index)
@@ -181,7 +181,7 @@ int avoid_dest(const struct path& file, const struct metadata& metadata, const s
 	return OK_DEST;
 }
 
-void updating(const struct path& file, const unsigned long int& src_mtime_i){
+void updating(const struct base::path& file, const unsigned long int& src_mtime_i){
 	const long int& src_mtime = file.metadatas.at(src_mtime_i).mtime;
 	const short& type = file.metadatas.at(src_mtime_i).type;
 	const std::string src = input_paths.at(src_mtime_i).path + file.name;
@@ -219,7 +219,7 @@ end:
 	}
 }
 
-int avoid_src(const struct path& file, const unsigned long int& src_mtime_i){
+int avoid_src(const struct base::path& file, const unsigned long int& src_mtime_i){
 	if(src_mtime_i == std::numeric_limits<unsigned long int>::max())
 		return NO_SRC;
 	else if(file.metadatas.at(src_mtime_i).type == NON_EXISTENT)
