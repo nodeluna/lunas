@@ -9,16 +9,7 @@
     outputs = { self, nixpkgs, utils}:
         utils.lib.eachDefaultSystem (system:
                 let
-                overlay = final: prev: {
-                libssh = prev.libssh.overrideAttrs (oldAttrs: rec {
-                        version = "0.11.1";
-                        src = prev.fetchurl {
-                        url = "https://www.libssh.org/files/0.11/libssh-0.11.1.tar.xz";
-                        sha256="0y8v5ihrqnjxchvjhz8fcczndchaaxxim64bqm8q3q4i5v3xrdql";
-                        };
-                        });
-                };
-                pkgs = import nixpkgs { inherit system; overlays = [ overlay ]; };
+                pkgs = import nixpkgs { inherit system; };
                 pname = "lunas";
                 version = "2.0.7";
                 in
