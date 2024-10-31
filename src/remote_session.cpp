@@ -2,27 +2,28 @@
 
 #ifdef REMOTE_ENABLED
 
-#include <string>
-#include <iostream>
-#include <libssh/sftp.h>
-#include "log.h"
-#include "raii_sftp.h"
-#include "path_parsing.h"
-#include "file_types.h"
-#include "remote_session.h"
-
+#	include <string>
+#	include <iostream>
+#	include <libssh/sftp.h>
+#	include "log.h"
+#	include "raii_sftp.h"
+#	include "path_parsing.h"
+#	include "file_types.h"
+#	include "remote_session.h"
 
 namespace rsession {
-	int verify_publickey(const ssh_session& ssh, const std::string& ip){
+	int verify_publickey(const ssh_session& ssh, const std::string& ip) {
 		ssh_known_hosts_e response = ssh_session_is_known_server(ssh);
-		switch(response){
+		switch (response) {
 			case SSH_KNOWN_HOSTS_OK:
 				break;
 			case SSH_KNOWN_HOSTS_CHANGED:
-				llog::error("the server key for '" + ip + "' has changed! either you are under attack or the admin changed the key");
+				llog::error("the server key for '" + ip +
+					    "' has changed! either you are under attack or the admin changed the key");
 				exit(1);
 			case SSH_KNOWN_HOSTS_OTHER:
-				llog::error("-[X] the server for '" + ip + "' gave a key of type while we had another type! possible attack!");
+				llog::error(
+				    "-[X] the server for '" + ip + "' gave a key of type while we had another type! possible attack!");
 				exit(1);
 			case SSH_KNOWN_HOSTS_ERROR:
 				llog::error("error while checking the server '" + ip + "', is the publickey valid? " + ssh_get_error(ssh));
@@ -30,86 +31,87 @@ namespace rsession {
 			case SSH_KNOWN_HOSTS_UNKNOWN:
 			case SSH_KNOWN_HOSTS_NOT_FOUND:
 				std::string ok;
-				int rc;
+				int	    rc;
 				llog::warn("the autheticity of server '" + ip + "' can't be established\n");
 				llog::warn("the publickey is not found, do you want to add it to '~/.ssh/known_hosts'? (y/n): ");
 				std::cin >> ok;
 
-				if(ok == "y")
+				if (ok == "y")
 					rc = ssh_session_update_known_hosts(ssh);
-				else{
+				else {
 					llog::error("server key verification failed");
 					exit(1);
 				}
-				if(ok == "y" && rc != SSH_OK){
+				if (ok == "y" && rc != SSH_OK) {
 					llog::error("couldn't add the key to the '~/.ssh/known_hosts'");
 					llog::error(ssh_get_error(ssh));
 					exit(1);
 				}
-			break;
+				break;
 		}
 		return 0;
 	}
 
-	int auth_password(const ssh_session& ssh, const std::string& ip, const std::string& pw){
+	int auth_password(const ssh_session& ssh, const std::string& ip, const std::string& pw) {
 		std::string password = pw;
-		if(password.empty()){
+		if (password.empty()) {
 			llog::print("--> login for: '" + ip + "'");
 			password = getpass("   --> Password: ");
 		}
 		return ssh_userauth_password(ssh, NULL, password.c_str());
 	}
 
-	int auth_publickey(const ssh_session& ssh, const char* password){
+	int auth_publickey(const ssh_session& ssh, const char* password) {
 		return ssh_userauth_publickey_auto(ssh, NULL, password);
 	}
 
-	int auth_publickey_passphrase(const ssh_session& ssh, const std::string& ip, const std::string& pw){
+	int auth_publickey_passphrase(const ssh_session& ssh, const std::string& ip, const std::string& pw) {
 		std::string password = pw;
-		if(password.empty()){
+		if (password.empty()) {
 			llog::print("--> login for: '" + ip + "'");
 			password = getpass("   --> private-key passphrase: ");
 		}
 		return rsession::auth_publickey(ssh, password.c_str());
 	}
 
-	int auth_none(const ssh_session& ssh){
+	int auth_none(const ssh_session& ssh) {
 		return ssh_userauth_none(ssh, NULL);
 	}
 
-	std::string auth_method(const int& method){
+	std::string auth_method(const int& method) {
 		std::string method_str;
-		if(method & SSH_AUTH_METHOD_HOSTBASED)
+		if (method & SSH_AUTH_METHOD_HOSTBASED)
 			method_str += "hostbased, ";
-		if(method & SSH_AUTH_METHOD_INTERACTIVE)
+		if (method & SSH_AUTH_METHOD_INTERACTIVE)
 			method_str += "keyboard-interactive, ";
-		if(method & SSH_AUTH_METHOD_GSSAPI_MIC)
-			method_str +=  "gssapi-mic";
+		if (method & SSH_AUTH_METHOD_GSSAPI_MIC)
+			method_str += "gssapi-mic";
 
 		return method_str;
 	}
 
-	int auth_list(const ssh_session& ssh, const std::string& ip, const std::string& pw){
+	int auth_list(const ssh_session& ssh, const std::string& ip, const std::string& pw) {
 		int rc = ssh_userauth_none(ssh, NULL);
-		if(rc == SSH_AUTH_SUCCESS || rc == SSH_AUTH_ERROR)
+		if (rc == SSH_AUTH_SUCCESS || rc == SSH_AUTH_ERROR)
 			return rc;
 
 		int method = ssh_userauth_list(ssh, NULL);
-		if(rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_NONE)
+		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_NONE)
 			rc = rsession::auth_none(ssh);
 
-		if(rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PUBLICKEY){
+		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PUBLICKEY) {
 			rc = rsession::auth_publickey(ssh, NULL);
-			if(rc == SSH_AUTH_DENIED)
+			if (rc == SSH_AUTH_DENIED)
 				rc = rsession::auth_publickey_passphrase(ssh, ip, pw);
 		}
 
-		if(rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PASSWORD)
+		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PASSWORD)
 			rc = rsession::auth_password(ssh, ip, pw);
 
-		if(rc == SSH_AUTH_SUCCESS)
+		if (rc == SSH_AUTH_SUCCESS)
 			return rc;
-		else if(method & SSH_AUTH_METHOD_INTERACTIVE || method & SSH_AUTH_METHOD_GSSAPI_MIC || method & SSH_AUTH_METHOD_HOSTBASED){
+		else if (method & SSH_AUTH_METHOD_INTERACTIVE || method & SSH_AUTH_METHOD_GSSAPI_MIC ||
+			 method & SSH_AUTH_METHOD_HOSTBASED) {
 			llog::error("unsupported auth method for '" + ip + "', " + rsession::auth_method(method));
 			llog::error(ssh_get_error(ssh));
 			llog::error("exiting...");
@@ -119,10 +121,10 @@ namespace rsession {
 		return SSH_AUTH_ERROR;
 	}
 
-	ssh_session init_ssh(const std::string& ip, const int& port, const std::string& pw){
+	ssh_session init_ssh(const std::string& ip, const int& port, const std::string& pw) {
 		ssh_session ssh = ssh_new();
-		int rc;
-		if(ssh == NULL){
+		int	    rc;
+		if (ssh == NULL) {
 			llog::error("Failed to create ssh session to, '" + ip + "'");
 			llog::error("exiting...");
 			exit(1);
@@ -130,15 +132,15 @@ namespace rsession {
 		std::string hostname = ip.substr(0, ip.find(':'));
 		ssh_options_set(ssh, SSH_OPTIONS_HOST, hostname.c_str());
 		ssh_options_set(ssh, SSH_OPTIONS_PORT, &port);
-		if(options::compression){
-			if(ssh_options_set(ssh, SSH_OPTIONS_COMPRESSION, "yes") != SSH_OK)
+		if (options::compression) {
+			if (ssh_options_set(ssh, SSH_OPTIONS_COMPRESSION, "yes") != SSH_OK)
 				llog::warn("couldn't set compression for '" + ip + "'");
-			if(ssh_options_set(ssh, SSH_OPTIONS_COMPRESSION_LEVEL, &options::compression_level) != SSH_OK)
+			if (ssh_options_set(ssh, SSH_OPTIONS_COMPRESSION_LEVEL, &options::compression_level) != SSH_OK)
 				llog::warn("couldn't set compression level for '" + ip + "'");
 		}
- 
+
 		rc = ssh_connect(ssh);
-		if (rc != SSH_OK){
+		if (rc != SSH_OK) {
 			llog::error("failed to create ssh session to '" + ip + "'");
 			llog::error(ssh_get_error(ssh));
 			llog::error("exiting...");
@@ -147,9 +149,9 @@ namespace rsession {
 		}
 
 		rc = rsession::auth_list(ssh, ip, pw);
-		if(rc == SSH_AUTH_SUCCESS)
+		if (rc == SSH_AUTH_SUCCESS)
 			rsession::verify_publickey(ssh, ip);
-		else{
+		else {
 			llog::error("couldn't authenticate to '" + ip + "'");
 			llog::error(ssh_get_error(ssh));
 			llog::error("exiting...");
@@ -161,11 +163,11 @@ namespace rsession {
 		return ssh;
 	}
 
-	sftp_session init_sftp(const ssh_session& ssh, const std::string& ip){
+	sftp_session init_sftp(const ssh_session& ssh, const std::string& ip) {
 		sftp_session sftp = sftp_new(ssh);
-		int rc;
+		int	     rc;
 
-		if (sftp == NULL){
+		if (sftp == NULL) {
 			llog::error("failed to create an sftp session to '" + ip + "'");
 			llog::error(ssh_get_error(ssh));
 			llog::error("If you are using fish shell try bash");
@@ -173,7 +175,7 @@ namespace rsession {
 		}
 
 		rc = sftp_init(sftp);
-		if (rc != SSH_OK){
+		if (rc != SSH_OK) {
 			llog::error("failed to initialize an sftp session to '" + ip + "'");
 			llog::error(ssh_get_error(ssh));
 			llog::error("If you are using fish shell try bash");
@@ -183,56 +185,58 @@ namespace rsession {
 		return sftp;
 	}
 
-	std::string absolute_path(const sftp_session& sftp, const std::string& ip){
-		if(ip.find(':') == ip.npos || ip.back() == ':'){
+	std::string absolute_path(const sftp_session& sftp, const std::string& ip) {
+		if (ip.find(':') == ip.npos || ip.back() == ':') {
 			llog::error("hostname: " + ip + " doesn't include an input path");
 			exit(1);
 		}
-		std::string sftp_path = ip.substr(ip.find(":")+1, ip.size());
+		std::string			       sftp_path = ip.substr(ip.find(":") + 1, ip.size());
 		std::expected<std::string, SSH_STATUS> path;
 
-		if(sftp_path.size() > 1 && sftp_path.substr(0, 2) == "~/"){
+		if (sftp_path.size() > 1 && sftp_path.substr(0, 2) == "~/") {
 			path = sftp::homedir(sftp->session, ip);
-			if(not path)
+			if (not path)
 				llog::rc(sftp, ip, path.error(), "couldn't get homedir", EXIT_FAILURE);
 			sftp_path = path.value() + sftp_path.substr(2, sftp_path.size());
 
-		}else if(sftp_path.size() > 1 && sftp_path.front() != path_seperator && sftp_path.front() != '.'){
+		} else if (sftp_path.size() > 1 && sftp_path.front() != path_seperator && sftp_path.front() != '.') {
 			path = sftp::homedir(sftp->session, ip);
-			if(not path)
+			if (not path)
 				llog::rc(sftp, ip, path.error(), "couldn't get homedir", EXIT_FAILURE);
 			sftp_path = path.value() + sftp_path;
 		}
 
-		if(options::follow_symlink){
+		if (options::follow_symlink) {
 			char* full_path = sftp_canonicalize_path(sftp, sftp_path.c_str());
-			if(full_path != NULL){
+			if (full_path != NULL) {
 				sftp_path = full_path;
 				ssh_string_free_char(full_path);
 			}
-		}else if(sftp_path.size() > 2 && sftp_path.substr(0, 3) == "../"){
-			int depth = 0;
+		} else if (sftp_path.size() > 2 && sftp_path.substr(0, 3) == "../") {
+			int  depth	  = 0;
 			auto current_path = sftp::cwd(sftp->session, ip);
-			if(not current_path)
+			if (not current_path)
 				llog::rc(sftp, ip, path.error(), "couldn't get cwd", EXIT_FAILURE);
 			os::pop_seperator(current_path.value());
 			parse_path::adjust_relative_path(sftp_path, depth);
 			parse_path::append_to_relative_path(sftp_path, current_path.value(), depth);
 		}
 		sftp_attributes attributes = sftp::attributes(sftp, sftp_path);
-		if(status::remote_type(attributes) == DIRECTORY)
+		if (status::remote_type(attributes) == DIRECTORY)
 			os::append_seperator(sftp_path);
-		if(attributes != NULL)
+		if (attributes != NULL)
 			sftp_attributes_free(attributes);
 		return sftp_path;
 	}
-	int free_sftp(sftp_session& sftp){
-		if(sftp != NULL)
+
+	int free_sftp(sftp_session& sftp) {
+		if (sftp != NULL)
 			sftp_free(sftp);
 		return 0;
 	}
-	int free_ssh(ssh_session& ssh){
-		if(ssh != NULL){
+
+	int free_ssh(ssh_session& ssh) {
+		if (ssh != NULL) {
 			ssh_disconnect(ssh);
 			ssh_free(ssh);
 		}
