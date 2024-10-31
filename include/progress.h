@@ -11,12 +11,13 @@ namespace progress {
 	void reset(void);
 
 	struct obj {
-		obj(){
-			progress::prepare();
-		}
-		~obj(){
-			progress::reset();
-		}
+			obj() {
+				progress::prepare();
+			}
+
+			~obj() {
+				progress::reset();
+			}
 	};
 }
 

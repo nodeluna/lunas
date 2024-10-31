@@ -4,7 +4,7 @@
 #include "config.h"
 
 #ifdef REMOTE_ENABLED
-#include <libssh/sftp.h>
+#	include <libssh/sftp.h>
 #endif // REMOTE_ENABLED
 
 #include <string>
@@ -13,7 +13,7 @@
 
 #define NO_EXIT -1
 
-namespace llog{
+namespace llog {
 	void error(const std::string& msg) noexcept;
 
 	void error_exit(const std::string& msg, const int& code);

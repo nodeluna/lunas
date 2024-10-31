@@ -7,26 +7,27 @@
 #include <optional>
 #include "config_handler.h"
 
-#define DEMO_CONFIG "global{\n"\
-	"\t#mkdir = on\n"\
-	"\t#compression = on\n"\
-	"\t#resume = on\n"\
-	"\t#progress = on\n"\
-	"\t#update = on\n"\
-	"\t#minimum-space = 1gib\n"\
-	"\t#attributes = mtime\n"\
-	"}\n"\
-	"luna {\n" \
-	"\tpath = /path/to/dir1\n"\
-	"\tpath = /path/to/dir2\n"\
-	"\tpath = /path/to/dir3\n"\
-	"\tremote {\n"\
-	"\t\tr = user@ip:dir\n"\
-	"\t\tport = 22\n"\
-	"\t}\n"\
+#define DEMO_CONFIG                 \
+	"global{\n"                 \
+	"\t#mkdir = on\n"           \
+	"\t#compression = on\n"     \
+	"\t#resume = on\n"          \
+	"\t#progress = on\n"        \
+	"\t#update = on\n"          \
+	"\t#minimum-space = 1gib\n" \
+	"\t#attributes = mtime\n"   \
+	"}\n"                       \
+	"luna {\n"                  \
+	"\tpath = /path/to/dir1\n"  \
+	"\tpath = /path/to/dir2\n"  \
+	"\tpath = /path/to/dir3\n"  \
+	"\tremote {\n"              \
+	"\t\tr = user@ip:dir\n"     \
+	"\t\tport = 22\n"           \
+	"\t}\n"                     \
 	"}\n"
 
-
+// clang-format off
 
 inline std::unordered_map<std::string, std::function<int(std::string)>> onoff_options = {
 	{"-R",			config_filler::resume		},
@@ -158,9 +159,11 @@ inline std::unordered_map<std::string, std::function<void(void)>> info = {
 	{"--meow",		lunas_info::meow		},
 };
 
+// clang-format on
+
 namespace config_manager {
-	inline std::string config_dir = std::getenv("HOME") + std::string("/.config/lunas/");
-	inline std::string file_name = std::string("lunas.luco");
+	inline std::string config_dir  = std::getenv("HOME") + std::string("/.config/lunas/");
+	inline std::string file_name   = std::string("lunas.luco");
 	inline std::string config_path = config_dir + file_name;
 
 	std::optional<std::string> make_demo_config(void);

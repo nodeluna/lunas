@@ -6,11 +6,10 @@
 #include "config.h"
 
 #ifdef REMOTE_ENABLED
-#include <libssh/sftp.h>
+#	include <libssh/sftp.h>
 #endif // REMOTE_ENABLED
 
 #include "base.h"
-
 
 namespace resume {
 	bool is_lspart(const std::string& path);
@@ -25,7 +24,8 @@ namespace resume {
 	void unlink(const std::string& dest);
 #endif // REMOTE_ENABLED
 
-	void sync(std::set<base::path>::iterator& itr, const struct base::path& lspart, std::string& dest, const unsigned long int& dest_index);
+	void sync(
+	    std::set<base::path>::iterator& itr, const struct base::path& lspart, std::string& dest, const unsigned long int& dest_index);
 
 	void init();
 }

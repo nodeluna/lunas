@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace utils{
+namespace utils {
 	bool exclude(const std::string& path, const std::string& input_path);
 }
 

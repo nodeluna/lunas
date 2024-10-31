@@ -55,7 +55,7 @@ namespace config_filler {
 
 namespace lunas_info {
 	void author(void);
-	
+
 	void version(void);
 
 	void license(void);
