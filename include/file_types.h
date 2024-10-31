@@ -1,12 +1,12 @@
 #ifndef TYPES
 #define TYPES
 
-#define REGULAR_FILE  1
-#define	DIRECTORY 2
-#define	SYMLINK 3
-#define	BROKEN_SYMLINK -3
+#define REGULAR_FILE 1
+#define DIRECTORY 2
+#define SYMLINK 3
+#define BROKEN_SYMLINK -3
 #define SOCKET 4
-#define	SPECIAL_TYPE 5
+#define SPECIAL_TYPE 5
 
 #include <string>
 #include <filesystem>
@@ -18,7 +18,7 @@ namespace fs = std::filesystem;
 
 std::string get_type_name(const short& type);
 
-namespace status{
+namespace status {
 	unsigned short int local_types(fs::file_status entry);
 
 	short int local_type(const std::string& path, const bool& cerr);
@@ -31,7 +31,7 @@ namespace status{
 #endif // REMOTE_ENABLED
 }
 
-namespace condition{
+namespace condition {
 	bool is_src(const short& type);
 
 	bool is_dest(const short& type);

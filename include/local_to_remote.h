@@ -5,9 +5,9 @@
 
 #ifdef REMOTE_ENABLED
 
-#include <libssh/sftp.h>
-#include <string>
-#include "copy.h"
+#	include <libssh/sftp.h>
+#	include <string>
+#	include "copy.h"
 
 namespace local_to_remote {
 	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type);
@@ -15,7 +15,6 @@ namespace local_to_remote {
 	struct syncstat mkdir(const std::string& src, const std::string& dest, const sftp_session& sftp);
 	struct syncstat symlink(const std::string& src, const std::string& dest, const sftp_session& sftp);
 }
-
 
 #endif // REMOTE_ENABLED
 

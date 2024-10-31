@@ -4,7 +4,6 @@
 #include "base.h"
 #include "copy.h"
 
-
 #define OK_DEST 0
 #define SAME_INPUT_PATH 1
 #define NOT_DEST 2

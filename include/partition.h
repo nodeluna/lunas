@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-namespace partition{
+namespace partition {
 	bool getting_full(const std::uintmax_t& available_space, const std::uintmax_t& file_size);
 }
 

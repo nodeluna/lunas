@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace parse_path{
+namespace parse_path {
 	std::string get_lower_dir_level(std::string path);
 
 	void adjust_relative_path(std::string& path, int& depth);
