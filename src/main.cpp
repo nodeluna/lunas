@@ -4,12 +4,11 @@
 #include "log.h"
 #include "config_manager.h"
 
-
-int main(const int argc, const char* argv[]){
+int main(const int argc, const char* argv[]) {
 	config_manager::preset("global");
 
 	cliargs(argc, argv);
-	if(input_paths.size() < 2){
+	if (input_paths.size() < 2) {
 		llog::print(about::smol_help);
 		exit(1);
 	}
