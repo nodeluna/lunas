@@ -19,13 +19,19 @@
 
 namespace remote_to_remote {
 	syncstat copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp,
-	    const short& type) {
+	    const struct syncmisc& misc) {
 		struct syncstat syncstat;
-		if (type == REGULAR_FILE)
-			syncstat = remote_to_remote::rfile(src, dest, src_sftp, dest_sftp);
-		else if (type == DIRECTORY)
+		if (misc.file_type == REGULAR_FILE) {
+			auto func = [&](const std::string& dest_lspart) -> struct syncstat {
+					struct syncstat			st = remote_to_remote::rfile(src, dest_lspart, src_sftp, dest_sftp);
+					struct fs_remote::original_name _(dest_sftp, dest_lspart, dest, st.code);
+					return st;
+			};
+
+			syncstat = regular_file_sync(src, dest, misc.src_mtime, func);
+		} else if (misc.file_type == DIRECTORY)
 			syncstat = remote_to_remote::mkdir(src, dest, src_sftp, dest_sftp);
-		else if (type == SYMLINK)
+		else if (misc.file_type == SYMLINK)
 			syncstat = remote_to_remote::symlink(src, dest, src_sftp, dest_sftp);
 		else
 			llog::error("can't sync special file '" + src + "'");

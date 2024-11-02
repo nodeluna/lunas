@@ -101,17 +101,17 @@ namespace resume {
 				    size_units(input_paths.at(dest_index).available_space));
 			return;
 		}
-		if (type != REGULAR_FILE)
-#ifdef REMOTE_ENABLED
-			resume::unlink(input_paths.at(dest_index).sftp, dest, type);
-#else
-			resume::unlink(dest);
-#endif // REMOTE_ENABLED
+
+		struct syncmisc misc = {
+		    .src_mtime = src_mtime,
+		    .file_type = type,
+		};
+		dest = lunas::original_dest(dest);
 
 #ifdef REMOTE_ENABLED
-		syncstat syncstat = lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, type);
+		syncstat syncstat = lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, misc);
 #else
-		struct syncstat syncstat = lunas::copy(src, dest, type);
+		struct syncstat syncstat = lunas::copy(src, dest, misc);
 #endif // REMOTE_ENABLED
 		register_sync(syncstat, dest_index, type);
 		if (syncstat.code == 1) {

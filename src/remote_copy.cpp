@@ -16,25 +16,19 @@
 
 namespace fs_remote {
 	syncstat copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp,
-	    const short& type) {
-		std::string original_dest = lunas::original_dest(dest);
-		llog::print_sync(src, original_dest, type);
-
+	    const struct syncmisc& misc) {
+		llog::print_sync(src, dest, misc.file_type);
 		struct syncstat syncstat;
 
-		if (src_sftp != nullptr && dest_sftp == nullptr) {
-			syncstat = remote_to_local::copy(src, dest, src_sftp, type);
-			struct fs_local::original_name _(dest, original_dest, syncstat.code);
-		} else if (src_sftp == nullptr && dest_sftp != nullptr) {
-			syncstat = local_to_remote::copy(src, dest, dest_sftp, type);
-			struct fs_remote::original_name _(dest_sftp, dest, original_dest, syncstat.code);
-		} else {
-			syncstat = remote_to_remote::copy(src, dest, src_sftp, dest_sftp, type);
-			struct fs_remote::original_name _(dest_sftp, dest, original_dest, syncstat.code);
-		}
+		if (src_sftp != nullptr && dest_sftp == nullptr)
+			syncstat = remote_to_local::copy(src, dest, src_sftp, misc);
+		else if (src_sftp == nullptr && dest_sftp != nullptr)
+			syncstat = local_to_remote::copy(src, dest, dest_sftp, misc);
+		else
+			syncstat = remote_to_remote::copy(src, dest, src_sftp, dest_sftp, misc);
 
 		if (options::dry_run == false && syncstat.code == 1)
-			remote_attrs::sync_utimes(src, original_dest, src_sftp, dest_sftp, type);
+			remote_attrs::sync_utimes(src, dest, src_sftp, dest_sftp, misc.file_type);
 
 		return syncstat;
 	}

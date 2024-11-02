@@ -24,14 +24,20 @@
 namespace fs = std::filesystem;
 
 namespace local_to_remote {
-	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type) {
+	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const struct syncmisc& misc) {
 		struct syncstat syncstat;
 
-		if (type == REGULAR_FILE)
-			syncstat = local_to_remote::rfile(src, dest, sftp);
-		else if (type == DIRECTORY)
+		if (misc.file_type == REGULAR_FILE) {
+			auto func = [&](const std::string& dest_lspart) -> struct syncstat {
+					struct syncstat			st = local_to_remote::rfile(src, dest_lspart, sftp);
+					struct fs_remote::original_name _(sftp, dest_lspart, dest, st.code);
+					return st;
+			};
+
+			syncstat = regular_file_sync(src, dest, misc.src_mtime, func);
+		} else if (misc.file_type == DIRECTORY)
 			syncstat = local_to_remote::mkdir(src, dest, sftp);
-		else if (type == SYMLINK)
+		else if (misc.file_type == SYMLINK)
 			syncstat = local_to_remote::symlink(src, dest, sftp);
 		else
 			llog::error("can't sync special file '" + src + "'");

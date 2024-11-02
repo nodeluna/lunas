@@ -7,16 +7,16 @@
 namespace lunas {
 #ifdef REMOTE_ENABLED
 	syncstat copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp,
-	    const short& type) {
+	    const struct syncmisc& misc) {
 #else
-	syncstat copy(const std::string& src, const std::string& dest, const short& type) {
+	syncstat copy(const std::string& src, const std::string& dest, const struct syncmisc& misc) {
 #endif
 #ifdef REMOTE_ENABLED
 		if (src_sftp != nullptr || dest_sftp != nullptr)
-			return fs_remote::copy(src, dest, src_sftp, dest_sftp, type);
+			return fs_remote::copy(src, dest, src_sftp, dest_sftp, misc);
 		else
 #endif
-			return fs_local::copy(src, dest, type);
+			return fs_local::copy(src, dest, misc);
 	}
 
 	std::string original_dest(const std::string& dest_with_hash) {

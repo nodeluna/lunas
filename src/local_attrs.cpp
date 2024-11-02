@@ -29,7 +29,7 @@ namespace local_attrs {
 
 		auto err = utime::set_local(dest, time_val.value());
 		if (err) {
-			llog::ec(dest, *err, "couldn't sync utimes of '", NO_EXIT);
+			llog::ec(dest, *err, "couldn't sync utimes of", NO_EXIT);
 			return false;
 		}
 

@@ -24,13 +24,19 @@
 #	include "resume.h"
 
 namespace remote_to_local {
-	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type) {
+	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const struct syncmisc& misc) {
 		struct syncstat syncstat;
-		if (type == REGULAR_FILE)
-			syncstat = remote_to_local::rfile(src, dest, sftp);
-		else if (type == DIRECTORY)
+		if (misc.file_type == REGULAR_FILE) {
+			auto func = [&](const std::string& dest_lspart) -> struct syncstat {
+					struct syncstat		       st = remote_to_local::rfile(src, dest_lspart, sftp);
+					struct fs_local::original_name _(dest_lspart, dest, st.code);
+					return st;
+			};
+
+			syncstat = regular_file_sync(src, dest, misc.src_mtime, func);
+		} else if (misc.file_type == DIRECTORY)
 			syncstat = remote_to_local::mkdir(src, dest, sftp);
-		else if (type == SYMLINK)
+		else if (misc.file_type == SYMLINK)
 			syncstat = remote_to_local::symlink(src, dest, sftp);
 		else
 			llog::error("can't sync special file '" + src + "'");

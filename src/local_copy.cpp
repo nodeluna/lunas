@@ -11,18 +11,12 @@
 #include "permissions.h"
 
 namespace fs_local {
-	syncstat copy(const std::string& src, const std::string& dest, const short& type) {
-		std::string original_dest = lunas::original_dest(dest);
-		llog::print_sync(src, original_dest, type);
-
-		struct syncstat syncstat = local_to_local::copy(src, dest, type);
-
-		{
-			struct fs_local::original_name _(dest, original_dest, syncstat.code);
-		}
+	syncstat copy(const std::string& src, const std::string& dest, const struct syncmisc& misc) {
+		llog::print_sync(src, dest, misc.file_type);
+		struct syncstat syncstat = local_to_local::copy(src, dest, misc);
 
 		if (options::dry_run == false && syncstat.code == 1)
-			local_attrs::sync_utimes(src, original_dest);
+			local_attrs::sync_utimes(src, dest);
 
 		return syncstat;
 	}

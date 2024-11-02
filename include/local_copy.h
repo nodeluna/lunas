@@ -17,7 +17,7 @@ struct lbuffque {
 };
 
 namespace fs_local {
-	struct syncstat copy(const std::string& src, const std::string& dest, const short& type);
+	struct syncstat copy(const std::string& src, const std::string& dest, const struct syncmisc& misc);
 
 	struct original_name {
 			original_name(const std::string& dest, const std::string& original_name, int& code);

@@ -204,12 +204,15 @@ void updating(const struct base::path& file, const unsigned long int& src_mtime_
 			sync = true;
 
 		if (sync) {
-			size_t	    src_quick_hash = resume::get_src_hash(src, src_mtime);
-			std::string dest = input_paths.at(dest_index).path + file.name + "." + std::to_string(src_quick_hash) + ".ls.part";
+			struct syncmisc misc = {
+			    .src_mtime = src_mtime,
+			    .file_type = type,
+			};
+			std::string dest = input_paths.at(dest_index).path + file.name;
 #ifdef REMOTE_ENABLED
-			syncstat syncstat = lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, type);
+			syncstat syncstat = lunas::copy(src, dest, input_paths.at(src_mtime_i).sftp, input_paths.at(dest_index).sftp, misc);
 #else
-			struct syncstat syncstat = lunas::copy(src, dest, type);
+			struct syncstat syncstat = lunas::copy(src, dest, misc);
 #endif // REMOTE_ENABLED
 			register_sync(syncstat, dest_index, type);
 		}

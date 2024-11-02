@@ -22,7 +22,7 @@ struct buffque {
 
 namespace fs_remote {
 	syncstat copy(const std::string& src, const std::string& dest, const sftp_session& src_sftp, const sftp_session& dest_sftp,
-	    const short& type);
+	    const struct syncmisc& misc);
 
 	struct original_name {
 			original_name(

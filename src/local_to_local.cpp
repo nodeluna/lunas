@@ -54,14 +54,20 @@ void fstream_aio_wait_read(std::queue<lbuffque>& queue) {
 }
 
 namespace local_to_local {
-	struct syncstat copy(const std::string& src, const std::string& dest, const short& type) {
+	struct syncstat copy(const std::string& src, const std::string& dest, const struct syncmisc& misc) {
 		struct syncstat syncstat;
 
-		if (type == REGULAR_FILE) {
-			syncstat = local_to_local::rfile(src, dest);
-		} else if (type == DIRECTORY)
+		if (misc.file_type == REGULAR_FILE) {
+			auto func = [&](const std::string& dest_lspart) -> struct syncstat {
+					struct syncstat		       st = local_to_local::rfile(src, dest_lspart);
+					struct fs_local::original_name _(dest_lspart, dest, st.code);
+					return st;
+			};
+
+			syncstat = regular_file_sync(src, dest, misc.src_mtime, func);
+		} else if (misc.file_type == DIRECTORY)
 			syncstat = local_to_local::mkdir(src, dest);
-		else if (type == SYMLINK)
+		else if (misc.file_type == SYMLINK)
 			syncstat = local_to_local::symlink(src, dest);
 		else {
 			llog::error("can't copy special file '" + src + "'");

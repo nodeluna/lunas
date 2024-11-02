@@ -10,7 +10,7 @@
 #	include "copy.h"
 
 namespace remote_to_local {
-	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const short& type);
+	struct syncstat copy(const std::string& src, const std::string& dest, const sftp_session& sftp, const struct syncmisc& misc);
 	struct syncstat rfile(const std::string& src, const std::string& dest, const sftp_session& sftp);
 	struct syncstat mkdir(const std::string& src, const std::string& dest, const sftp_session& sftp);
 	struct syncstat symlink(const std::string& src, const std::string& dest, const sftp_session& sftp);
