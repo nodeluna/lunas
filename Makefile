@@ -18,7 +18,7 @@ ifneq ($(findstring clang++, $(CC)),)
 	CFLAGS += -D__cpp_concepts=202002L -Wno-builtin-macro-redefined -Wno-macro-redefined
 endif
 
-all: mkdir_build $(OBJS) $(TARGET)
+all: mkdir_build pkg_version $(OBJS) $(TARGET)
 
 debug: append_debug_option all
 
@@ -57,6 +57,17 @@ clean:
 			rm -r "$$i";\
 		fi;\
 	done
+
+define pkg_version
+	@pkg-config --atleast-version=$(1) $(2); \
+	STATUS=$$?; \
+	if [ $$STATUS -ne 0 ]; then \
+		echo -e "\x1b[1;31m-[X] $(2) >= $(1) is required to compile $(TARGET) \x1b[1;0m"; \
+	fi
+endef
+
+pkg_version:
+	$(call pkg_version,0.11.0,libssh)
 
 append_debug_option:
 	$(eval CFLAGS=$(CFLAGS) -g)

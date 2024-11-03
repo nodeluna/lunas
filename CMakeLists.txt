@@ -18,6 +18,7 @@ if(DISABLE_REMOTE)
 	message("Compiling without remote support")
 	target_compile_definitions(${PROJECT_NAME} PRIVATE DISABLE_REMOTE)
 else()
+	find_package(libssh 0.11.0 REQUIRED)
 	target_link_libraries(${PROJECT_NAME} ssh)
 endif()
 
