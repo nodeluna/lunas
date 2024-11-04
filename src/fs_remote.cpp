@@ -6,6 +6,7 @@
 #	include <cstring>
 #	include <fcntl.h>
 #	include <expected>
+#	include <sys/stat.h>
 #	include <libssh/sftp.h>
 #	include "fs_remote.h"
 #	include "base.h"

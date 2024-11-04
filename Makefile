@@ -1,9 +1,9 @@
 CC = g++
 CFLAGS = -O1 -Iinclude -Wall -Wextra -pedantic -std=c++23
 TARGET = lunas
-LIB = $(shell pkg-config --cflags --libs libssh)
 PREFIX = /usr
 INSTALL_DIR = $(PREFIX)/bin
+LIB = $(shell pkg-config --cflags --libs libssh) -pthread
 BUILD_DIR = build
 HEADER_DIR = include
 MANPAGE_DIR = $(PREFIX)/share/man/man1
@@ -78,7 +78,7 @@ append_asan_option:
 
 local_options:
 	$(info :: compiling without remote support)
-	$(eval LIB=)
+	$(eval LIB= -pthread)
 	$(eval CFLAGS=$(CFLAGS) -D DISABLE_REMOTE)
 
 cppcheck: mkdir_build

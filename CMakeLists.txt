@@ -22,6 +22,8 @@ else()
 	target_link_libraries(${PROJECT_NAME} ssh)
 endif()
 
+target_link_libraries(${PROJECT_NAME} pthread)
+
 add_custom_target(local
 	COMMAND ${CMAKE_COMMAND} -D DISABLE_REMOTE=1 .
 	COMMAND ${CMAKE_COMMAND} --build .

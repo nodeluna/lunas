@@ -4,6 +4,8 @@
 #ifdef _POSIX_C_SOURCE
 #	if _POSIX_C_SOURCE >= 200809L
 #		define LUTIMES_EXISTS
+#	else
+#		warning lutimes() wasn't found. modifications to symlinks' mtime/atime will affect their target
 #	endif
 #elif __ANDROID_API__
 #	if __ANDROID_API__ >= 26

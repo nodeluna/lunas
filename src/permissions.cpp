@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <system_error>
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <expected>
 #include "permissions.h"
 #include "log.h"

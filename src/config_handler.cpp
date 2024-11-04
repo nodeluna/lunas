@@ -2,6 +2,8 @@
 #include <functional>
 #include <string>
 #include <iostream>
+#include <ranges>
+#include <algorithm>
 #include <unordered_map>
 #include "config_handler.h"
 #include "config.h"
@@ -318,7 +320,7 @@ namespace config_filler {
 				else if (*it == '=') {
 					std::string arg;
 					bool	    found_seperator = false;
-					std::for_each(++it, data.end(), [&](const char c) {
+					std::ranges::for_each(++it, data.end(), [&](const char c) {
 						if (c != '=' && c != ',' && not found_seperator) {
 							if (std::next(it) != data.end())
 								++it;
