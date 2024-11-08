@@ -122,7 +122,7 @@ namespace remote_to_remote {
 					break;
 
 				read_requests_sent++;
-				rqueue.push(bq);
+				rqueue.push(std::move(bq));
 				total_read_bytes_requested += bytes_requested;
 			}
 
@@ -159,7 +159,7 @@ namespace remote_to_remote {
 
 			if (total_write_bytes_requested >= src_size || rqueue.empty())
 				continue;
-			wqueue.push(rqueue.front());
+			wqueue.push(std::move(rqueue.front()));
 			rqueue.pop();
 
 			bytes_requested =

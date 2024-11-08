@@ -2,10 +2,11 @@
 #include <iostream>
 #include <fstream>
 #include <queue>
-#include <future>
+#include <thread>
+#include <mutex>
 #include <cstring>
 #include <cerrno>
-#include <mutex>
+#include <cstdint>
 #include <condition_variable>
 #include "local_to_local.h"
 #include "file_types.h"
@@ -17,40 +18,52 @@
 #include "local_attrs.h"
 #include "progress.h"
 
+
 std::mutex		file_mutex;
 std::condition_variable cv;
 
-std::future<void> fstream_aio_read_begin(std::fstream& src_file, std::queue<lbuffque>* queue, unsigned long int& position) {
-	return std::async(std::launch::async, [&src_file, queue, &position]() {
+void fstream_aio_read_begin(std::fstream* src_file, std::queue<lbuffque>* queue, std::uintmax_t position, size_t queue_limit) {
+	const std::uint64_t buffer_size = LOCAL_BUFFER_SIZE;
+	while (not src_file->eof()) {
 		std::unique_lock<std::mutex> lock_file(file_mutex);
+		if (queue->size() >= queue_limit)
+			cv.wait(lock_file, [&queue, &queue_limit]() { return queue->size() < queue_limit; });
 
-		if (src_file.eof()) {
-			queue->back().bytes_read = 0;
-			goto done;
+		{
+			struct lbuffque bq(buffer_size);
+			queue->push(std::move(bq));
 		}
 
-		src_file.seekg(position);
-		if (src_file.fail() || src_file.bad()) {
+		src_file->seekg(position);
+		if (src_file->fail() || src_file->bad()) {
 			queue->back().bytes_read = -1;
 			goto done;
 		}
 
-		src_file.read(queue->back().buffer.data(), queue->back().buffer.size());
-		if (src_file.bad()) {
+		src_file->read(queue->back().buffer.data(), queue->back().buffer.size());
+		if (src_file->bad()) {
 			queue->back().bytes_read = -1;
 			goto done;
 		}
 
-		position += src_file.gcount();
-		queue->back().bytes_read = src_file.gcount();
+		queue->back().bytes_read = src_file->gcount();
+		position += queue->back().bytes_read;
 	done:
+		lock_file.unlock();
 		cv.notify_one();
-	});
+	}
 }
 
-void fstream_aio_wait_read(std::queue<lbuffque>& queue) {
+struct lbuffque fstream_aio_wait_read(std::queue<lbuffque>& queue) {
 	std::unique_lock<std::mutex> lock(file_mutex);
 	cv.wait(lock, [&queue]() { return !queue.empty(); });
+
+	struct lbuffque lbuffque = std::move(queue.front());
+	queue.pop();
+
+	lock.unlock();
+	cv.notify_one();
+	return lbuffque;
 }
 
 namespace local_to_local {
@@ -80,7 +93,7 @@ namespace local_to_local {
 	struct syncstat rfile(const std::string& src, const std::string& dest) {
 		struct syncstat syncstat;
 		std::error_code ec;
-		std::uintmax_t	src_size = std::filesystem::file_size(src, ec), dest_size = 0, total_bytes_requested = 0;
+		std::uintmax_t	src_size = std::filesystem::file_size(src, ec), dest_size = 0;
 		if (llog::ec(src, ec, "couldn't get src size", NO_EXIT) == false)
 			return syncstat;
 		syncstat.copied_size = src_size;
@@ -118,42 +131,32 @@ namespace local_to_local {
 		else if (not local_attrs::sync_ownership(src, dest))
 			return syncstat;
 
-		int		     max_requests = 5, requests_sent = 0, bytes_written;
-		const std::uint64_t  buffer_size = LOCAL_BUFFER_SIZE;
-		std::uintmax_t	     position	 = dest_size;
+		int		     bytes_written;
+		std::uintmax_t	     position = dest_size;
 		std::queue<lbuffque> queue;
-
+		const size_t	     queue_limit = 3;
+		auto		     thread	 = std::jthread(fstream_aio_read_begin, &src_file, &queue, position, queue_limit);
 		struct progress::obj _;
 
 		while (dest_size < src_size) {
-			while (requests_sent < max_requests && total_bytes_requested < src_size) {
-				struct lbuffque bq(buffer_size);
-				queue.push(std::move(bq));
-				fstream_aio_read_begin(src_file, &queue, position);
-				requests_sent++;
-				total_bytes_requested += buffer_size;
-			}
+			struct lbuffque lbuffque = fstream_aio_wait_read(queue);
 
-			fstream_aio_wait_read(queue);
-
-			if (queue.front().bytes_read == -1) {
+			if (lbuffque.bytes_read == -1) {
 				llog::error("error reading '" + src + "', " + std::strerror(errno));
 				goto fail;
-			} else if (queue.front().bytes_read == 0)
+			} else if (lbuffque.bytes_read == 0)
 				break;
 
 			std::fpos pos = dest_file.tellp();
-			dest_file.write(queue.front().buffer.data(), queue.front().bytes_read);
+			dest_file.write(lbuffque.buffer.data(), lbuffque.bytes_read);
 			bytes_written = dest_file.tellp() - pos;
-			if (bytes_written != queue.front().bytes_read || dest_file.bad() || dest_file.fail()) {
+			if (bytes_written != lbuffque.bytes_read || dest_file.bad() || dest_file.fail()) {
 				llog::error("error writing '" + dest + "', " + std::strerror(errno));
 				goto fail;
 			}
 
 			dest_size += bytes_written;
 			progress::ingoing(src_size, dest_size);
-			queue.pop();
-			requests_sent--;
 		}
 
 		if (dest_size != src_size) {

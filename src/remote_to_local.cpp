@@ -123,7 +123,7 @@ namespace remote_to_local {
 					break;
 
 				requests_sent++;
-				queue.push(bq);
+				queue.push(std::move(bq));
 				total_bytes_requested += bytes_requested;
 			}
 		read_again:
@@ -166,7 +166,8 @@ namespace remote_to_local {
 		return syncstat;
 	fail:
 		while (queue.empty() != true) {
-			sftp_aio_free(queue.front().aio);
+			if (queue.front().aio != NULL)
+				sftp_aio_free(queue.front().aio);
 			queue.pop();
 		}
 

@@ -105,23 +105,25 @@ namespace local_to_remote {
 		struct progress::obj _;
 
 		while (dest_size < src_size) {
-			struct buffque bq(buffer_size);
-			if (src_file.eof())
-				goto done_reading;
+			{
+				struct buffque bq(buffer_size);
+				if (src_file.eof())
+					goto done_reading;
 
-			src_file.seekg(position);
-			if (src_file.bad() || src_file.fail()) {
-				llog::error("error reading '" + src + "', " + std::strerror(errno));
-				goto fail;
+				src_file.seekg(position);
+				if (src_file.bad() || src_file.fail()) {
+					llog::error("error reading '" + src + "', " + std::strerror(errno));
+					goto fail;
+				}
+				src_file.read(bq.buffer.data(), buffer_size);
+				if (src_file.bad()) {
+					llog::error("error reading '" + src + "', " + std::strerror(errno));
+					goto fail;
+				}
+				bq.bytes_xfered = src_file.gcount();
+				position += bq.bytes_xfered;
+				queue.push(std::move(bq));
 			}
-			src_file.read(bq.buffer.data(), buffer_size);
-			if (src_file.bad()) {
-				llog::error("error reading '" + src + "', " + std::strerror(errno));
-				goto fail;
-			}
-			bq.bytes_xfered = src_file.gcount();
-			position += src_file.gcount();
-			queue.push(bq);
 		done_reading:
 
 			if (requests_sent >= max_requests || (total_bytes_requested >= src_size && requests_sent > 0)) {
