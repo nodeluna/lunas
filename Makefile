@@ -9,7 +9,7 @@ HEADER_DIR = include
 MANPAGE_DIR = $(PREFIX)/share/man/man1
 SRC_DIR = src
 SRCS := $(wildcard src/*.cpp)
-HEADERS := $(wildcard include/*.cpp)
+HEADERS := $(wildcard include/*.h)
 OBJS := $(addprefix build/, $(notdir $(SRCS:.cpp=.o)))
 DEP := $(OBJS:.o=.d)
 
@@ -23,6 +23,8 @@ all: mkdir_build pkg_version $(OBJS) $(TARGET)
 debug: append_debug_option all
 
 asan: append_asan_option all
+
+tsan: append_tsan_option all
 
 local: local_options all
 
@@ -74,7 +76,16 @@ append_debug_option:
 
 append_asan_option:
 	$(info :: compiling with asan)
-	$(eval CFLAGS=$(CFLAGS) -g -fsanitize=address -fno-omit-frame-pointer)
+	$(eval CFLAGS=$(CFLAGS) -g -fsanitize=address -fsanitize=undefined -fsanitize=float-cast-overflow\
+		-fsanitize=float-divide-by-zero -fno-sanitize-recover=all -fsanitize=leak\
+		-fsanitize=alignment -fno-omit-frame-pointer)
+
+append_tsan_option:
+	$(info :: compiling with tsan)
+	$(eval CFLAGS=$(CFLAGS) -g -fsanitize=undefined -fsanitize=float-cast-overflow\
+		-fsanitize=float-divide-by-zero -fno-sanitize-recover=all -fsanitize=thread\
+		-fsanitize=alignment -fno-omit-frame-pointer)
+	$(eval CC=clang++ -D__cpp_concepts=202002L -Wno-builtin-macro-redefined -Wno-macro-redefined)
 
 local_options:
 	$(info :: compiling without remote support)
