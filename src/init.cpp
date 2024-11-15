@@ -34,6 +34,8 @@ void init_rsessions(void) {
 		ssh_session ssh	 = rsession::init_ssh(remote_path.ip, remote_path.port, remote_path.password);
 		remote_path.sftp = rsession::init_sftp(ssh, remote_path.ip);
 		remote_path.path = rsession::absolute_path(remote_path.sftp, remote_path.ip);
+		if (not remote_path.password.empty())
+			remote_path.password.clear();
 	}
 }
 #endif // REMOTE_ENABLED

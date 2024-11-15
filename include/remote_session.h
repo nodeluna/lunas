@@ -10,7 +10,7 @@
 
 namespace rsession {
 	int	     verify_publickey(const ssh_session& ssh, const std::string& ip);
-	int	     auth_password(const ssh_session& ssh, const std::string& ip, const std::string& pw);
+	int	     auth_password(const ssh_session& ssh, const std::string& pw);
 	int	     auth_publickey(const ssh_session& ssh, const char* password);
 	int	     auth_publickey_passphrase(const ssh_session& ssh, const std::string& ip, const std::string& pw);
 	int	     auth_none(const ssh_session& ssh);

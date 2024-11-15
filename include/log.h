@@ -20,6 +20,8 @@ namespace llog {
 
 	void warn(const std::string& msg) noexcept;
 
+	void warn2(const std::string& msg) noexcept;
+
 	void print(const std::string& msg) noexcept;
 
 #ifdef REMOTE_ENABLED

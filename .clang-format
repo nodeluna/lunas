@@ -31,6 +31,7 @@ AllowShortEnumsOnASingleLine: false
 
 SeparateDefinitionBlocks: Always
 BreakBeforeBraces: Attach
+AlwaysBreakTemplateDeclarations: true
 
 AccessModifierOffset: 0
 NamespaceIndentation: All

@@ -5,6 +5,7 @@
 
 #ifdef REMOTE_ENABLED
 #	include <libssh/sftp.h>
+#	include <libssh/libssh.h>
 
 #	include <string>
 #	include <expected>
@@ -13,6 +14,20 @@
 typedef int SSH_STATUS;
 
 #	define REMOTE_BUFFER_SIZE 65536 * 2
+
+enum key_type_t {
+	none	    = 1 << 0,
+	public_key  = 1 << 1,
+	private_key = 1 << 2,
+};
+
+struct ssh_key_data {
+		std::string	  path;
+		ssh_auth_callback auth_fn;
+		void*		  userdata   = nullptr;
+		char*		  passphrase = nullptr;
+		key_type_t	  key_type   = key_type_t::none;
+};
 
 namespace raii {
 	namespace sftp {
@@ -87,8 +102,24 @@ namespace raii {
 				statvfs_t& operator=(const statvfs_t&) = delete;
 				~statvfs_t();
 		};
+
 	}
 
+	namespace ssh {
+		class key {
+				ssh_key key_t;
+				bool	free_key = false;
+				int	retry	 = 3;
+
+			public:
+				explicit key();
+				int	       import_key(const struct ssh_key_data& data);
+				const ssh_key& get();
+				const int&     get_retry_countdown();
+				// void	       set_retry_countdown(const int& retries);
+				~key();
+		};
+	}
 }
 
 namespace sftp {

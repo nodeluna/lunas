@@ -4,12 +4,18 @@
 
 #	include <string>
 #	include <iostream>
+#	include <filesystem>
+#	include <thread>
+#	include <chrono>
 #	include <libssh/sftp.h>
+#	include <libssh/libssh.h>
 #	include "log.h"
 #	include "raii_sftp.h"
 #	include "path_parsing.h"
 #	include "file_types.h"
 #	include "remote_session.h"
+
+namespace fs = std::filesystem;
 
 namespace rsession {
 	int verify_publickey(const ssh_session& ssh, const std::string& ip) {
@@ -32,8 +38,8 @@ namespace rsession {
 			case SSH_KNOWN_HOSTS_NOT_FOUND:
 				std::string ok;
 				int	    rc;
-				llog::warn("the autheticity of server '" + ip + "' can't be established\n");
-				llog::warn("the publickey is not found, do you want to add it to '~/.ssh/known_hosts'? (y/n): ");
+				llog::warn2("the autheticity of server '" + ip + "' can't be established\n");
+				llog::warn2("the publickey is not found, do you want to add it to '~/.ssh/known_hosts'? (y/n): ");
 				std::cin >> ok;
 
 				if (ok == "y")
@@ -52,26 +58,23 @@ namespace rsession {
 		return 0;
 	}
 
-	int auth_password(const ssh_session& ssh, const std::string& ip, const std::string& pw) {
+	int auth_password(const ssh_session& ssh, const std::string& pw) {
 		std::string password = pw;
-		if (password.empty()) {
-			llog::print("--> login for: '" + ip + "'");
-			password = getpass("   --> Password: ");
+		int	    rc	     = SSH_OK;
+		int	    retry    = 3;
+		while (retry > 0) {
+			retry--;
+			if (password.empty() || rc == SSH_AUTH_DENIED)
+				password = getpass("   --> Password: ");
+			rc = ssh_userauth_password(ssh, NULL, password.c_str());
+			if (rc == SSH_AUTH_DENIED) {
+				llog::error("access denied. retries left: " + std::to_string(retry));
+				continue;
+			} else
+				break;
 		}
-		return ssh_userauth_password(ssh, NULL, password.c_str());
-	}
 
-	int auth_publickey(const ssh_session& ssh, const char* password) {
-		return ssh_userauth_publickey_auto(ssh, NULL, password);
-	}
-
-	int auth_publickey_passphrase(const ssh_session& ssh, const std::string& ip, const std::string& pw) {
-		std::string password = pw;
-		if (password.empty()) {
-			llog::print("--> login for: '" + ip + "'");
-			password = getpass("   --> private-key passphrase: ");
-		}
-		return rsession::auth_publickey(ssh, password.c_str());
+		return rc;
 	}
 
 	int auth_none(const ssh_session& ssh) {
@@ -90,6 +93,82 @@ namespace rsession {
 		return method_str;
 	}
 
+	int auth_fn(const char* prompt, char* buffer, size_t len, int echo, int verify, void* userdata) {
+		const std::string* key_path = static_cast<std::string*>(userdata);
+		( void ) prompt;
+		std::string _prompt = "   --> enter passphrase for key '" + *key_path + "': ";
+		return ssh_getpass(_prompt.c_str(), buffer, len, echo, verify);
+	};
+
+	int auth_publickey_manual(const ssh_session& ssh) {
+		int rc = 0;
+
+		try {
+			for (const auto& entry : fs::directory_iterator(std::string(getenv("HOME")) + "/.ssh/")) {
+				if (entry.path().extension() == ".pub") {
+					raii::ssh::key pubkey;
+
+					struct ssh_key_data pubkey_data;
+					{
+						pubkey_data.path     = entry.path().string().c_str();
+						pubkey_data.key_type = key_type_t::public_key;
+					}
+
+				try_import_publickey_again:
+					rc = pubkey.import_key(pubkey_data);
+					if (rc == SSH_AUTH_AGAIN) {
+						std::this_thread::sleep_for(std::chrono::seconds(1));
+						goto try_import_publickey_again;
+					} else if (rc != SSH_OK)
+						continue;
+
+					int retries = 3;
+				try_try_publickey_again:
+					rc = ssh_userauth_try_publickey(ssh, NULL, pubkey.get());
+					if (rc == SSH_AUTH_AGAIN && retries > 0) {
+						std::this_thread::sleep_for(std::chrono::seconds(1));
+						retries--;
+						goto try_try_publickey_again;
+					} else if (rc != SSH_AUTH_SUCCESS)
+						continue;
+
+					struct ssh_key_data privkey_data;
+					{
+						privkey_data.path     = entry.path().parent_path() / entry.path().stem();
+						privkey_data.auth_fn  = auth_fn;
+						privkey_data.key_type = key_type_t::private_key;
+						privkey_data.userdata = static_cast<void*>(&privkey_data.path);
+					}
+
+					raii::ssh::key privkey;
+				retry_passphrase:
+					rc = privkey.import_key(privkey_data);
+					if (rc != SSH_AUTH_SUCCESS && privkey.get_retry_countdown() > 0)
+						goto retry_passphrase;
+					else if (rc != SSH_AUTH_SUCCESS)
+						continue;
+
+					retries = 3;
+				ssh_try_publickey_again:
+					rc = ssh_userauth_publickey(ssh, NULL, privkey.get());
+					if (rc == SSH_AUTH_SUCCESS) {
+						break;
+					} else if (rc == SSH_AUTH_AGAIN && retries > 0) {
+						std::this_thread::sleep_for(std::chrono::seconds(1));
+						retries--;
+						goto ssh_try_publickey_again;
+					} else
+						return rc;
+				}
+			}
+		} catch (const std::exception& e) {
+			llog::warn(e.what());
+			rc = SSH_AUTH_DENIED;
+		}
+
+		return rc;
+	}
+
 	int auth_list(const ssh_session& ssh, const std::string& ip, const std::string& pw) {
 		int rc = ssh_userauth_none(ssh, NULL);
 		if (rc == SSH_AUTH_SUCCESS || rc == SSH_AUTH_ERROR)
@@ -99,14 +178,14 @@ namespace rsession {
 		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_NONE)
 			rc = rsession::auth_none(ssh);
 
-		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PUBLICKEY) {
-			rc = rsession::auth_publickey(ssh, NULL);
-			if (rc == SSH_AUTH_DENIED)
-				rc = rsession::auth_publickey_passphrase(ssh, ip, pw);
-		}
+		if (rc != SSH_AUTH_SUCCESS)
+			llog::print(std::string("--> login for: '") + ip + std::string("'"));
+
+		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PUBLICKEY)
+			rc = rsession::auth_publickey_manual(ssh);
 
 		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PASSWORD)
-			rc = rsession::auth_password(ssh, ip, pw);
+			rc = rsession::auth_password(ssh, pw);
 
 		if (rc == SSH_AUTH_SUCCESS)
 			return rc;
