@@ -267,7 +267,7 @@ void remove_extra() {
 #ifdef REMOTE_ENABLED
 				auto fsize = file_size(input_paths.at(i).sftp, input_paths.at(i).path + it->name, file.type);
 #else
-				auto fsize += file_size(input_paths.at(i).path + it->name, file.type);
+				auto fsize = file_size(input_paths.at(i).path + it->name, file.type);
 #endif // REMOTE_ENABLED
 				if (fsize)
 					input_paths.at(i).removed_size += fsize.value();

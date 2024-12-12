@@ -11,7 +11,7 @@
                 let
                 pkgs = import nixpkgs { inherit system; };
                 pname = "lunas";
-                version = "2.1.1";
+                version = "2.1.2";
                 in
                 {
 
