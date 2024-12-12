@@ -8,7 +8,7 @@ namespace about {
 	inline std::string author = "\n  -> nodeluna - nodeluna@proton.me"
 				    "\n  -> https://github.com/nodeluna\n";
 
-	inline std::string version = std::string("\n  -> lunas 2.1.1") + (LOCAL_ONLY ? " (local)" : "");
+	inline std::string version = std::string("\n  -> lunas 2.1.2") + (LOCAL_ONLY ? " (local)" : "");
 
 	inline std::string license = "\n  -> GPLv3+\n"
 				     "  -> This program is distributed in the hope that it will be useful,\n"

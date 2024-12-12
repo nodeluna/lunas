@@ -265,6 +265,13 @@ void remove_extra() {
 			if (file.type != NON_EXISTENT && input_paths.at(i).srcdest == DEST) {
 				llog::print("! removing extra '" + input_paths.at(i).path + it->name + "', not found in any source");
 #ifdef REMOTE_ENABLED
+				auto fsize = file_size(input_paths.at(i).sftp, input_paths.at(i).path + it->name, file.type);
+#else
+				auto fsize += file_size(input_paths.at(i).path + it->name, file.type);
+#endif // REMOTE_ENABLED
+				if (fsize)
+					input_paths.at(i).removed_size += fsize.value();
+#ifdef REMOTE_ENABLED
 				resume::unlink(input_paths.at(i).sftp, input_paths.at(i).path + it->name, file.type);
 #else
 				resume::unlink(input_paths.at(i).path + it->name);
@@ -356,6 +363,7 @@ void print_stats() {
 		if (options::remove_extra) {
 			stats += ", Removed dirs: " + std::to_string(input_path.removed_dirs);
 			stats += ", Removed files: " + std::to_string(input_path.removed_files);
+			stats += ", Freed : " + size_units(input_path.removed_size);
 		}
 		llog::print("total synced to '" + input_path.path + "': " + stats);
 	}

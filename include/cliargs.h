@@ -23,6 +23,7 @@ struct input_path {
 		std::uintmax_t synced_dirs     = 0;
 		std::uintmax_t removed_files   = 0;
 		std::uintmax_t removed_dirs    = 0;
+		std::uintmax_t removed_size    = 0;
 };
 
 inline std::vector<input_path> input_paths;
