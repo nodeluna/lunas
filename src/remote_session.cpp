@@ -101,65 +101,66 @@ namespace rsession {
 	};
 
 	int auth_publickey_manual(const ssh_session& ssh) {
-		int rc = 0;
+		int rc = SSH_AUTH_DENIED;
 
 		try {
 			for (const auto& entry : fs::directory_iterator(std::string(getenv("HOME")) + "/.ssh/")) {
-				if (entry.path().extension() == ".pub") {
-					raii::ssh::key pubkey;
+				if (entry.path().extension() != ".pub")
+					continue;
 
-					struct ssh_key_data pubkey_data;
-					{
-						pubkey_data.path     = entry.path().string().c_str();
-						pubkey_data.key_type = key_type_t::public_key;
-					}
+				raii::ssh::key pubkey;
 
-				try_import_publickey_again:
-					rc = pubkey.import_key(pubkey_data);
-					if (rc == SSH_AUTH_AGAIN) {
-						std::this_thread::sleep_for(std::chrono::seconds(1));
-						goto try_import_publickey_again;
-					} else if (rc != SSH_OK)
-						continue;
-
-					int retries = 3;
-				try_try_publickey_again:
-					rc = ssh_userauth_try_publickey(ssh, NULL, pubkey.get());
-					if (rc == SSH_AUTH_AGAIN && retries > 0) {
-						std::this_thread::sleep_for(std::chrono::seconds(1));
-						retries--;
-						goto try_try_publickey_again;
-					} else if (rc != SSH_AUTH_SUCCESS)
-						continue;
-
-					struct ssh_key_data privkey_data;
-					{
-						privkey_data.path     = entry.path().parent_path() / entry.path().stem();
-						privkey_data.auth_fn  = auth_fn;
-						privkey_data.key_type = key_type_t::private_key;
-						privkey_data.userdata = static_cast<void*>(&privkey_data.path);
-					}
-
-					raii::ssh::key privkey;
-				retry_passphrase:
-					rc = privkey.import_key(privkey_data);
-					if (rc != SSH_AUTH_SUCCESS && privkey.get_retry_countdown() > 0)
-						goto retry_passphrase;
-					else if (rc != SSH_AUTH_SUCCESS)
-						continue;
-
-					retries = 3;
-				ssh_try_publickey_again:
-					rc = ssh_userauth_publickey(ssh, NULL, privkey.get());
-					if (rc == SSH_AUTH_SUCCESS) {
-						break;
-					} else if (rc == SSH_AUTH_AGAIN && retries > 0) {
-						std::this_thread::sleep_for(std::chrono::seconds(1));
-						retries--;
-						goto ssh_try_publickey_again;
-					} else
-						return rc;
+				struct ssh_key_data pubkey_data;
+				{
+					pubkey_data.path     = entry.path().string().c_str();
+					pubkey_data.key_type = key_type_t::public_key;
 				}
+
+			try_import_publickey_again:
+				rc = pubkey.import_key(pubkey_data);
+				if (rc == SSH_AUTH_AGAIN) {
+					std::this_thread::sleep_for(std::chrono::seconds(1));
+					goto try_import_publickey_again;
+				} else if (rc != SSH_OK)
+					continue;
+
+				int retries = 3;
+			try_try_publickey_again:
+				rc = ssh_userauth_try_publickey(ssh, NULL, pubkey.get());
+				if (rc == SSH_AUTH_AGAIN && retries > 0) {
+					std::this_thread::sleep_for(std::chrono::seconds(1));
+					retries--;
+					goto try_try_publickey_again;
+				} else if (rc != SSH_AUTH_SUCCESS)
+					continue;
+
+				struct ssh_key_data privkey_data;
+				{
+					privkey_data.path     = entry.path().parent_path() / entry.path().stem();
+					privkey_data.auth_fn  = auth_fn;
+					privkey_data.key_type = key_type_t::private_key;
+					privkey_data.userdata = static_cast<void*>(&privkey_data.path);
+				}
+
+				raii::ssh::key privkey;
+			retry_passphrase:
+				rc = privkey.import_key(privkey_data);
+				if (rc != SSH_AUTH_SUCCESS && privkey.get_retry_countdown() > 0)
+					goto retry_passphrase;
+				else if (rc != SSH_AUTH_SUCCESS)
+					continue;
+
+				retries = 3;
+			ssh_try_publickey_again:
+				rc = ssh_userauth_publickey(ssh, NULL, privkey.get());
+				if (rc == SSH_AUTH_SUCCESS) {
+					break;
+				} else if (rc == SSH_AUTH_AGAIN && retries > 0) {
+					std::this_thread::sleep_for(std::chrono::seconds(1));
+					retries--;
+					goto ssh_try_publickey_again;
+				} else
+					return rc;
 			}
 		} catch (const std::exception& e) {
 			llog::warn(e.what());
@@ -263,7 +264,6 @@ namespace rsession {
 		if (sftp == NULL) {
 			llog::error("failed to create an sftp session to '" + ip + "'");
 			llog::error(ssh_get_error(ssh));
-			llog::error("If you are using fish shell try bash");
 			exit(1);
 		}
 
@@ -271,7 +271,6 @@ namespace rsession {
 		if (rc != SSH_OK) {
 			llog::error("failed to initialize an sftp session to '" + ip + "'");
 			llog::error(ssh_get_error(ssh));
-			llog::error("If you are using fish shell try bash");
 			exit(1);
 		}
 
