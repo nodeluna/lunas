@@ -179,7 +179,7 @@ namespace rsession {
 			rc = rsession::auth_none(ssh);
 
 		if (rc != SSH_AUTH_SUCCESS)
-			llog::print(std::string("--> login for: '") + ip + std::string("'"));
+			llog::print(std::string("--> authenticating: '") + ip + std::string("'"));
 
 		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PUBLICKEY)
 			rc = rsession::auth_publickey_manual(ssh);
@@ -209,8 +209,22 @@ namespace rsession {
 			exit(1);
 		}
 		std::string hostname = ip.substr(0, ip.find(':'));
+
+		int log = SSH_LOG_NOLOG;
+		if (options::ssh_log_level == ssh_log_level::no_log)
+			log = SSH_LOG_NOLOG;
+		else if (options::ssh_log_level == ssh_log_level::warning)
+			log = SSH_LOG_WARNING;
+		else if (options::ssh_log_level == ssh_log_level::protocol)
+			log = SSH_LOG_PROTOCOL;
+		else if (options::ssh_log_level == ssh_log_level::packet)
+			log = SSH_LOG_PACKET;
+		else if (options::ssh_log_level == ssh_log_level::functions)
+			log = SSH_LOG_FUNCTIONS;
+
 		ssh_options_set(ssh, SSH_OPTIONS_HOST, hostname.c_str());
 		ssh_options_set(ssh, SSH_OPTIONS_PORT, &port);
+		ssh_options_set(ssh, SSH_OPTIONS_LOG_VERBOSITY, &log);
 		if (options::compression) {
 			if (ssh_options_set(ssh, SSH_OPTIONS_COMPRESSION, "yes") != SSH_OK)
 				llog::warn("couldn't set compression for '" + ip + "'");

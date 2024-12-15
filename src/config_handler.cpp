@@ -385,6 +385,26 @@ namespace config_filler {
 			return -1;
 		return 0;
 	}
+
+	int ssh_log(const std::string& data) {
+		if (data == "nolog")
+			options::ssh_log_level = ssh_log_level::no_log;
+		else if (data == "warning")
+			options::ssh_log_level = ssh_log_level::warning;
+		else if (data == "protocol")
+			options::ssh_log_level = ssh_log_level::protocol;
+		else if (data == "packet")
+			options::ssh_log_level = ssh_log_level::packet;
+		else if (data == "functions")
+			options::ssh_log_level = ssh_log_level::functions;
+		else {
+			llog::warn("invalid ssh log level '" + data +
+				   "'. valid levels [nolog, warning, protocol, packet, functions] default is nolog");
+			exit(1);
+		}
+
+		return 0;
+	}
 }
 
 namespace lunas_info {

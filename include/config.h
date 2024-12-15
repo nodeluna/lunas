@@ -13,9 +13,18 @@
 #else
 #	define LOCAL_ONLY true
 #endif
+
 #if (!defined(DISABLE_CHECKSUM))
 #	define CHECKSUM_ENABLED
 #endif
+
+enum ssh_log_level {
+	no_log	  = 1 << 0,
+	warning	  = 1 << 1,
+	protocol  = 1 << 4,
+	packet	  = 1 << 5,
+	functions = 1 << 6,
+};
 
 namespace options {
 	inline std::unordered_set<std::string> exclude;
@@ -40,6 +49,7 @@ namespace options {
 	inline bool			       attributes_mtime	 = true;
 	inline bool			       attributes_atime	 = false;
 	inline int			       compression_level = 5;
+	inline int			       ssh_log_level	 = ssh_log_level::no_log;
 	inline std::uintmax_t		       minimum_space	 = 1073741824;
 	inline std::string		       color_error	 = "\x1b[1;31m";
 	inline std::string		       reset_color	 = "\x1b[0m";

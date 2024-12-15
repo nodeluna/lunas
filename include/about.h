@@ -63,6 +63,10 @@ namespace about {
 	    "\n"
 	    "    [-CL, --compression-level] <level>\n"
 	    "        chose the compression level, 1-9, 9 being the most efficient but slower\n"
+	    "\n"
+	    "    [-sl, --ssh-log] <level>\n"
+	    "        enable ssh logs. available levels are: nolog, warning, protocol, packet and functions. the default log level is nolog\n"
+	    "        check the man page for more information\n"
 #else
 	    "    [X REMOTE X]\n"
 	    "        remote is disabled in the compilation process\n"

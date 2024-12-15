@@ -90,6 +90,22 @@ path of the remote destination sftp directory. this option can be used many time
 enable compression in remote transfer, zlib is used
 
 .TP
+.B [-sl, --ssh-log] <level>
+
+enable ssh logs. available levels are: nolog, warning, protocol, packet and functions. the default log level is nolog
+
+	nolog: no logging
+.br
+	warning: only warnings
+.br
+	protocol: high level protocol information
+.br
+	packet: lower level protocol information
+.br
+	functions: every function path
+.br
+
+.TP
 .B [-CL, --compression-level] <level>
 
 chose the compression level, 1-9, 9 being the most efficient but slower
