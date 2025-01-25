@@ -9,6 +9,7 @@ HEADER_DIR = include
 MANPAGE_DIR = $(PREFIX)/share/man/man1
 SRC_DIR = src
 SRCS := $(wildcard src/*.cpp)
+MODS := $(shell find mod -name "*.cpp")
 HEADERS := $(wildcard include/*.h)
 OBJS := $(addprefix build/, $(notdir $(SRCS:.cpp=.o)))
 DEP := $(OBJS:.o=.d)
@@ -109,7 +110,7 @@ clean-test:
 	cd test && \
 	go run clean.go
 format:
-	clang-format -i $(SRCS) $(HEADERS)
+	clang-format -i $(SRCS) $(HEADERS) $(MODS)
 
 
 -include $(DEP)
