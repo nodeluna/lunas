@@ -405,6 +405,17 @@ namespace config_filler {
 
 		return 0;
 	}
+
+	int timeout(const std::string& data) {
+		if (is_num(data) == false)
+			llog::error_exit("argument '" + data + "' for option timeout isn't a number", EXIT_FAILURE);
+
+		time_t level = std::stoull(data);
+		if (level < 0)
+			llog::error_exit("timeout must be between > 0. provided level '" + data + "'", EXIT_FAILURE);
+		options::timeout_sec = level;
+		return 0;
+	}
 }
 
 namespace lunas_info {

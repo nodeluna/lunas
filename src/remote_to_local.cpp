@@ -28,9 +28,9 @@ namespace remote_to_local {
 		struct syncstat syncstat;
 		if (misc.file_type == REGULAR_FILE) {
 			auto func = [&](const std::string& dest_lspart) -> struct syncstat {
-					struct syncstat		       st = remote_to_local::rfile(src, dest_lspart, sftp);
-					struct fs_local::original_name _(dest_lspart, dest, st.code);
-					return st;
+				struct syncstat		       st = remote_to_local::rfile(src, dest_lspart, sftp);
+				struct fs_local::original_name _(dest_lspart, dest, st.code);
+				return st;
 			};
 
 			syncstat = regular_file_sync(src, dest, misc.src_mtime, func);

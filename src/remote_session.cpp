@@ -225,6 +225,7 @@ namespace rsession {
 
 		ssh_options_set(ssh, SSH_OPTIONS_HOST, hostname.c_str());
 		ssh_options_set(ssh, SSH_OPTIONS_PORT, &port);
+		ssh_options_set(ssh, SSH_OPTIONS_TIMEOUT, &options::timeout_sec);
 		ssh_options_set(ssh, SSH_OPTIONS_LOG_VERBOSITY, &log);
 		if (options::compression) {
 			if (ssh_options_set(ssh, SSH_OPTIONS_COMPRESSION, "yes") != SSH_OK)

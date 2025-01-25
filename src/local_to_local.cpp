@@ -18,7 +18,6 @@
 #include "local_attrs.h"
 #include "progress.h"
 
-
 std::mutex		file_mutex;
 std::condition_variable cv;
 
@@ -72,9 +71,9 @@ namespace local_to_local {
 
 		if (misc.file_type == REGULAR_FILE) {
 			auto func = [&](const std::string& dest_lspart) -> struct syncstat {
-					struct syncstat		       st = local_to_local::rfile(src, dest_lspart);
-					struct fs_local::original_name _(dest_lspart, dest, st.code);
-					return st;
+				struct syncstat		       st = local_to_local::rfile(src, dest_lspart);
+				struct fs_local::original_name _(dest_lspart, dest, st.code);
+				return st;
 			};
 
 			syncstat = regular_file_sync(src, dest, misc.src_mtime, func);

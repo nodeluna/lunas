@@ -53,6 +53,8 @@ namespace config_filler {
 	int rollback(const std::string& data);
 
 	int ssh_log(const std::string& data);
+
+	int timeout(const std::string& data);
 }
 
 namespace lunas_info {
