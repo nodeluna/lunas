@@ -13,7 +13,7 @@ module;
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
 
-export module sftp;
+export module lunas.sftp;
 export import :attributes;
 export import :raii;
 export import :ssh;
@@ -69,28 +69,28 @@ namespace lunas {
 	}
 
 	std::optional<ssh_error> sftp::unlink(const std::string& path) {
-		if (sftp_unlink(m_sftp, path.c_str()) != SSH_OK)
+		if (not session_data.options.dry_run && sftp_unlink(m_sftp, path.c_str()) != SSH_OK)
 			return ssh_error(this->get_sftp_session());
 
 		return std::nullopt;
 	}
 
 	std::optional<ssh_error> sftp::rmdir(const std::string& path) {
-		if (sftp_rmdir(m_sftp, path.c_str()) != SSH_OK)
+		if (not session_data.options.dry_run && sftp_rmdir(m_sftp, path.c_str()) != SSH_OK)
 			return ssh_error(this->get_sftp_session());
 
 		return std::nullopt;
 	}
 
 	std::optional<ssh_error> sftp::mkdir(const std::string& path, const unsigned int& perms = 0755) {
-		if (sftp_mkdir(m_sftp, path.c_str(), perms) != SSH_OK)
+		if (not session_data.options.dry_run && sftp_mkdir(m_sftp, path.c_str(), perms) != SSH_OK)
 			return ssh_error(this->get_sftp_session());
 
 		return std::nullopt;
 	}
 
 	std::optional<ssh_error> sftp::symlink(const std::string& target, const std::string& path) {
-		if (sftp_symlink(m_sftp, target.c_str(), path.c_str()) != SSH_OK)
+		if (not session_data.options.dry_run && sftp_symlink(m_sftp, target.c_str(), path.c_str()) != SSH_OK)
 			return ssh_error(this->get_sftp_session());
 
 		return std::nullopt;
@@ -119,8 +119,14 @@ namespace lunas {
 		}
 
 		char buffer[REMOTE_BUFFER_SIZE];
+		int  is_stderr = 0;
 		while (true) {
-			int nbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0);
+			int nbytes = ssh_channel_read(channel, buffer, sizeof(buffer), is_stderr);
+			if (nbytes == 0 && output.empty() && is_stderr == 0) {
+				is_stderr = 1;
+				continue;
+			}
+
 			if (nbytes < 0) {
 				return std::unexpected(
 				    ssh_error(this->get_sftp_session(), fmt::err_path("error while getting output of ", command)));
@@ -132,6 +138,9 @@ namespace lunas {
 
 		if (output.empty() != true && output.back() == '\n')
 			output.pop_back();
+
+		if (is_stderr == 1)
+			return std::unexpected(ssh_error(output));
 
 		return output;
 	}

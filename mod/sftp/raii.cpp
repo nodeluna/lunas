@@ -4,7 +4,7 @@ module;
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
 
-export module sftp:raii;
+export module lunas.sftp:raii;
 
 enum key_type_t {
 	none	    = 1 << 0,

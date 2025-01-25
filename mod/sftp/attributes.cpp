@@ -5,7 +5,7 @@ module;
 #include <cstdint>
 #include <libssh/sftp.h>
 
-export module sftp:attributes;
+export module lunas.sftp:attributes;
 
 export namespace lunas {
 	enum class follow_symlink {

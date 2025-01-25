@@ -5,7 +5,7 @@ module;
 #include <print>
 #include <format>
 
-export module sftp:log;
+export module lunas.sftp:log;
 
 namespace llog {
 	void error(const std::string& data) {

@@ -9,7 +9,7 @@ module;
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
 
-export module sftp:ssh;
+export module lunas.sftp:ssh;
 import :raii;
 import :log;
 

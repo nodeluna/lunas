@@ -4,7 +4,7 @@ module;
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 
-export module sftp:error;
+export module lunas.sftp:error;
 
 export namespace lunas {
 	enum class sftp_error_type {

@@ -3,7 +3,7 @@ module;
 #include <string>
 #include <filesystem>
 
-export module sftp:path;
+export module lunas.sftp:path;
 
 auto& path_seperator = std::filesystem::path::preferred_separator;
 
