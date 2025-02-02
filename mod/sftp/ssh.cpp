@@ -37,7 +37,7 @@ export namespace lunas {
 			std::string key_path;
 
 			struct options {
-					int	      compression_level = 5;
+					int	      compression_level = 0;
 					int	      timeout		= 5;
 					ssh_log_level log_level		= ssh_log_level::no_log;
 					bool	      dry_run		= false;

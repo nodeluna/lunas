@@ -13,7 +13,7 @@ export namespace lunas {
 		no,
 	};
 
-	enum class file_type {
+	enum class file_type_t {
 		regular_file,
 		directory,
 		symlink,
@@ -31,7 +31,7 @@ export namespace lunas {
 
 		public:
 			attributes(const sftp_session& sftp, const std::string& path, follow_symlink follow);
-			file_type	file_type();
+			file_type_t	file_type();
 			std::string	file_type_name();
 			bool		exists();
 			sftp_attributes release();
@@ -94,25 +94,25 @@ namespace lunas {
 		return attr->type;
 	}
 
-	file_type attributes::file_type() {
+	file_type_t attributes::file_type() {
 		if (attr->type == SSH_FILEXFER_TYPE_SYMLINK)
-			return file_type::symlink;
+			return file_type_t::symlink;
 		else if (attr->type == SSH_FILEXFER_TYPE_DIRECTORY)
-			return file_type::directory;
+			return file_type_t::directory;
 		else if (attr->type == SSH_FILEXFER_TYPE_REGULAR)
-			return file_type::regular_file;
+			return file_type_t::regular_file;
 		else
-			return file_type::other;
+			return file_type_t::other;
 	}
 
 	std::string attributes::file_type_name() {
 		auto type = this->file_type();
 
-		if (type == file_type::symlink)
+		if (type == file_type_t::symlink)
 			return "symlink";
-		else if (type == file_type::directory)
+		else if (type == file_type_t::directory)
 			return "directory";
-		else if (type == file_type::regular_file)
+		else if (type == file_type_t::regular_file)
 			return "regular_file";
 		else
 			return "other";

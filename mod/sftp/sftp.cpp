@@ -264,7 +264,7 @@ namespace lunas {
 		}
 
 		auto attributes = this->attributes(sftp_path, follow_symlink::yes);
-		if (attributes && attributes.value()->file_type() == file_type::directory)
+		if (attributes && attributes.value()->file_type() == file_type_t::directory)
 			path::append_seperator(sftp_path);
 
 		return sftp_path;
