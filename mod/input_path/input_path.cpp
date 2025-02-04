@@ -58,7 +58,7 @@ export namespace lunas {
 					this->path = std::move(other.path);
 				}
 
-				std::expected<std::monostate, lunas::ssh_error> init_sftp(const struct session_data& data) {
+				std::expected<std::monostate, lunas::error> init_sftp(const struct session_data& data) {
 					try {
 						sftp = std::make_unique<lunas::sftp>(data);
 					} catch (const std::exception& e) {
@@ -73,19 +73,19 @@ export namespace lunas {
 					return std::monostate();
 				}
 
-				bool is_src() {
+				bool is_src() const {
 					return srcdest == srcdest::src || srcdest == srcdest::srcdest;
 				}
 
-				bool is_dest() {
+				bool is_dest() const {
 					return srcdest == srcdest::dest || srcdest == srcdest::srcdest;
 				}
 
-				bool is_srcdest() {
+				bool is_srcdest() const {
 					return srcdest == srcdest::srcdest;
 				}
 
-				bool is_remote() {
+				bool is_remote() const {
 					return sftp != nullptr;
 				}
 

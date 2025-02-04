@@ -5,7 +5,7 @@ project(lunas)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(CMAKE_CXX_STANDARD 23)
-add_compile_options(-Wall -Wextra -pedantic -O1 -g)
+add_compile_options(-Wall -Wextra -pedantic -O1)
 
 set(output_dir "${PROJECT_SOURCE_DIR}/bin")
 set(mods_dir "${PROJECT_SOURCE_DIR}/mod")
