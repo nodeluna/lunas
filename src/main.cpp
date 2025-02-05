@@ -9,6 +9,7 @@ import lunas.stdout;
 import lunas.error;
 import lunas.ipath;
 import lunas.presync;
+import lunas.stats;
 
 int main(const int argc, const char* argv[]) {
 	std::expected<struct lunas::parsed_data, lunas::error> cliopts = lunas::config::parse_cliarg(argc, argv);
@@ -49,6 +50,8 @@ int main(const int argc, const char* argv[]) {
 		}
 		lunas::println(cliopts->options.quiet, "{}", ret.value());
 	}
+
+	lunas::print_stats(cliopts.value());
 
 	return 0;
 }
