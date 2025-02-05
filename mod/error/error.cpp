@@ -40,6 +40,30 @@ export namespace lunas {
 		config_demo_config_error,
 		config_file_parsing_error,
 		init_sftp_error,
+
+		presync_same_input_path,
+
+		cppfs_remove,
+		cppfs_mkdir,
+		cppfs_symlink,
+		cppfs_file_size,
+
+		attributes_set_utimes,
+		attributes_get_utimes,
+		attributes_set_permissions,
+		attributes_get_permissions,
+		attributes_permissions_check,
+		attributes_file_type,
+		attributes_symlink_check,
+		attributes_space_info,
+
+		ipath,
+
+		local_readdir,
+		remote_readdir,
+
+		sftp_readdir,
+		sftp_readdir_eof,
 	};
 
 	class error {

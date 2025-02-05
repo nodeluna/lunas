@@ -10,6 +10,7 @@ export import lunas.config.cliarg;
 import lunas.ipath;
 import lunas.stdout;
 import lunas.error;
+import lunas.path;
 
 export namespace lunas {
 	namespace config {
@@ -38,10 +39,11 @@ namespace lunas {
 
 			for (auto& ipath : cliopts.ipaths) {
 				if (std::holds_alternative<struct lunas::ipath::local_path>(ipath)) {
-					auto&				local_path = std::get<struct lunas::ipath::local_path>(ipath);
+					auto& local_path = std::get<struct lunas::ipath::local_path>(ipath);
+					lunas::path::append_seperator(local_path.path);
 					struct lunas::ipath::input_path ipath(local_path.path);
 					ipath.srcdest = local_path.srcdest;
-					data.ipaths.push_back(std::move(ipath));
+					data.ipaths_emplace_back(std::move(ipath));
 
 				} else if (std::holds_alternative<struct lunas::ipath::remote_path>(ipath)) {
 					auto&				remote_path = std::get<struct lunas::ipath::remote_path>(ipath);
@@ -61,7 +63,7 @@ namespace lunas {
 					} catch (std::exception& e) {
 						return std::unexpected(lunas::error(e.what(), lunas::error_type::init_sftp_error));
 					}
-					data.ipaths.push_back(std::move(ipath));
+					data.ipaths_emplace_back(std::move(ipath));
 				}
 			}
 

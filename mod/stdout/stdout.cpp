@@ -26,4 +26,27 @@ export namespace lunas {
 			std::println("{}", std::format(fmt, std::forward<args_t>(args)...));
 		}
 	}
+
+	template<typename... args_t>
+	std::string fmterr(std::format_string<args_t...> fmt, args_t&&... args) {
+		return "\x1b[1;31m-[X] " + std::format(fmt, std::forward<args_t>(args)...) + " \x1b[0m\n";
+	}
+
+	template<typename... args_t>
+	void fmterr_multiline(std::string& err, std::format_string<args_t...> fmt, args_t&&... args) {
+		bool empty = false;
+		if (not err.empty()) {
+			err += "\x1b[1;31m-[X] ";
+			empty = true;
+		}
+		err += std::format(fmt, std::forward<args_t>(args)...);
+		if (not empty)
+			err += " \x1b[0m";
+		err += "\n";
+	}
+
+	template<typename... args_t>
+	std::string fmtwarn(std::format_string<args_t...> fmt, args_t&&... args) {
+		return "\x1b[1;31m-[!!] " + std::format(fmt, std::forward<args_t>(args)...) + " \x1b[0m\n";
+	}
 }

@@ -5,6 +5,7 @@ module;
 #include <cstdint>
 
 export module lunas.config.options;
+export import lunas.file_types;
 import lunas.sftp;
 
 export namespace lunas {
@@ -33,7 +34,7 @@ export namespace lunas {
 				bool				mkdir		  = false;
 				bool				progress_bar	  = true;
 				bool				remove_extra	  = false;
-				bool				follow_symlink	  = false;
+				lunas::follow_symlink		follow_symlink	  = lunas::follow_symlink::no;
 				bool				mtime_count	  = true;
 				bool				no_broken_symlink = false;
 				bool				update		  = false;

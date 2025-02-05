@@ -6,24 +6,9 @@ module;
 #include <libssh/sftp.h>
 
 export module lunas.sftp:attributes;
+export import lunas.file_types;
 
 export namespace lunas {
-	enum class follow_symlink {
-		yes,
-		no,
-	};
-
-	enum class file_type_t {
-		regular_file,
-		directory,
-		symlink,
-		socket,
-		block_file,
-		character_file,
-		fifo,
-		other,
-	};
-
 	class attributes {
 		private:
 			::sftp_attributes attr = nullptr;
@@ -31,11 +16,16 @@ export namespace lunas {
 
 		public:
 			attributes(const sftp_session& sftp, const std::string& path, follow_symlink follow);
-			file_type_t	file_type();
-			std::string	file_type_name();
-			bool		exists();
-			sftp_attributes release();
-			std::string	path();
+			attributes(const ::sftp_attributes& attribute);
+
+			attributes() {
+			}
+
+			lunas::file_types file_type();
+			std::string	  file_type_name();
+			bool		  exists();
+			sftp_attributes	  release();
+			std::string	  path();
 
 			std::string    name();
 			std::string    longname();
@@ -74,6 +64,9 @@ namespace lunas {
 			attr = sftp_lstat(sftp, path.c_str());
 	}
 
+	attributes::attributes(const ::sftp_attributes& attribute) : attr(attribute) {
+	}
+
 	std::string attributes::path() {
 		return file_path;
 	}
@@ -94,25 +87,27 @@ namespace lunas {
 		return attr->type;
 	}
 
-	file_type_t attributes::file_type() {
+	lunas::file_types attributes::file_type() {
+		if (attr == nullptr)
+			return lunas::file_types::not_found;
 		if (attr->type == SSH_FILEXFER_TYPE_SYMLINK)
-			return file_type_t::symlink;
+			return lunas::file_types::symlink;
 		else if (attr->type == SSH_FILEXFER_TYPE_DIRECTORY)
-			return file_type_t::directory;
+			return lunas::file_types::directory;
 		else if (attr->type == SSH_FILEXFER_TYPE_REGULAR)
-			return file_type_t::regular_file;
+			return lunas::file_types::regular_file;
 		else
-			return file_type_t::other;
+			return lunas::file_types::other;
 	}
 
 	std::string attributes::file_type_name() {
 		auto type = this->file_type();
 
-		if (type == file_type_t::symlink)
+		if (type == lunas::file_types::symlink)
 			return "symlink";
-		else if (type == file_type_t::directory)
+		else if (type == lunas::file_types::directory)
 			return "directory";
-		else if (type == file_type_t::regular_file)
+		else if (type == lunas::file_types::regular_file)
 			return "regular_file";
 		else
 			return "other";

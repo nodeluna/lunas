@@ -6,12 +6,14 @@ module;
 #include <cstdint>
 #include <variant>
 #include <expected>
+#include <cstddef>
 
 #include <print>
 
 export module lunas.ipath;
 import lunas.config.options;
 import lunas.sftp;
+import lunas.path;
 
 export namespace lunas {
 	namespace ipath {
@@ -56,6 +58,8 @@ export namespace lunas {
 					this->sftp = std::move(other.sftp);
 					other.sftp.reset();
 					this->path = std::move(other.path);
+					srcdest	   = other.srcdest;
+					sync_stats = std::move(other.sync_stats);
 				}
 
 				std::expected<std::monostate, lunas::error> init_sftp(const struct session_data& data) {
@@ -65,9 +69,10 @@ export namespace lunas {
 						throw;
 					}
 					auto ok = sftp->absolute_path();
-					if (ok)
+					if (ok) {
 						path = ok.value();
-					else
+						lunas::path::append_seperator(path);
+					} else
 						return std::unexpected(ok.error());
 
 					return std::monostate();
@@ -104,7 +109,18 @@ export namespace lunas {
 	}
 
 	struct parsed_data {
+		private:
 			std::vector<struct lunas::ipath::input_path> ipaths;
-			struct lunas::config::options		     options;
+
+		public:
+			struct lunas::config::options options;
+
+			const std::vector<struct lunas::ipath::input_path>& get_ipaths() const {
+				return ipaths;
+			}
+
+			void ipaths_emplace_back(struct lunas::ipath::input_path&& ipath) {
+				ipaths.emplace_back(std::move(ipath));
+			}
 	};
 }

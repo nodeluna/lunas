@@ -1,11 +1,14 @@
 #include <expected>
+#include <variant>
 #include <vector>
+#include <set>
 
 import lunas.sftp;
 import lunas.config;
 import lunas.stdout;
 import lunas.error;
 import lunas.ipath;
+import lunas.presync;
 
 int main(const int argc, const char* argv[]) {
 	std::expected<struct lunas::parsed_data, lunas::error> cliopts = lunas::config::parse_cliarg(argc, argv);
@@ -19,7 +22,22 @@ int main(const int argc, const char* argv[]) {
 		return 1;
 	}
 
-	for (auto& input_path : cliopts.value().ipaths) {
+	auto ret = lunas::presync_operations(cliopts.value());
+	if (not ret) {
+		lunas::printerr("{}", ret.error().message());
+		return 1;
+	}
+
+	if (std::holds_alternative<std::set<lunas::file_table>>(ret.value())) {
+		std::set<lunas::file_table> content = std::get<std::set<lunas::file_table>>(ret.value());
+		for (const auto& file : content) {
+			lunas::println(cliopts->options.quiet, "{}", file.path);
+		}
+	} else {
+		lunas::println(cliopts->options.quiet, "didn't read input directories, only one source was found");
+	}
+
+	for (const auto& input_path : cliopts.value().get_ipaths()) {
 		lunas::println(cliopts->options.quiet, "path: {}", input_path.path);
 		if (not input_path.is_remote())
 			continue;

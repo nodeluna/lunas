@@ -18,6 +18,7 @@ import lunas.sftp;
 import lunas.path;
 import lunas.stdout;
 import lunas.error;
+import lunas.file_types;
 
 export namespace lunas {
 	namespace config {
@@ -206,9 +207,9 @@ export namespace lunas {
 			std::expected<std::monostate, lunas::error> follow_symlink(
 			    const std::string& data, lunas::config::options& options) {
 				if (data == "on")
-					options.follow_symlink = true;
+					options.follow_symlink = lunas::follow_symlink::yes;
 				else if (data == "off")
-					options.follow_symlink = false;
+					options.follow_symlink = lunas::follow_symlink::no;
 				else
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
 				return std::monostate();

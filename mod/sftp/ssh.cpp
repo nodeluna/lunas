@@ -62,6 +62,7 @@ export namespace lunas {
 			ssh(const struct session_data& data);
 			const ssh_session& get_ssh_session();
 			std::string	   get_ip() const;
+			std::string	   get_hostname() const;
 
 			~ssh();
 	};
@@ -133,6 +134,10 @@ namespace lunas {
 
 	std::string ssh::get_ip() const {
 		return session_data.ip;
+	}
+
+	std::string ssh::get_hostname() const {
+		return session_data.ip.substr(0, session_data.ip.find(":"));
 	}
 
 	int auth_fn(const char* prompt, char* buffer, size_t len, int echo, int verify, void* userdata) {

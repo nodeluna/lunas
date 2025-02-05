@@ -20,6 +20,7 @@ export import :ssh;
 export import :log;
 export import :error;
 export import :path;
+export import :dir;
 
 #define REMOTE_BUFFER_SIZE 65536 * 2
 namespace fs = std::filesystem;
@@ -30,6 +31,24 @@ export namespace lunas {
 			::sftp_session m_sftp = NULL;
 
 		public:
+			enum class time_type : uint8_t {
+				atime,
+				mtime,
+				utimes,
+			};
+
+			struct time_val {
+					time_t atime	  = 0;
+					time_t atime_nsec = 0;
+					time_t mtime	  = 0;
+					time_t mtime_nsec = 0;
+			};
+
+			struct owner {
+					int uid = -1;
+					int gid = -1;
+			};
+
 			sftp(const struct session_data& data);
 			~sftp();
 
@@ -39,13 +58,22 @@ export namespace lunas {
 			std::expected<std::monostate, lunas::error> rmdir(const std::string& path);
 			std::expected<std::monostate, lunas::error> mkdir(const std::string& path, const unsigned int& perms);
 			std::expected<std::monostate, lunas::error> symlink(const std::string& target, const std::string& path);
-			std::expected<std::string, lunas::error>    cmd(const std::string& command);
-			std::expected<std::string, lunas::error>    readlink(const std::string& link);
-			std::expected<bool, lunas::error>	    is_broken_link(const std::string& link);
-			std::expected<std::string, lunas::error>    homedir();
-			std::expected<std::string, lunas::error>    homedir(const std::string_view& user);
-			std::expected<std::string, lunas::error>    cwd();
-			std::expected<std::string, lunas::error>    absolute_path();
+			std::expected<std::unique_ptr<lunas::sftp_dir>, lunas::error> opendir(const std::string& path);
+			std::expected<std::string, lunas::error>		      cmd(const std::string& command);
+			std::expected<std::string, lunas::error>		      readlink(const std::string& link);
+			std::expected<bool, lunas::error>			      is_broken_link(const std::string& link);
+			std::expected<std::string, lunas::error>		      homedir();
+			std::expected<std::string, lunas::error>		      homedir(const std::string_view& user);
+			std::expected<std::string, lunas::error>		      cwd();
+			std::expected<std::string, lunas::error>		      absolute_path();
+			std::expected<time_val, lunas::error>			      get_utimes(
+						    const std::string& path, const sftp::time_type time_type, const lunas::follow_symlink follow);
+			std::expected<std::monostate, lunas::error> set_utimes(
+			    const std::string& path, const sftp::time_val& time_val, const lunas::follow_symlink follow);
+
+			std::expected<sftp::owner, lunas::error> get_ownership(const std::string& path, const lunas::follow_symlink follow);
+			std::expected<std::monostate, lunas::error> set_ownership(
+			    const std::string& path, const sftp::owner own, const lunas::follow_symlink follow);
 			std::expected<std::unique_ptr<attributes>, lunas::error> attributes(const std::string& path, follow_symlink type);
 	};
 }
@@ -94,6 +122,14 @@ namespace lunas {
 			return std::unexpected(ssh_error(this->get_sftp_session()));
 
 		return std::monostate();
+	}
+
+	std::expected<std::unique_ptr<lunas::sftp_dir>, lunas::error> sftp::opendir(const std::string& path) {
+		try {
+			return std::make_unique<lunas::sftp_dir>(this->get_sftp_session(), path);
+		} catch (const std::exception& e) {
+			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't open directory", path)));
+		}
 	}
 
 	std::expected<std::unique_ptr<attributes>, lunas::error> sftp::attributes(const std::string& path, follow_symlink follow) {
@@ -202,6 +238,120 @@ namespace lunas {
 		return m_sftp;
 	}
 
+	std::expected<sftp::time_val, lunas::error> sftp::get_utimes(
+	    const std::string& path, const sftp::time_type time_type, const lunas::follow_symlink follow) {
+
+		auto attr = this->attributes(path, follow);
+		if (not attr)
+			return std::unexpected(attr.error());
+		auto& attributes = attr.value();
+
+		struct sftp::time_val time_val;
+		struct timespec	      timespec;
+		int		      rv;
+		switch (time_type) {
+			case sftp::time_type::atime:
+				time_val.atime	    = attributes->atime();
+				time_val.atime_nsec = attributes->atime_nseconds();
+
+				rv = clock_gettime(CLOCK_REALTIME, &timespec);
+				if (rv == 0) {
+					time_val.mtime	    = timespec.tv_sec;
+					time_val.mtime_nsec = timespec.tv_nsec;
+				} else
+					return std::unexpected(
+					    lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get utimes", path)));
+				break;
+			case sftp::time_type::mtime:
+				time_val.mtime	    = attributes->mtime();
+				time_val.mtime_nsec = attributes->mtime_nseconds();
+
+				rv = clock_gettime(CLOCK_REALTIME, &timespec);
+				if (rv == 0) {
+					time_val.atime	    = timespec.tv_sec;
+					time_val.atime_nsec = timespec.tv_nsec;
+				} else
+					return std::unexpected(
+					    lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get utimes", path)));
+				break;
+			case sftp::time_type::utimes:
+				time_val.atime	    = attributes->atime();
+				time_val.atime_nsec = attributes->atime_nseconds();
+				time_val.mtime	    = attributes->mtime();
+				time_val.mtime_nsec = attributes->mtime_nseconds();
+				break;
+			default:
+				break;
+		}
+
+		return time_val;
+	}
+
+	std::expected<std::monostate, lunas::error> sftp::set_utimes(
+	    const std::string& path, const sftp::time_val& time_val, const lunas::follow_symlink follow) {
+
+		struct sftp_attributes_struct attributes;
+		attributes.flags	  = SSH_FILEXFER_ATTR_ACMODTIME;
+		attributes.atime	  = time_val.atime;
+		attributes.atime_nseconds = time_val.atime_nsec;
+		attributes.mtime	  = time_val.mtime;
+		attributes.mtime_nseconds = time_val.mtime_nsec;
+
+		int rc = SSH_OK;
+
+		if (follow == lunas::follow_symlink::yes)
+			rc = sftp_setstat(m_sftp, path.c_str(), &attributes);
+		else
+			rc = sftp_lsetstat(m_sftp, path.c_str(), &attributes);
+
+		if (rc != SSH_OK)
+			return std::unexpected(lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't set utimes", path)));
+
+		return std::monostate();
+	}
+
+	std::expected<sftp::owner, lunas::error> sftp::get_ownership(const std::string& path, const lunas::follow_symlink follow) {
+		struct owner own;
+
+		auto attr = this->attributes(path, follow);
+		if (not attr)
+			return std::unexpected(attr.error());
+		auto& attributes = attr.value();
+
+		own.uid = attributes->uid();
+		own.gid = attributes->gid();
+		return own;
+	}
+
+	std::expected<std::monostate, lunas::error> sftp::set_ownership(
+	    const std::string& path, const sftp::owner own, const lunas::follow_symlink follow) {
+		struct sftp_attributes_struct attributes;
+		attributes.flags = SSH_FILEXFER_ATTR_UIDGID;
+		attributes.uid	 = own.uid;
+		attributes.gid	 = own.gid;
+
+		if (own.uid == -1 || own.gid == -1) {
+			auto attr = this->attributes(path, follow);
+			if (not attr)
+				return std::unexpected(attr.error());
+			if (own.uid == -1)
+				attributes.uid = attr.value()->uid();
+			if (own.gid == -1)
+				attributes.gid = attr.value()->gid();
+		}
+
+		int rc;
+		if (follow == lunas::follow_symlink::yes)
+			rc = sftp_setstat(m_sftp, path.c_str(), &attributes);
+		else
+			rc = sftp_lsetstat(m_sftp, path.c_str(), &attributes);
+
+		if (rc != SSH_OK)
+			return std::unexpected(lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't set ownership", path)));
+
+		return std::monostate();
+	}
+
 	std::expected<std::string, lunas::error> sftp::absolute_path(/*TODO: add a path parameter instead of sftp_path*/) {
 		if (session_data.ip.find(':') == session_data.ip.npos || session_data.ip.back() == ':') {
 			return std::unexpected(
@@ -264,7 +414,7 @@ namespace lunas {
 		}
 
 		auto attributes = this->attributes(sftp_path, follow_symlink::yes);
-		if (attributes && attributes.value()->file_type() == file_type_t::directory)
+		if (attributes && attributes.value()->file_type() == lunas::file_types::directory)
 			path::append_seperator(sftp_path);
 
 		return sftp_path;
