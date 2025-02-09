@@ -30,9 +30,9 @@ import lunas.error;
 
 export namespace lunas {
 	enum class time_type : uint8_t {
-		atime,
-		mtime,
-		utimes,
+		atime  = 1,
+		mtime  = 2,
+		utimes = 3,
 	};
 
 	struct time_val {

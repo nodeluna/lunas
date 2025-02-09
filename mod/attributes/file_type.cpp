@@ -39,8 +39,10 @@ namespace lunas {
 			status = std::filesystem::symlink_status(path, ec);
 
 		if (ec.value() != 0) {
-			std::string err = "couldn't get type of '" + path + "', " + std::strerror(errno);
-			return std::unexpected(lunas::error(err, lunas::error_type::attributes_file_type));
+			std::string	  err = "couldn't get type of '" + path + "', " + std::strerror(errno);
+			lunas::error_type type =
+			    errno == ENOENT ? lunas::error_type::attributes_no_such_file : lunas::error_type::attributes_file_type;
+			return std::unexpected(lunas::error(err, type));
 		}
 
 		return enum_file_types(status);

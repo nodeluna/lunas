@@ -22,6 +22,9 @@ export namespace lunas {
 
 		std::expected<std::monostate, lunas::error> set(
 		    const std::string& path, std::filesystem::perms permissions, lunas::follow_symlink follow);
+
+		std::expected<std::monostate, lunas::error> set(
+		    const std::string& path, unsigned int permissions, lunas::follow_symlink follow);
 	}
 }
 
@@ -67,6 +70,11 @@ namespace lunas {
 				return std::unexpected(lunas::error(err, lunas::error_type::attributes_set_permissions));
 			}
 			return std::monostate();
+		}
+
+		std::expected<std::monostate, lunas::error> set(
+		    const std::string& path, unsigned int permissions, lunas::follow_symlink follow) {
+			return set(path, ( std::filesystem::perms ) permissions, follow);
 		}
 	}
 }

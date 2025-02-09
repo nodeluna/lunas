@@ -28,8 +28,10 @@ export namespace lunas {
 
 		ssh_denied = SSH_REQUEST_DENIED,
 		ssh_fatal  = SSH_FATAL,
+		ssh_error  = SSH_ERROR,
 		ssh_other,
 		ssh_unknown,
+		ssh_again,
 
 		config_invalid_argument,
 		config_invalid_option,
@@ -52,18 +54,42 @@ export namespace lunas {
 		attributes_get_utimes,
 		attributes_set_permissions,
 		attributes_get_permissions,
+		attributes_set_ownership,
+		attributes_get_ownership,
 		attributes_permissions_check,
 		attributes_file_type,
 		attributes_symlink_check,
 		attributes_space_info,
+		attributes_no_such_file,
 
 		ipath,
-
+		input_directory_check,
 		local_readdir,
 		remote_readdir,
 
 		sftp_readdir,
 		sftp_readdir_eof,
+
+		source_not_found,
+		source_broken_symlink,
+
+		dest_check_ok,
+		dest_check_same_input_path,
+		dest_check_not_dest,
+		dest_check_existing_directory,
+		dest_check_type_conflict,
+		dest_check_same_mtime,
+		dest_check_no_space_left,
+		dest_check_brokenlink,
+		dest_check_orphaned_file,
+
+		sync_special_file_ignored,
+		sync_is_open,
+		sync_error_reading,
+		sync_error_writing,
+		sync_size_mismatch,
+		sync_read_symlink,
+		sync_get_file_size,
 	};
 
 	class error {

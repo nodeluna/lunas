@@ -5,6 +5,8 @@ module;
 #include <string>
 #include <print>
 #include <variant>
+#include <set>
+#include <cstdint>
 
 export module lunas.presync:misc;
 
@@ -12,11 +14,14 @@ import lunas.error;
 import lunas.stdout;
 import lunas.ipath;
 import lunas.sftp;
+import lunas.file_table;
+import lunas.file_types;
 
 export namespace lunas {
 	namespace presync {
 		std::expected<std::monostate, lunas::error> input_paths_are_different(
 		    const std::vector<struct lunas::ipath::input_path>& ipaths);
+		size_t to_be_synced_counter(const std::set<file_table>& conent);
 	}
 }
 
@@ -65,6 +70,31 @@ namespace lunas {
 			}
 
 			return std::monostate();
+		}
+
+		size_t to_be_synced_counter(const std::set<file_table>& content) {
+			size_t to_be_synced = 0;
+			for (const auto& file : content) {
+				time_t tmp		= 0;
+				size_t files_dont_exist = 0;
+				for (const auto& metadata : file.metadatas) {
+					if (tmp == 0 && metadata.file_type != lunas::file_types::not_found) {
+						tmp = metadata.mtime;
+						continue;
+					}
+
+					if (metadata.file_type != lunas::file_types::not_found && metadata.mtime != tmp &&
+					    metadata.file_type != lunas::file_types::directory) {
+						to_be_synced += file.metadatas.size() - 1 - files_dont_exist;
+						break;
+					} else if (metadata.file_type == lunas::file_types::not_found) {
+						to_be_synced++;
+						files_dont_exist++;
+					}
+				}
+			}
+
+			return to_be_synced;
 		}
 	}
 }

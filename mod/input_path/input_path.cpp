@@ -54,6 +54,30 @@ export namespace lunas {
 				input_path() {
 				}
 
+				void increment_stats_synced_files() {
+					sync_stats.synced_files++;
+				}
+
+				void increment_stats_synced_dirs() {
+					sync_stats.synced_dirs++;
+				}
+
+				void increment_stats_removed_files() {
+					sync_stats.removed_files++;
+				}
+
+				void increment_stats_removed_dirs() {
+					sync_stats.removed_dirs++;
+				}
+
+				void increment_stats_removed_size(const std::uintmax_t size) {
+					sync_stats.removed_size += size;
+				}
+
+				void increment_stats_synced_size(const std::uintmax_t size) {
+					sync_stats.synced_size += size;
+				}
+
 				input_path(input_path&& other) noexcept {
 					this->sftp = std::move(other.sftp);
 					other.sftp.reset();
@@ -117,6 +141,10 @@ export namespace lunas {
 
 			const std::vector<struct lunas::ipath::input_path>& get_ipaths() const {
 				return ipaths;
+			}
+
+			struct lunas::ipath::input_path& get_ipath(size_t index) {
+				return ipaths.at(index);
 			}
 
 			void ipaths_emplace_back(struct lunas::ipath::input_path&& ipath) {

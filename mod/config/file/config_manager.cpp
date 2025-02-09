@@ -11,6 +11,8 @@ module;
 #include <cerrno>
 #include <unordered_map>
 #include <map>
+#include <variant>
+#include <algorithm>
 
 export module lunas.config.file:manager;
 import :luco;

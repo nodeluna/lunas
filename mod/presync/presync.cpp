@@ -9,13 +9,14 @@ export module lunas.presync;
 export import :misc;
 export import lunas.presync.fill_tree;
 export import lunas.file_table;
+export import lunas.content;
 
 import lunas.error;
 import lunas.ipath;
+import lunas.stdout;
 
 export namespace lunas {
-	std::expected<std::variant<std::set<lunas::file_table>, std::monostate>, lunas::error> presync_operations(
-	    const lunas::parsed_data& cliopts);
+	std::expected<std::variant<lunas::content, std::monostate>, lunas::error> presync_operations(const lunas::parsed_data& cliopts);
 }
 
 namespace lunas {
@@ -31,14 +32,13 @@ namespace lunas {
 		return false;
 	}
 
-	std::expected<std::variant<std::set<lunas::file_table>, std::monostate>, lunas::error> presync_operations(
-	    const lunas::parsed_data& cliopts) {
+	std::expected<std::variant<lunas::content, std::monostate>, lunas::error> presync_operations(const lunas::parsed_data& cliopts) {
 
 		if (auto ok = presync::input_paths_are_different(cliopts.get_ipaths()); not ok)
 			return std::unexpected(ok.error());
 
-		const auto&		    ipaths = cliopts.get_ipaths();
-		std::set<lunas::file_table> content;
+		const auto&    ipaths = cliopts.get_ipaths();
+		lunas::content content;
 
 		for (size_t index = 0; index < ipaths.size(); index++) {
 			struct lunas::fill_tree_type data =
@@ -49,24 +49,29 @@ namespace lunas {
 					return std::unexpected(ok.error());
 
 				if (more_than_one_source(ipaths)) {
-					auto ok = lunas::presync::remote::readdir(content, ipaths[index].path, data);
+					lunas::println(cliopts.options.quiet, "--> reading directory {}", ipaths[index].path);
+					auto ok = lunas::presync::remote::readdir(content.files_table, ipaths[index].path, data);
 					if (not ok)
 						return std::unexpected(ok.error());
-				} else
-					return std::monostate();
+				}
 			} else {
 				auto ok = lunas::presync::local::input_directory_check(data);
 				if (not ok)
 					return std::unexpected(ok.error());
 
 				if (more_than_one_source(ipaths)) {
-					auto ok = lunas::presync::local::readdir(content, ipaths[index].path, data);
+					lunas::println(cliopts.options.quiet, "--> reading directory {}", ipaths[index].path);
+					auto ok = lunas::presync::local::readdir(content.files_table, ipaths[index].path, data);
 					if (not ok)
 						return std::unexpected(ok.error());
-				} else
-					return std::monostate();
+				}
 			}
 		}
+
+		if (not more_than_one_source(ipaths))
+			return std::monostate();
+
+		content.to_be_synced = lunas::presync::to_be_synced_counter(content.files_table);
 
 		return content;
 	}

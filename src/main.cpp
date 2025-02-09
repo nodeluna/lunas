@@ -9,7 +9,9 @@ import lunas.stdout;
 import lunas.error;
 import lunas.ipath;
 import lunas.presync;
+import lunas.sync;
 import lunas.stats;
+import lunas.content;
 
 int main(const int argc, const char* argv[]) {
 	std::expected<struct lunas::parsed_data, lunas::error> cliopts = lunas::config::parse_cliarg(argc, argv);
@@ -26,29 +28,22 @@ int main(const int argc, const char* argv[]) {
 	auto ret = lunas::presync_operations(cliopts.value());
 	if (not ret) {
 		lunas::printerr("{}", ret.error().message());
-		return 1;
+		return 2;
 	}
 
-	if (std::holds_alternative<std::set<lunas::file_table>>(ret.value())) {
-		std::set<lunas::file_table> content = std::get<std::set<lunas::file_table>>(ret.value());
-		for (const auto& file : content) {
-			lunas::println(cliopts->options.quiet, "{}", file.path);
+	if (std::holds_alternative<lunas::content>(ret.value())) {
+		lunas::content content = std::get<lunas::content>(ret.value());
+		auto	       ok      = lunas::sync(cliopts.value(), content);
+		if (not ok) {
+			lunas::printerr("{}", ok.error().message());
+			return 3;
 		}
 	} else {
-		lunas::println(cliopts->options.quiet, "didn't read input directories, only one source was found");
-	}
-
-	for (const auto& input_path : cliopts.value().get_ipaths()) {
-		lunas::println(cliopts->options.quiet, "path: {}", input_path.path);
-		if (not input_path.is_remote())
-			continue;
-
-		auto ret = input_path.sftp->cmd("lunas");
-		if (not ret) {
-			lunas::printerr("{}", ret.error().message());
-			continue;
+		auto ok = lunas::sync(cliopts.value());
+		if (not ok) {
+			lunas::printerr("{}", ok.error().message());
+			return 3;
 		}
-		lunas::println(cliopts->options.quiet, "{}", ret.value());
 	}
 
 	lunas::print_stats(cliopts.value());

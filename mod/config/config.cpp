@@ -2,6 +2,7 @@ module;
 
 #include <expected>
 #include <print>
+#include <variant>
 
 export module lunas.config;
 export import lunas.config.file;

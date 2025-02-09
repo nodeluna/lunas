@@ -22,6 +22,7 @@ import lunas.cppfs;
 import lunas.stdout;
 import lunas.attributes;
 import lunas.exclude;
+import lunas.config.options;
 
 namespace fs = std::filesystem;
 
@@ -106,24 +107,26 @@ namespace lunas {
 						lunas::error_type::ipath));
 
 				auto type = lunas::get_file_type(data.ipath->path, lunas::follow_symlink::yes);
-				if (not type) {
+				if (not type && type.error().value() == lunas::error_type::attributes_no_such_file) {
+					if (not data.options->mkdir) {
+						std::string err = "input directory '" + data.ipath->path +
+								  "', doesn't exist. use -mkdir option to create it";
+						return std::unexpected(lunas::error(err, lunas::error_type::input_directory_check));
+					} else {
+						auto ok = lunas::cppfs::mkdir(data.ipath->path, data.options->dry_run);
+						if (not ok)
+							return std::unexpected(ok.error());
+
+						lunas::warn("created input directory '{}', it was not found", data.ipath->path);
+
+						if (data.options->dry_run)
+							return std::monostate();
+					}
+				} else if (not type) {
 					return std::unexpected(type.error());
-				} else if (type.value() == lunas::file_types::not_found && not data.options->mkdir) {
-					std::string err =
-					    "input directory '" + data.ipath->path + "', doesn't exist. use -mkdir option to create it";
-					return std::unexpected(lunas::error(err, lunas::error_type::local_readdir));
-				} else if (type.value() == lunas::file_types::not_found && data.options->mkdir) {
-					auto ok = lunas::cppfs::mkdir(data.ipath->path, data.options->dry_run);
-					if (not ok)
-						return std::unexpected(ok.error());
-
-					lunas::warn("created input directory '{}', it was not found", data.ipath->path);
-
-					if (data.options->dry_run)
-						return std::monostate();
 				} else if (type.value() != lunas::file_types::directory) {
 					std::string err = "input path '" + data.ipath->path + "', isn't a directory";
-					return std::unexpected(lunas::error(err, lunas::error_type::local_readdir));
+					return std::unexpected(lunas::error(err, lunas::error_type::input_directory_check));
 				}
 
 				auto ok = lunas::permissions::is_file_readable(data.ipath->path, lunas::follow_symlink::yes);
@@ -131,7 +134,7 @@ namespace lunas {
 					return std::unexpected(ok.error());
 				} else if (ok.value() == false) {
 					std::string err = "couldn't read input directory '" + data.ipath->path + "', permission denied";
-					return std::unexpected(lunas::error(err, lunas::error_type::local_readdir));
+					return std::unexpected(lunas::error(err, lunas::error_type::input_directory_check));
 				}
 
 				return std::monostate();
