@@ -10,6 +10,7 @@ export module lunas.sync;
 export import :types;
 export import :copy;
 export import :multi_source;
+export import :remove;
 
 export import lunas.error;
 export import lunas.ipath;
@@ -34,6 +35,7 @@ export namespace lunas {
 		struct progress_stats progress_stats;
 		progress_stats.total_to_be_synced = content.to_be_synced;
 		std::expected<std::monostate, lunas::error> synced;
+		lunas::println(data.options.quiet, "");
 
 		for (auto file = content.files_table.begin(); file != content.files_table.end();) {
 			auto src_index = multi_source::get_src(*file, data);
@@ -55,8 +57,30 @@ export namespace lunas {
 			++file;
 		}
 
-		for (auto file = content.files_table.rbegin(); file != content.files_table.rend(); ++file) {
-			// TODO: remove_extra
+		if (not data.options.remove_extra)
+			return std::monostate();
+
+		const auto& ipaths = data.get_ipaths();
+
+		for (auto file = content.files_table.rbegin(); file != content.files_table.rend() && data.options.remove_extra; ++file) {
+			auto src_index = multi_source::get_src(*file, data);
+			if (not src_index && src_index.error().value() == lunas::error_type::source_not_found) {
+				size_t dest_index = 0;
+				for (auto& metadata : file->metadatas) {
+					if (metadata.file_type != lunas::file_types::not_found) {
+						std::string to_be_removed = ipaths.at(dest_index).path + file->path;
+						lunas::print_remove_extra(to_be_removed);
+						auto file_size = lunas::get_size_and_remove(
+						    ipaths.at(dest_index).sftp, to_be_removed, metadata.file_type, data.options.dry_run);
+						if (not file_size)
+							lunas::printerr("{}", file_size.error().message());
+						else
+							lunas::register_remove(
+							    file_size.value(), metadata.file_type, data.get_ipath(dest_index));
+					}
+					dest_index++;
+				}
+			}
 		}
 
 		return std::monostate();

@@ -53,7 +53,7 @@ namespace lunas {
 				std::filesystem::create_symlink(target, dest, ec);
 
 			if (ec.value() != 0) {
-				std::string err = "couldn't make symlink '" + target + "', " + std::strerror(errno);
+				std::string err = "couldn't make symlink '" + dest + "', " + std::strerror(errno);
 				return std::unexpected(lunas::error(err, lunas::error_type::cppfs_symlink));
 			}
 			return std::monostate();

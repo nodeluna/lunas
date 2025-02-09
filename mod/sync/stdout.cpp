@@ -7,6 +7,7 @@ module;
 export module lunas.sync:stdout;
 export import :types;
 export import lunas.file_types;
+export import lunas.stdout;
 
 export namespace lunas {
 	void print_sync(const std::string& src, const std::string& dest, const struct lunas::syncmisc& misc) {
@@ -29,14 +30,18 @@ export namespace lunas {
 		std::string space(count.size() - 3, ' ');
 		if (misc.file_type == lunas::file_types::directory) {
 			if (misc.options.verbose)
-				std::println("{} [Dir]   '{}''\n{}-> [At]   '{}'", count, src, space, dest);
+				lunas::println(misc.options.quiet, "{} [Dir]   '{}''\n{}-> [At]   '{}'", count, src, space, dest);
 			else
-				std::println("{} [Dir]   '{}'", count, dest);
+				lunas::println(misc.options.quiet, "{} [Dir]   '{}'", count, dest);
 		} else {
 			if (misc.options.verbose)
-				std::println("{} [File]  '{}''\n{}-> [To]   '{}'", count, src, space, dest);
+				lunas::println(misc.options.quiet, "{} [File]  '{}''\n{}-> [To]   '{}'", count, src, space, dest);
 			else
-				std::println("{} [File]  '{}'", count, dest);
+				lunas::println(misc.options.quiet, "{} [File]  '{}'", count, dest);
 		}
+	}
+
+	void print_remove_extra(const std::string& path) {
+		std::println("! removing extra '{}', not found in any source", path);
 	}
 }

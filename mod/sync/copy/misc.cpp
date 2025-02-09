@@ -10,34 +10,18 @@ export import :types;
 export import lunas.sftp;
 export import lunas.error;
 export import lunas.ipath;
+export import lunas.cppfs;
 export import lunas.stdout;
 
 export namespace lunas {
-	size_t get_src_hash(const std::string& src, const unsigned long int& src_mtime) {
-		return std::hash<std::string>{}(src + std::to_string(src_mtime));
-	}
+	size_t get_src_hash(const std::string& src, const unsigned long int& src_mtime);
 
-	std::string get_dest_hash(const std::string& dest, const size_t& src_mtimepath_hash) {
-		int		  dot_counter = 0;
-		unsigned long int i	      = dest.size() - 1;
-		for (;; i--) {
-			if (dot_counter == 3)
-				break;
-			if (dest.at(i) == '.')
-				dot_counter++;
-			if (i == 0)
-				break;
-		}
-
-		return dest.substr(i + 2, std::to_string(src_mtimepath_hash).size());
-	}
+	std::string get_dest_hash(const std::string& dest, const size_t& src_mtimepath_hash);
 
 	auto regular_file_sync(const std::string& src, const std::string& dest, const time_t& src_mtime,
-	    std::function<std::expected<syncstat, lunas::error>(const std::string&)> func) -> std::expected<syncstat, lunas::error> {
-		size_t	    src_quick_hash = get_src_hash(src, src_mtime);
-		std::string dest_lspart	   = dest + "." + std::to_string(src_quick_hash) + ".ls.part";
-		return func(dest_lspart);
-	};
+	    std::function<std::expected<syncstat, lunas::error>(const std::string&)> func) -> std::expected<syncstat, lunas::error>;
+
+	std::expected<std::uintmax_t, lunas::error> file_size(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path);
 
 	namespace remote {
 		struct original_name {
@@ -72,6 +56,39 @@ export namespace lunas {
 }
 
 namespace lunas {
+	size_t get_src_hash(const std::string& src, const unsigned long int& src_mtime) {
+		return std::hash<std::string>{}(src + std::to_string(src_mtime));
+	}
+
+	std::string get_dest_hash(const std::string& dest, const size_t& src_mtimepath_hash) {
+		int		  dot_counter = 0;
+		unsigned long int i	      = dest.size() - 1;
+		for (;; i--) {
+			if (dot_counter == 3)
+				break;
+			if (dest.at(i) == '.')
+				dot_counter++;
+			if (i == 0)
+				break;
+		}
+
+		return dest.substr(i + 2, std::to_string(src_mtimepath_hash).size());
+	}
+
+	auto regular_file_sync(const std::string& src, const std::string& dest, const time_t& src_mtime,
+	    std::function<std::expected<syncstat, lunas::error>(const std::string&)> func) -> std::expected<syncstat, lunas::error> {
+		size_t	    src_quick_hash = get_src_hash(src, src_mtime);
+		std::string dest_lspart	   = dest + "." + std::to_string(src_quick_hash) + ".ls.part";
+		return func(dest_lspart);
+	}
+
+	std::expected<std::uintmax_t, lunas::error> file_size(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path) {
+		if (sftp != nullptr)
+			return sftp->file_size(path);
+		else
+			return lunas::cppfs::file_size(path);
+	}
+
 	namespace remote {
 		original_name::original_name(const std::unique_ptr<lunas::sftp>& session, const std::string& dest_lspart,
 		    const std::string& original_name, lunas::sync_code& code)

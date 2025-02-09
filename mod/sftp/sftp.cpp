@@ -75,6 +75,7 @@ export namespace lunas {
 			std::expected<std::string, lunas::error>			 homedir(const std::string_view& user);
 			std::expected<std::string, lunas::error>			 cwd();
 			std::expected<std::string, lunas::error>			 absolute_path();
+			std::expected<std::uintmax_t, lunas::error>			 file_size(const std::string& path);
 
 			template<typename struct_time_val = time_val, typename struct_time_type = time_type>
 			std::expected<struct_time_val, lunas::error> get_utimes(
@@ -390,6 +391,14 @@ namespace lunas {
 
 		unsigned int perms = attr.value()->permissions();
 		return perms;
+	}
+
+	std::expected<std::uintmax_t, lunas::error> sftp::file_size(const std::string& path) {
+		auto attr = this->attributes(path, lunas::follow_symlink::yes);
+		if (not attr)
+			return std::unexpected(attr.error());
+
+		return attr.value()->file_size();
 	}
 
 	std::expected<std::monostate, lunas::error> sftp::set_ownership(
