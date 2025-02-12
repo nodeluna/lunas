@@ -42,8 +42,8 @@ namespace lunas {
 	namespace presync {
 		namespace remote {
 			namespace readdir_operations {
-				std::expected<lunas::file_types, lunas::error> type(
-				    std::unique_ptr<lunas::attributes>& file, const std::string& path, const lunas::fill_tree_type& data);
+				std::expected<lunas::file_types, lunas::error> type(std::unique_ptr<lunas::sftp_attributes>& file,
+				    const std::string& path, const lunas::fill_tree_type& data);
 
 				std::expected<time_t, lunas::error> mtime(
 				    const struct metadata& metadata, const std::string& path, const lunas::fill_tree_type& data);
@@ -121,7 +121,7 @@ namespace lunas {
 						if (not ok)
 							return std::unexpected(ok.error());
 
-						lunas::warn("created input directory '{}', it was not found", data.ipath->path);
+						lunas::warn_ok("created input directory '{}', it was not found", data.ipath->path);
 						return std::monostate();
 					}
 				} else if (not type) {
@@ -135,8 +135,8 @@ namespace lunas {
 			}
 
 			namespace readdir_operations {
-				std::expected<lunas::file_types, lunas::error> type(
-				    std::unique_ptr<lunas::attributes>& file, const std::string& path, const lunas::fill_tree_type& data) {
+				std::expected<lunas::file_types, lunas::error> type(std::unique_ptr<lunas::sftp_attributes>& file,
+				    const std::string& path, const lunas::fill_tree_type& data) {
 					if (file->file_type() == lunas::file_types::symlink) {
 						if (data.options->no_broken_symlink && data.ipath->sftp->is_broken_link(path)) {
 							return lunas::file_types::brokenlink;

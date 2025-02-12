@@ -150,13 +150,14 @@ namespace lunas {
 
 			std::ios::openmode openmode;
 
-			if (misc.file_type == lunas::file_types::resume_regular_file && misc.options.resume) {
-				dest_size = std::filesystem::file_size(dest, ec);
-				if (ec.value() != 0) {
-					std::string err = "couldn't get dest size '" + dest + "', " + std::strerror(errno);
-					return std::unexpected(lunas::error(err, lunas::error_type::sync_get_file_size));
+			if (misc.options.resume) {
+				auto file_size = lunas::cppfs::file_size(dest);
+				if (not file_size && file_size.error().value() != lunas::error_type::no_such_file)
+					return std::unexpected(file_size.error());
+				if (file_size) {
+					dest_size = file_size.value();
+					syncstat.copied_size -= dest_size;
 				}
-				syncstat.copied_size -= dest_size;
 				openmode = std::ios::out | std::ios::binary | std::ios::app;
 			} else {
 				openmode = std::ios::out | std::ios::binary;

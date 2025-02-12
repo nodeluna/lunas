@@ -64,8 +64,10 @@ namespace lunas {
 			std::uintmax_t	size = std::filesystem::file_size(path, ec);
 
 			if (ec.value() != 0) {
-				std::string err = "couldn't get file size of '" + path + "', " + std::strerror(errno);
-				return std::unexpected(lunas::error(err, lunas::error_type::cppfs_file_size));
+				std::string	  err = "couldn't get file size of '" + path + "', " + std::strerror(errno);
+				lunas::error_type type =
+				    errno == ENOENT ? lunas::error_type::attributes_no_such_file : lunas::error_type::cppfs_file_size;
+				return std::unexpected(lunas::error(err, type));
 			}
 			return size;
 		}

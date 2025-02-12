@@ -50,6 +50,7 @@ export namespace lunas {
 		cppfs_symlink,
 		cppfs_file_size,
 
+		attributes_get,
 		attributes_set_utimes,
 		attributes_get_utimes,
 		attributes_set_permissions,
@@ -60,15 +61,17 @@ export namespace lunas {
 		attributes_file_type,
 		attributes_symlink_check,
 		attributes_space_info,
-		attributes_no_such_file,
+		attributes_no_such_file = sftp_no_such_file,
 
 		ipath,
 		input_directory_check,
 		local_readdir,
 		remote_readdir,
+		opendir,
 
 		sftp_readdir,
 		sftp_readdir_eof,
+		readdir_eof,
 
 		source_not_found,
 		source_broken_symlink,
@@ -82,6 +85,10 @@ export namespace lunas {
 		dest_check_no_space_left,
 		dest_check_brokenlink,
 		dest_check_orphaned_file,
+		dest_check_skip_sync,
+		src_check_partial_file,
+
+		no_such_file = sftp_no_such_file,
 
 		sync_special_file_ignored,
 		sync_is_open,
@@ -94,29 +101,34 @@ export namespace lunas {
 
 	class error {
 		private:
-			std::string msg	       = "";
-			error_type  error_type = error_type::none;
+			std::string msg	 = "";
+			error_type  type = error_type::none;
 
 		public:
 			error(const std::string_view& message, const enum error_type type);
+			error(const std::string& message);
 			error(const enum error_type type);
 			error(std::function<void(std::string&, enum error_type&)> custom_constructor);
 			error();
 
 			[[nodiscard]] const std::string message() const noexcept;
+			[[nodiscard]] const char*	what() const;
 			[[nodiscard]] enum error_type	value() const noexcept;
 	};
 }
 
 namespace lunas {
-	error::error(const std::string_view& message, const enum error_type type) : msg(message), error_type(type) {
+	error::error(const std::string_view& message, const enum error_type type) : msg(message), type(type) {
 	}
 
-	error::error(const enum error_type type) : error_type(type) {
+	error::error(const std::string& message) : msg(message) {
+	}
+
+	error::error(const enum error_type type) : type(type) {
 	}
 
 	error::error(std::function<void(std::string&, enum error_type&)> custom_constructor) {
-		custom_constructor(this->msg, this->error_type);
+		custom_constructor(this->msg, this->type);
 	}
 
 	error::error() {
@@ -126,7 +138,11 @@ namespace lunas {
 		return msg;
 	}
 
+	const char* error::what() const {
+		return msg.c_str();
+	}
+
 	enum error_type error::value() const noexcept {
-		return error_type;
+		return type;
 	}
 }

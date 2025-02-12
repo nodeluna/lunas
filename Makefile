@@ -110,7 +110,7 @@ clean-test:
 	cd test && \
 	go run clean.go
 format:
-	clang-format -i $(SRCS) $(HEADERS) $(MODS)
+	clang-format -i $(MODS)
 
 
 -include $(DEP)

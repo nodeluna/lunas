@@ -90,7 +90,8 @@ export namespace lunas {
 			std::expected<sftp::owner, lunas::error> get_ownership(const std::string& path, const lunas::follow_symlink follow);
 			std::expected<std::monostate, lunas::error> set_ownership(
 			    const std::string& path, const sftp::owner own, const lunas::follow_symlink follow);
-			std::expected<std::unique_ptr<attributes>, lunas::error> attributes(const std::string& path, follow_symlink type);
+			std::expected<std::unique_ptr<lunas::sftp_attributes>, lunas::error> attributes(
+			    const std::string& path, follow_symlink type);
 
 			std::string get_str_error();
 	};
@@ -190,8 +191,8 @@ namespace lunas {
 		}
 	}
 
-	std::expected<std::unique_ptr<attributes>, lunas::error> sftp::attributes(const std::string& path, follow_symlink follow) {
-		auto attr = std::make_unique<lunas::attributes>(m_sftp, path, follow);
+	std::expected<std::unique_ptr<sftp_attributes>, lunas::error> sftp::attributes(const std::string& path, follow_symlink follow) {
+		auto attr = std::make_unique<lunas::sftp_attributes>(m_sftp, path, follow);
 		if (attr->exists())
 			return attr;
 		else

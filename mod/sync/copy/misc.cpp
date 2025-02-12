@@ -21,6 +21,8 @@ export namespace lunas {
 	auto regular_file_sync(const std::string& src, const std::string& dest, const time_t& src_mtime,
 	    std::function<std::expected<syncstat, lunas::error>(const std::string&)> func) -> std::expected<syncstat, lunas::error>;
 
+	std::string dest_lspart(const std::string& dest, size_t src_quick_hash);
+
 	std::expected<std::uintmax_t, lunas::error> file_size(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path);
 
 	namespace remote {
@@ -75,11 +77,15 @@ namespace lunas {
 		return dest.substr(i + 2, std::to_string(src_mtimepath_hash).size());
 	}
 
+	std::string dest_lspart(const std::string& src, const std::string& dest, const time_t src_mtime) {
+		size_t src_quick_hash = get_src_hash(src, src_mtime);
+		return dest + "." + std::to_string(src_quick_hash) + ".ls.part";
+	}
+
 	auto regular_file_sync(const std::string& src, const std::string& dest, const time_t& src_mtime,
 	    std::function<std::expected<syncstat, lunas::error>(const std::string&)> func) -> std::expected<syncstat, lunas::error> {
-		size_t	    src_quick_hash = get_src_hash(src, src_mtime);
-		std::string dest_lspart	   = dest + "." + std::to_string(src_quick_hash) + ".ls.part";
-		return func(dest_lspart);
+		std::string dest_lspart_path = dest_lspart(src, dest, src_mtime);
+		return func(dest_lspart_path);
 	}
 
 	std::expected<std::uintmax_t, lunas::error> file_size(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path) {

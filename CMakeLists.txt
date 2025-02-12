@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.28)
 
 project(lunas)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 set(CMAKE_CXX_STANDARD 23)
 add_compile_options(-Wall -Wextra -pedantic -O1)

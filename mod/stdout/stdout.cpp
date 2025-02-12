@@ -21,9 +21,16 @@ export namespace lunas {
 	}
 
 	template<typename... args_t>
+	void warn_ok(std::format_string<args_t...> fmt, args_t&&... args) {
+		std::string output = "-[!!] " + std::format(fmt, std::forward<args_t>(args)...);
+		std::println("{}", output);
+	}
+
+	template<typename... args_t>
 	void println(bool quiet, std::format_string<args_t...> fmt, args_t&&... args) {
 		if (not quiet) {
-			std::println("{}", std::format(fmt, std::forward<args_t>(args)...));
+			std::string output = std::format(fmt, std::forward<args_t>(args)...);
+			std::println("{}", output);
 		}
 	}
 

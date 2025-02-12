@@ -67,18 +67,64 @@ export namespace lunas {
 		    const lunas::metadata& dest_metadata, const size_t src_index, const size_t dest_index,
 		    const struct lunas::parsed_data& data) {
 			if (src_index == dest_index)
-				return std::unexpected(lunas::error_type::dest_check_same_input_path);
+				return std::unexpected(lunas::error_type::dest_check_skip_sync);
 			else if (not data.get_ipaths().at(dest_index).is_dest())
-				return std::unexpected(lunas::error_type::dest_check_not_dest);
+				return std::unexpected(lunas::error_type::dest_check_skip_sync);
 			else if (dest_metadata.file_type == lunas::file_types::directory)
-				return std::unexpected(lunas::error_type::dest_check_existing_directory);
+				return std::unexpected(lunas::error_type::dest_check_skip_sync);
 			else if (dest_metadata.mtime == src_metadata.mtime)
-				return std::unexpected(lunas::error_type::dest_check_same_mtime);
+				return std::unexpected(lunas::error_type::dest_check_skip_sync);
 			else if (dest_metadata.file_type == lunas::file_types::brokenlink)
 				return std::unexpected(lunas::error_type::dest_check_brokenlink);
+			else if (src_metadata.file_type == lunas::file_types::resume_regular_file)
+				return std::unexpected(lunas::error_type::dest_check_skip_sync);
 			else if (dest_metadata.file_type != lunas::file_types::not_found &&
+				 dest_metadata.file_type != lunas::file_types::resume_regular_file &&
 				 dest_metadata.file_type != src_metadata.file_type)
 				return std::unexpected(lunas::error_type::dest_check_type_conflict);
+
+			return std::monostate();
+		}
+
+		std::expected<std::monostate, lunas::error> check_dest_and_sync(const lunas::metadata& src_metadata,
+		    const lunas::metadata& dest_metadata, const size_t src_index, const size_t dest_index, const std::string& src,
+		    const std::string& dest, struct lunas::parsed_data& data, struct progress_stats& progress_stats) {
+
+			const auto& ipaths = data.get_ipaths();
+
+			bool sync = false;
+
+			if (auto ok = sync_dest(src_metadata, dest_metadata, src_index, dest_index, data); not ok)
+				return std::unexpected(ok.error());
+
+			if (data.options.update && src_metadata.mtime > dest_metadata.mtime)
+				sync = true;
+			else if (data.options.rollback && src_metadata.mtime < dest_metadata.mtime)
+				sync = true;
+			else if (dest_metadata.file_type == lunas::file_types::not_found ||
+				 dest_metadata.file_type == lunas::file_types::resume_regular_file)
+				sync = true;
+
+			if (sync) {
+				struct syncmisc misc = {
+				    .src_mtime = src_metadata.mtime,
+				    .file_type = dest_metadata.file_type == lunas::file_types::resume_regular_file ? dest_metadata.file_type
+														   : src_metadata.file_type,
+				    .options   = data.options,
+				    .progress_stats = progress_stats,
+				};
+#ifdef REMOTE_ENABLED
+				auto syncstat = lunas::copy(src, dest, ipaths.at(src_index).sftp, ipaths.at(dest_index).sftp, misc);
+#else
+				auto syncstat = lunas::copy(src, dest, misc);
+#endif // REMOTE_ENABLED
+
+				if (not syncstat)
+					return std::unexpected(syncstat.error());
+				else
+					lunas::register_synced_stats(
+					    syncstat.value(), misc.file_type, data.get_ipath(dest_index), progress_stats);
+			}
 
 			return std::monostate();
 		}
@@ -86,51 +132,21 @@ export namespace lunas {
 		std::expected<std::monostate, lunas::error> updating(const lunas::file_table& file_table, const size_t src_index,
 		    struct lunas::parsed_data& data, struct progress_stats& progress_stats) {
 
-			time_t	    src_mtime  = file_table.metadatas.at(src_index).mtime;
-			const auto& ipaths     = data.get_ipaths();
-			size_t	    dest_index = 0;
+			const auto& src_metadata = file_table.metadatas.at(src_index);
+			const auto& ipaths	 = data.get_ipaths();
+			size_t	    dest_index	 = 0;
 			for (const auto& dest_metadata : file_table.metadatas) {
-				bool sync = false;
+				const std::string src  = ipaths.at(src_index).path + file_table.path;
+				const std::string dest = ipaths.at(dest_index).path + file_table.path;
 
-				if (auto ok = sync_dest(file_table.metadatas.at(src_index), dest_metadata, src_index, dest_index, data);
-				    not ok) {
-					if (ok.error() == lunas::error_type::dest_check_type_conflict)
-						lunas::printerr("conflict in types between '{}' and '{}'",
-						    ipaths.at(src_index).path + file_table.path,
-						    ipaths.at(dest_index).path + file_table.path);
-					goto end;
+				auto ok = check_dest_and_sync(
+				    src_metadata, dest_metadata, src_index, dest_index, src, dest, data, progress_stats);
+				if (not ok) {
+					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
+						lunas::printerr("conflict in types between '{}' and '{}'", src, dest);
+					else if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
+						lunas::printerr("{}", ok.error().message());
 				}
-
-				if (data.options.update && src_mtime > dest_metadata.mtime)
-					sync = true;
-				else if (data.options.rollback && src_mtime < dest_metadata.mtime)
-					sync = true;
-				else if (dest_metadata.file_type == lunas::file_types::not_found)
-					sync = true;
-
-				if (sync) {
-					struct syncmisc misc = {
-					    .src_mtime	    = src_mtime,
-					    .file_type	    = file_table.metadatas.at(src_index).file_type,
-					    .options	    = data.options,
-					    .progress_stats = progress_stats,
-					};
-					std::string src	 = ipaths.at(src_index).path + file_table.path;
-					std::string dest = ipaths.at(dest_index).path + file_table.path;
-#ifdef REMOTE_ENABLED
-					auto syncstat = lunas::copy(src, dest, ipaths.at(src_index).sftp, ipaths.at(dest_index).sftp, misc);
-#else
-					auto syncstat = lunas::copy(src, dest, misc);
-#endif // REMOTE_ENABLED
-
-					if (not syncstat)
-						lunas::printerr("{}", syncstat.error().message());
-					else
-						lunas::register_synced_stats(
-						    syncstat.value(), misc.file_type, data.get_ipath(dest_index), progress_stats);
-				}
-
-			end:
 				dest_index++;
 			}
 

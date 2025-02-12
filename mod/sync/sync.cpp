@@ -5,28 +5,100 @@ module;
 #include <variant>
 #include <ctime>
 #include <string>
+#include <cstddef>
+#include <exception>
 
 export module lunas.sync;
-export import :types;
-export import :copy;
-export import :multi_source;
-export import :remove;
+import :types;
+import :copy;
+import :multi_source;
+import :remove;
 
 export import lunas.error;
 export import lunas.ipath;
-export import lunas.file_table;
-export import lunas.file_types;
 export import lunas.content;
+import lunas.file_table;
+import lunas.file_types;
+import lunas.file;
 
 import lunas.stdout;
 
 export namespace lunas {
-	std::expected<std::monostate, lunas::error> sync(const struct lunas::parsed_data& data);
+	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data);
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data, lunas::content& content);
 }
 
 export namespace lunas {
-	std::expected<std::monostate, lunas::error> sync(const struct lunas::parsed_data& data) {
+	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data) {
+
+		const auto& ipaths    = data.get_ipaths();
+		size_t	    src_index = 0;
+		for (const auto& path : ipaths) {
+			if (path.is_src())
+				break;
+			src_index++;
+		}
+		if (not ipaths.at(src_index).is_src())
+			return std::unexpected(lunas::error("didn't find any source in the input directories"));
+
+		auto directory = lunas::opendir(ipaths.at(src_index).sftp, ipaths.at(src_index).path);
+		if (not directory)
+			return std::unexpected(directory.error());
+
+		lunas::println(data.options.quiet, "--> opened source directory '{}'", ipaths.at(src_index).path);
+		lunas::println(data.options.quiet, "");
+
+		struct progress_stats			    progress_stats;
+		std::expected<std::monostate, lunas::error> ok;
+
+		while (auto src_file = directory.value()->read()) {
+			size_t dest_index = 0;
+			for (const auto& ipath : ipaths) {
+				if (src_index == dest_index || not ipath.is_dest()) {
+					dest_index++;
+					continue;
+				}
+
+				std::string dest_path;
+				{
+					std::string relative = src_file.value().path;
+					relative	     = relative.substr(ipaths.at(src_index).path.size(), relative.size());
+					dest_path	     = ipaths.at(dest_index).path + relative;
+				}
+
+				struct metadata src_metadata = {
+				    .mtime     = src_file->mtime,
+				    .file_type = src_file->file_type,
+				};
+				struct metadata dest_metadata;
+
+				auto dest_file = lunas::get_attributes(ipaths.at(dest_index).sftp, dest_path, data.options.follow_symlink);
+				if (not dest_file && dest_file.error().value() != lunas::error_type::no_such_file) {
+					lunas::warn("{}", dest_file.error().message());
+					goto end;
+				} else if (dest_file) {
+					dest_metadata.mtime	= dest_file.value()->mtime();
+					dest_metadata.file_type = dest_file.value()->file_type();
+				}
+				progress_stats.total_to_be_synced = progress_stats.total_synced;
+
+				ok = multi_source::check_dest_and_sync(
+				    src_metadata, dest_metadata, src_index, dest_index, src_file->path, dest_path, data, progress_stats);
+				if (not ok) {
+					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
+						lunas::printerr("conflict in types between '{}' and '{}'", src_file->path, dest_path);
+					else if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
+						lunas::printerr("{}", ok.error().message());
+				}
+
+			end:
+				dest_index++;
+			}
+		}
+
+		if (not directory.value()->eof())
+			lunas::println(false, "didn't reach eof");
+
 		return std::monostate();
 	}
 

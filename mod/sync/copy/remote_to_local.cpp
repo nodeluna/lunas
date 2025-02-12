@@ -99,16 +99,18 @@ namespace lunas {
 			std::error_code	   ec;
 			std::ios::openmode openmode;
 
-			if (misc.file_type == lunas::file_types::resume_regular_file && misc.options.resume) {
+			if (misc.options.resume) {
 				auto file_size = lunas::cppfs::file_size(dest);
-				if (not file_size)
+				if (not file_size && file_size.error().value() != lunas::error_type::no_such_file)
 					return std::unexpected(file_size.error());
-				dest_size = file_size.value();
-				syncstat.copied_size -= dest_size;
+				if (file_size) {
+					dest_size = file_size.value();
+					syncstat.copied_size -= dest_size;
 
-				auto ok = src_file.value()->seek64(dest_size);
-				if (not ok)
-					return std::unexpected(ok.error());
+					auto ok = src_file.value()->seek64(dest_size);
+					if (not ok)
+						return std::unexpected(ok.error());
+				}
 
 				openmode = std::ios::out | std::ios::binary | std::ios::app;
 			} else {

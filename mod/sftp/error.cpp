@@ -3,6 +3,7 @@ module;
 #include <string>
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
+#include <typeinfo>
 
 export module lunas.sftp:error;
 export import lunas.error;

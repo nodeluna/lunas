@@ -117,7 +117,7 @@ namespace lunas {
 						if (not ok)
 							return std::unexpected(ok.error());
 
-						lunas::warn("created input directory '{}', it was not found", data.ipath->path);
+						lunas::warn_ok("created input directory '{}', it was not found", data.ipath->path);
 
 						if (data.options->dry_run)
 							return std::monostate();

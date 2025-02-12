@@ -90,11 +90,11 @@ namespace lunas {
 			}
 
 			int access_type;
-			if (misc.file_type == lunas::file_types::resume_regular_file && misc.options.resume) {
+			if (misc.options.resume) {
 				auto attrs = sftp->attributes(dest, lunas::follow_symlink::yes);
 				if (not attrs && attrs.error().value() != lunas::error_type::sftp_no_such_file) {
 					return std::unexpected(attrs.error());
-				} else if (not attrs) {
+				} else if (attrs) {
 					dest_size = attrs.value()->file_size();
 					syncstat.copied_size -= dest_size;
 				}
