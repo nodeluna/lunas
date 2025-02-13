@@ -2,14 +2,11 @@ cmake_minimum_required(VERSION 3.28)
 
 project(lunas)
 
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 set(CMAKE_CXX_STANDARD 23)
 add_compile_options(-Wall -Wextra -pedantic -O1)
 
 set(output_dir "${PROJECT_SOURCE_DIR}/bin")
 set(mods_dir "${PROJECT_SOURCE_DIR}/mod")
-# file(GLOB SOURCES src/*.cpp)
 file(GLOB_RECURSE MODS ${mods_dir}/*.cpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${output_dir}")
 
@@ -19,7 +16,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
         add_compile_options(-fdiagnostics-color)
 endif()
 
-# add_executable(${PROJECT_NAME} ${SOURCES}) 
 add_executable(${PROJECT_NAME} src/main.cpp) 
 
 if(DISABLE_REMOTE)

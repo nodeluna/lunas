@@ -32,16 +32,20 @@ A syncing cli tool that can handle more than two directories locally and remotel
 * by default, lunas only syncs files that do not already exist in destination directories, to overwrite older or newer files, --update or --rollback can be used.
 * if files with same relative path were found in different input dirs but with different file types, an error is printed and it won't be synced
 
-## build
-
-* cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++
-* ninja -C build
-
 ## dependencies
 
 clang >= 17
 
 lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
+
+## build
+
+* make
+
+or
+
+* cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++
+* ninja -C build
 
 ## remote syncing
 
