@@ -12,6 +12,7 @@ module;
 #include <cstdint>
 #include <condition_variable>
 #include <memory>
+#include <utility>
 
 export module lunas.sync:local_to_local;
 export import :types;
@@ -34,6 +35,24 @@ struct lbuffque {
 };
 
 export namespace lunas {
+	class jthread {
+		private:
+			std::thread thread;
+
+		public:
+			jthread(const jthread&)		   = delete;
+			jthread& operator=(const jthread&) = delete;
+
+			template<typename function, typename... args_t>
+			jthread(function&& func, args_t&&... args) : thread(std::forward<function>(func), std::forward<args_t>(args)...) {
+			}
+
+			~jthread() {
+				if (thread.joinable())
+					thread.join();
+			}
+	};
+
 	void fstream_aio_read_begin(
 	    std::unique_ptr<std::fstream>& src_file, std::queue<lbuffque>* queue, std::uintmax_t position, size_t queue_limit);
 	struct lbuffque fstream_aio_wait_read(std::queue<lbuffque>& queue);
@@ -184,7 +203,7 @@ namespace lunas {
 			std::uintmax_t	     position = dest_size;
 			std::queue<lbuffque> queue;
 			const size_t	     queue_limit = 3;
-			auto		   thread = std::jthread(fstream_aio_read_begin, std::ref(src_file), &queue, position, queue_limit);
+			lunas::jthread thread = lunas::jthread(fstream_aio_read_begin, std::ref(src_file), &queue, position, queue_limit);
 			class progress_bar progress_bar(misc.options.progress_bar, misc.options.quiet);
 
 			while (dest_size < src_size) {
