@@ -31,12 +31,12 @@ export namespace lunas {
 
 export namespace lunas {
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data) {
-		const auto& ipaths    = data.get_ipaths();
+		const auto& ipaths = data.get_ipaths();
 
 		if (ipaths.empty())
 			return std::unexpected(lunas::error("didn't find any input directories"));
 
-		size_t	    src_index = 0;
+		size_t src_index = 0;
 		for (const auto& path : ipaths) {
 			if (path.is_src())
 				break;

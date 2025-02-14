@@ -44,7 +44,7 @@ add_custom_target(local
 )
 
 install(
-	TARGETS lunas DESTINATION bin
+	TARGETS ${PROJECT_NAME} DESTINATION bin
 )
 
 install(
