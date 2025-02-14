@@ -41,7 +41,12 @@ export namespace lunas {
 		if (not ipaths.at(src_index).is_src())
 			return std::unexpected(lunas::error("didn't find any source in the input directories"));
 
-		auto directory = lunas::opendir(ipaths.at(src_index).sftp, ipaths.at(src_index).path);
+		struct directory_options directory_options = {
+		    .follow_symlink    = data.options.follow_symlink,
+		    .no_broken_symlink = data.options.no_broken_symlink,
+		};
+
+		auto directory = lunas::opendir(ipaths.at(src_index).sftp, ipaths.at(src_index).path, directory_options);
 		if (not directory)
 			return std::unexpected(directory.error());
 
@@ -52,10 +57,15 @@ export namespace lunas {
 		std::expected<std::monostate, lunas::error> ok;
 
 		while (auto src_file = directory.value()->read()) {
-			size_t dest_index = 0;
-			for (const auto& ipath : ipaths) {
-				if (src_index == dest_index || not ipath.is_dest()) {
-					dest_index++;
+			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++) {
+				if (src_index == dest_index || not ipaths.at(dest_index).is_dest())
+					continue;
+
+				if (not std::holds_alternative<lunas::file_types>(src_file->file_type)) {
+					lunas::printerr("{}", std::get<lunas::error>(src_file->file_type).message());
+					continue;
+				} else if (not std::holds_alternative<time_t>(src_file->mtime)) {
+					lunas::printerr("{}", std::get<lunas::error>(src_file->mtime).message());
 					continue;
 				}
 
@@ -67,15 +77,15 @@ export namespace lunas {
 				}
 
 				struct metadata src_metadata = {
-				    .mtime     = src_file->mtime,
-				    .file_type = src_file->file_type,
+				    .mtime     = std::get<time_t>(src_file->mtime),
+				    .file_type = std::get<lunas::file_types>(src_file->file_type),
 				};
 				struct metadata dest_metadata;
 
 				auto dest_file = lunas::get_attributes(ipaths.at(dest_index).sftp, dest_path, data.options.follow_symlink);
 				if (not dest_file && dest_file.error().value() != lunas::error_type::no_such_file) {
 					lunas::warn("{}", dest_file.error().message());
-					goto end;
+					continue;
 				} else if (dest_file) {
 					dest_metadata.mtime	= dest_file.value()->mtime();
 					dest_metadata.file_type = dest_file.value()->file_type();
@@ -90,9 +100,6 @@ export namespace lunas {
 					else if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
 						lunas::printerr("{}", ok.error().message());
 				}
-
-			end:
-				dest_index++;
 			}
 		}
 

@@ -9,10 +9,8 @@ module;
 
 export module lunas.sftp:dir;
 export import :attributes;
-export import :error;
-export import :log;
-
-import lunas.stdout;
+import :error;
+import :log;
 
 export namespace lunas {
 	class sftp_dir {

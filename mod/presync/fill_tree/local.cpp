@@ -56,6 +56,7 @@ namespace lunas {
 			    std::set<lunas::file_table>& content, const std::string& path, const lunas::fill_tree_type& data) {
 				try {
 					for (const auto& entry : fs::directory_iterator(path)) {
+						struct lunas::metadata metadata;
 						{
 							std::string relative_path = entry.path().string().substr(
 							    data.ipath->path.size(), entry.path().string().size());
@@ -64,8 +65,6 @@ namespace lunas {
 								continue;
 
 							const std::string& str_entry = entry.path().string();
-
-							struct lunas::metadata metadata;
 
 							{
 								auto ok = readdir_operations::type(entry, str_entry, data.options);
@@ -84,7 +83,7 @@ namespace lunas {
 							readdir_operations::insert(content, metadata, relative_path, data);
 						}
 
-						if (entry.is_directory()) {
+						if (metadata.file_type == lunas::file_types::directory) {
 							auto ok = readdir(content, entry.path().string(), data);
 							if (not ok)
 								return std::unexpected(ok.error());

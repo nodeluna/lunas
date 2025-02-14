@@ -61,6 +61,8 @@ namespace lunas {
 
 				while (auto file = dir.value()->read(data.ipath->sftp->get_sftp_session())) {
 					std::string full_path;
+
+					struct metadata metadata;
 					{
 						{
 							std::string file_name = file.value()->name();
@@ -72,7 +74,6 @@ namespace lunas {
 						if (lunas::exclude(relative_path, data.options->exclude, data.options->exclude_pattern))
 							continue;
 
-						struct metadata metadata;
 						{
 							auto type = readdir_operations::type(file.value(), full_path, data);
 							if (not type)
@@ -91,7 +92,7 @@ namespace lunas {
 						readdir_operations::insert(content, metadata, relative_path, data);
 					}
 
-					if (file.value()->file_type() == lunas::file_types::directory) {
+					if (metadata.file_type == lunas::file_types::directory) {
 						file.value().reset();
 						lunas::path::append_seperator(full_path);
 						readdir(content, full_path, data);
