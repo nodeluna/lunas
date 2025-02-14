@@ -20,6 +20,7 @@ export import lunas.content;
 import lunas.file_table;
 import lunas.file_types;
 import lunas.file;
+import lunas.exclude;
 
 import lunas.stdout;
 
@@ -30,8 +31,11 @@ export namespace lunas {
 
 export namespace lunas {
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data) {
-
 		const auto& ipaths    = data.get_ipaths();
+
+		if (ipaths.empty())
+			return std::unexpected(lunas::error("didn't find any input directories"));
+
 		size_t	    src_index = 0;
 		for (const auto& path : ipaths) {
 			if (path.is_src())
@@ -61,11 +65,8 @@ export namespace lunas {
 				if (src_index == dest_index || not ipaths.at(dest_index).is_dest())
 					continue;
 
-				if (not std::holds_alternative<lunas::file_types>(src_file->file_type)) {
-					lunas::printerr("{}", std::get<lunas::error>(src_file->file_type).message());
-					continue;
-				} else if (not std::holds_alternative<time_t>(src_file->mtime)) {
-					lunas::printerr("{}", std::get<lunas::error>(src_file->mtime).message());
+				if (auto ok = src_file.value().holds_attributes(); not ok) {
+					lunas::printerr("{}", ok.error().message());
 					continue;
 				}
 
@@ -74,6 +75,8 @@ export namespace lunas {
 					std::string relative = src_file.value().path;
 					relative	     = relative.substr(ipaths.at(src_index).path.size(), relative.size());
 					dest_path	     = ipaths.at(dest_index).path + relative;
+					if (lunas::exclude(relative, data.options.exclude, data.options.exclude_pattern))
+						continue;
 				}
 
 				struct metadata src_metadata = {

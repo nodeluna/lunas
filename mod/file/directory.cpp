@@ -45,6 +45,7 @@ export namespace lunas {
 			std::string				      path;
 			std::variant<lunas::file_types, lunas::error> file_type = lunas::error("empty directory_entry.file_type value");
 			std::variant<time_t, lunas::error>	      mtime	= lunas::error("empty directory_entry.mtime value");
+			std::expected<std::monostate, lunas::error>   holds_attributes();
 	};
 
 	class directory {
@@ -189,6 +190,15 @@ namespace lunas {
 				    "couldn't open directory '" + path.string() + ", " + std::strerror(errno), lunas::error_type::opendir);
 			}
 		}
+	}
+
+	std::expected<std::monostate, lunas::error> directory_entry::holds_attributes() {
+		if (not std::holds_alternative<lunas::file_types>(this->file_type))
+			return std::unexpected(std::get<lunas::error>(this->file_type));
+		else if (not std::holds_alternative<time_t>(this->mtime))
+			return std::unexpected(std::get<lunas::error>(this->mtime));
+
+		return std::monostate();
 	}
 
 	bool directory::eof() {

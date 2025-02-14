@@ -43,28 +43,16 @@ namespace lunas {
 		for (size_t index = 0; index < ipaths.size(); index++) {
 			struct lunas::fill_tree_type data =
 			    lunas::presync::prepare_fill_tree_data(&ipaths[index], index, ipaths.size(), &cliopts.options);
-			if (ipaths[index].is_remote()) {
-				auto ok = lunas::presync::remote::input_directory_check(data);
+
+			auto ok = lunas::presync::input_directory_check(data);
+			if (not ok)
+				return std::unexpected(ok.error());
+
+			if (more_than_one_source(ipaths)) {
+				lunas::println(cliopts.options.quiet, "--> reading directory {}", ipaths[index].path);
+				auto ok = lunas::presync::readdir(content.files_table, ipaths[index].path, data);
 				if (not ok)
 					return std::unexpected(ok.error());
-
-				if (more_than_one_source(ipaths)) {
-					lunas::println(cliopts.options.quiet, "--> reading directory {}", ipaths[index].path);
-					auto ok = lunas::presync::remote::readdir(content.files_table, ipaths[index].path, data);
-					if (not ok)
-						return std::unexpected(ok.error());
-				}
-			} else {
-				auto ok = lunas::presync::local::input_directory_check(data);
-				if (not ok)
-					return std::unexpected(ok.error());
-
-				if (more_than_one_source(ipaths)) {
-					lunas::println(cliopts.options.quiet, "--> reading directory {}", ipaths[index].path);
-					auto ok = lunas::presync::local::readdir(content.files_table, ipaths[index].path, data);
-					if (not ok)
-						return std::unexpected(ok.error());
-				}
 			}
 		}
 
