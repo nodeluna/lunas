@@ -114,6 +114,14 @@ export namespace lunas {
 					return srcdest == srcdest::srcdest;
 				}
 
+				bool is_src_only() const {
+					return srcdest == srcdest::src;
+				}
+
+				bool is_dest_only() const {
+					return srcdest == srcdest::dest;
+				}
+
 				bool is_remote() const {
 					return sftp != nullptr;
 				}

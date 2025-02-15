@@ -107,7 +107,60 @@ export namespace lunas {
 		}
 
 		if (not directory.value()->eof())
-			lunas::println(false, "didn't reach eof");
+			lunas::println(false, "didn't reach eof '{}'", ipaths.at(src_index).path);
+
+		if (data.options.remove_extra) {
+			directory_options.follow_symlink = lunas::follow_symlink::no;
+			lunas::println(false, "");
+			lunas::warn_ok("remove extra is running. checking for extra files to be removed...");
+
+			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++) {
+				if (not ipaths.at(dest_index).is_dest_only())
+					continue;
+
+				directory = lunas::opendir(ipaths.at(dest_index).sftp, ipaths.at(dest_index).path, directory_options);
+				if (not directory)
+					return std::unexpected(directory.error());
+
+				while (auto dest_file = directory.value()->read()) {
+					if (auto ok = dest_file.value().holds_attributes(); not ok) {
+						lunas::printerr("{}", ok.error().message());
+						continue;
+					}
+
+					std::string src_path;
+					{
+						std::string relative = dest_file.value().path;
+						relative	     = relative.substr(ipaths.at(dest_index).path.size(), relative.size());
+						src_path	     = ipaths.at(src_index).path + relative;
+						if (lunas::exclude(relative, data.options.exclude, data.options.exclude_pattern))
+							continue;
+					}
+
+					auto src_file =
+					    lunas::get_attributes(ipaths.at(src_index).sftp, src_path, lunas::follow_symlink::no);
+					if (src_file) {
+						continue;
+					} else if (not src_file && src_file.error().value() != lunas::error_type::no_such_file) {
+						lunas::warn("{}", src_file.error().message());
+						continue;
+					} else if (not src_file && src_file.error().value() == lunas::error_type::no_such_file) {
+						lunas::print_remove_extra(dest_file.value().path);
+						auto file_size =
+						    lunas::get_size_and_remove(ipaths.at(dest_index).sftp, dest_file.value().path,
+							std::get<lunas::file_types>(dest_file->file_type), data.options.dry_run);
+						if (not file_size)
+							lunas::printerr("{}", file_size.error().message());
+						else
+							lunas::register_remove(file_size.value(),
+							    std::get<lunas::file_types>(dest_file->file_type), data.get_ipath(dest_index));
+					}
+				}
+
+				if (not directory.value()->eof())
+					lunas::println(false, "didn't reach eof of directory '{}'", ipaths.at(dest_index).path);
+			}
+		}
 
 		return std::monostate();
 	}
@@ -150,6 +203,8 @@ export namespace lunas {
 				size_t dest_index = 0;
 				for (auto& metadata : file->metadatas) {
 					if (metadata.file_type != lunas::file_types::not_found) {
+						if (lunas::exclude(file->path, data.options.exclude, data.options.exclude_pattern))
+							continue;
 						std::string to_be_removed = ipaths.at(dest_index).path + file->path;
 						lunas::print_remove_extra(to_be_removed);
 						auto file_size = lunas::get_size_and_remove(

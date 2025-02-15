@@ -31,7 +31,6 @@ export namespace lunas {
 	class local_directory {
 		private:
 			std::filesystem::recursive_directory_iterator itr;
-			std::filesystem::recursive_directory_iterator end;
 
 		public:
 			local_directory();
@@ -76,11 +75,11 @@ namespace lunas {
 	}
 
 	local_directory::local_directory(const std::filesystem::path path, const std::filesystem::directory_options& options)
-	    : itr(path, options), end(std::filesystem::recursive_directory_iterator()) {
+	    : itr(path, options) {
 	}
 
 	bool local_directory::eof() {
-		return itr == end;
+		return itr == std::default_sentinel_t();
 	}
 
 	std::expected<std::filesystem::directory_entry, lunas::error> local_directory::read() {

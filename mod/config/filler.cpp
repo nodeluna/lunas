@@ -42,7 +42,11 @@ export namespace lunas {
 
 			struct lunas::ipath::local_path fill_local_path(const std::string& argument, const lunas::ipath::srcdest& srcdest) {
 				struct lunas::ipath::local_path local_path;
-				local_path.path	   = std::filesystem::absolute(argument);
+				auto				absolute_path = lunas::path::absolute(argument);
+				if (absolute_path)
+					local_path.path = absolute_path.value();
+				else
+					local_path.path = std::filesystem::absolute(argument);
 				local_path.srcdest = srcdest;
 				return local_path;
 			}
