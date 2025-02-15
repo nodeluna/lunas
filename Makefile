@@ -3,7 +3,7 @@ MODS := $(shell find mod -name "*.cpp")
 DIRS = build bin
 
 all:
-	@cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++
+	@cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++ -Wno-dev
 	@ninja -C build
 
 

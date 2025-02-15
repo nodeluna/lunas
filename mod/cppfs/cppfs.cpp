@@ -1,12 +1,16 @@
 module;
 
-#include <filesystem>
-#include <string>
-#include <expected>
-#include <system_error>
-#include <variant>
-#include <cerrno>
-#include <cstring>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <filesystem>
+#	include <string>
+#	include <expected>
+#	include <system_error>
+#	include <variant>
+#	include <cerrno>
+#	include <cstring>
+#endif
 
 export module lunas.cppfs;
 import lunas.error;
@@ -29,7 +33,7 @@ namespace lunas {
 				std::filesystem::remove(path, ec);
 
 			if (ec.value() != 0) {
-				std::string err = "couldn't remove file '" + path + "', " + std::strerror(errno);
+				std::string err = "couldn't remove file '" + path + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::cppfs_remove));
 			}
 			return std::monostate();
@@ -41,7 +45,7 @@ namespace lunas {
 				std::filesystem::create_directory(path, ec);
 
 			if (ec.value() != 0) {
-				std::string err = "couldn't mkdir '" + path + "', " + std::strerror(errno);
+				std::string err = "couldn't mkdir '" + path + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::cppfs_mkdir));
 			}
 			return std::monostate();
@@ -53,7 +57,7 @@ namespace lunas {
 				std::filesystem::create_symlink(target, dest, ec);
 
 			if (ec.value() != 0) {
-				std::string err = "couldn't make symlink '" + dest + "', " + std::strerror(errno);
+				std::string err = "couldn't make symlink '" + dest + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::cppfs_symlink));
 			}
 			return std::monostate();
@@ -64,9 +68,10 @@ namespace lunas {
 			std::uintmax_t	size = std::filesystem::file_size(path, ec);
 
 			if (ec.value() != 0) {
-				std::string	  err = "couldn't get file size of '" + path + "', " + std::strerror(errno);
-				lunas::error_type type =
-				    errno == ENOENT ? lunas::error_type::attributes_no_such_file : lunas::error_type::cppfs_file_size;
+				std::string	  err  = "couldn't get file size of '" + path + "', " + ec.message();
+				lunas::error_type type = ec == std::errc::no_such_file_or_directory
+							     ? lunas::error_type::attributes_no_such_file
+							     : lunas::error_type::cppfs_file_size;
 				return std::unexpected(lunas::error(err, type));
 			}
 			return size;

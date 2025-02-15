@@ -1,8 +1,12 @@
 module;
 
-#include <string>
-#include <cstddef>
-#include <limits>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string>
+#	include <cstddef>
+#	include <limits>
+#endif
 
 export module lunas.presync.fill_tree:types;
 import lunas.config.options;

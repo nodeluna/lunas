@@ -1,9 +1,13 @@
 module;
 
-#include <expected>
-#include <variant>
-#include <memory>
-#include <string>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <expected>
+#	include <variant>
+#	include <memory>
+#	include <string>
+#endif
 
 export module lunas.file:operations;
 export import lunas.sftp;

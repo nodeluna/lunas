@@ -1,12 +1,16 @@
 module;
 
-#include <filesystem>
-#include <memory>
-#include <exception>
-#include <string>
-#include <set>
-#include <expected>
-#include <variant>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <filesystem>
+#	include <memory>
+#	include <exception>
+#	include <string>
+#	include <set>
+#	include <expected>
+#	include <variant>
+#endif
 
 export module lunas.presync.fill_tree;
 export import :types;

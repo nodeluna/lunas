@@ -1,9 +1,14 @@
 module;
 
-#include <string>
-#include <string_view>
-#include <functional>
 #include <libssh/sftp.h>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <string_view>
+#	include <functional>
+#endif
 
 export module lunas.error;
 

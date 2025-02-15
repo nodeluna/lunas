@@ -1,15 +1,21 @@
 module;
 
-#include <string>
-#include <fstream>
-#include <expected>
-#include <memory>
-#include <cstring>
-#include <cerrno>
+#include <system_error>
 #include <fcntl.h>
-#include <queue>
-#include <vector>
-#include <filesystem>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <fstream>
+#	include <expected>
+#	include <memory>
+#	include <cstring>
+#	include <cerrno>
+#	include <queue>
+#	include <vector>
+#	include <filesystem>
+#endif
 
 export module lunas.sync:remote_to_local;
 export import :types;

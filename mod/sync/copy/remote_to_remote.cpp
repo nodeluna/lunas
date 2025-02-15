@@ -1,10 +1,15 @@
 module;
 
-#include <string>
-#include <expected>
-#include <queue>
-#include <memory>
 #include <fcntl.h>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <expected>
+#	include <queue>
+#	include <memory>
+#endif
 
 export module lunas.sync:remote_to_remote;
 export import :types;

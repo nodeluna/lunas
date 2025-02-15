@@ -1,6 +1,10 @@
 module;
 
-#include <set>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <set>
+#endif
 
 export module lunas.content;
 export import lunas.file_table;

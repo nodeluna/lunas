@@ -1,14 +1,17 @@
 module;
 
-#include <string>
-#include <vector>
-#include <memory>
-#include <cstdint>
-#include <variant>
-#include <expected>
-#include <cstddef>
-
-#include <print>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string>
+#	include <vector>
+#	include <memory>
+#	include <cstdint>
+#	include <variant>
+#	include <expected>
+#	include <cstddef>
+#	include <print>
+#endif
 
 export module lunas.ipath;
 import lunas.config.options;

@@ -1,18 +1,22 @@
 module;
 
-#include <string>
-#include <print>
-#include <string>
-#include <fstream>
-#include <filesystem>
-#include <expected>
-#include <cstdlib>
-#include <cstring>
-#include <cerrno>
-#include <unordered_map>
-#include <map>
-#include <variant>
-#include <algorithm>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string>
+#	include <print>
+#	include <string>
+#	include <fstream>
+#	include <filesystem>
+#	include <expected>
+#	include <cstdlib>
+#	include <cstring>
+#	include <cerrno>
+#	include <unordered_map>
+#	include <map>
+#	include <variant>
+#	include <algorithm>
+#endif
 
 export module lunas.config.file:manager;
 import :luco;
@@ -64,7 +68,7 @@ namespace lunas {
 			if (fs::exists(config_dir, ec) != true) {
 				auto ok = lunas::cppfs::mkdir(config_dir, options.dry_run);
 				if (not ok) {
-					std::string err = "couldn't create config dir '" + config_dir + std::strerror(errno);
+					std::string err = "couldn't create config dir '" + config_dir + "', " + ec.message();
 					return std::unexpected(lunas::error(err, lunas::error_type::config_demo_config_error));
 				}
 			}
@@ -75,26 +79,26 @@ namespace lunas {
 			}
 
 			if (ec.value() != 0) {
-				std::string err = "couldn't check config file '" + config_file + "', " + std::strerror(errno);
+				std::string err = "couldn't check config file '" + config_file + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::config_demo_config_error));
 			}
 
 			std::fstream file;
 			file.open(config_file, std::ios::out);
 			if (file.is_open() == false) {
-				std::string err = "couldn't open config file '" + config_file + "', " + std::strerror(errno);
+				std::string err = "couldn't open config file '" + config_file + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::config_demo_config_error));
 			}
 
 			file << DEMO_CONFIG;
 			if (file.bad() == true) {
-				std::string err = "error writing config file '" + config_file + "', " + std::strerror(errno);
+				std::string err = "error writing config file '" + config_file + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::config_demo_config_error));
 			}
 
 			file.close();
 			if (file.is_open() == true)
-				lunas::warn("couldn't close config file '{}', {}", config_file, std::strerror(errno));
+				lunas::warn("couldn't close config file '{}', {}", config_file, ec.message());
 
 			std::print(":: wrote a demo config file to '{}'", config_file);
 			return std::monostate();

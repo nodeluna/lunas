@@ -1,17 +1,21 @@
 module;
 
-#include <cctype>
-#include <cstdlib>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <functional>
-#include <optional>
-#include <unordered_map>
-#include <algorithm>
-#include <expected>
-#include <variant>
-#include <print>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <cctype>
+#	include <cstdlib>
+#	include <iostream>
+#	include <string>
+#	include <vector>
+#	include <functional>
+#	include <optional>
+#	include <unordered_map>
+#	include <algorithm>
+#	include <expected>
+#	include <variant>
+#	include <print>
+#endif
 
 export module lunas.config.cliarg;
 import lunas.config.options;

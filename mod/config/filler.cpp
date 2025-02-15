@@ -1,14 +1,18 @@
 module;
 
-#include <cctype>
-#include <expected>
-#include <string>
-#include <algorithm>
-#include <print>
-#include <variant>
-#include <filesystem>
-#include <unordered_map>
-#include <functional>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <cctype>
+#	include <expected>
+#	include <string>
+#	include <algorithm>
+#	include <print>
+#	include <variant>
+#	include <filesystem>
+#	include <unordered_map>
+#	include <functional>
+#endif
 
 export module lunas.config.filler;
 import lunas.about;

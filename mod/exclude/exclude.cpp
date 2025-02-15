@@ -1,9 +1,13 @@
 module;
 
-#include <string>
-#include <algorithm>
-#include <ranges>
-#include <unordered_set>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <algorithm>
+#	include <ranges>
+#	include <unordered_set>
+#endif
 
 export module lunas.exclude;
 

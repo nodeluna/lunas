@@ -1,16 +1,20 @@
 module;
 
-#include <filesystem>
-#include <memory>
-#include <expected>
-#include <variant>
-#include <stack>
-#include <chrono>
-#include <system_error>
-#include <cerrno>
-#include <cstring>
-#include <stdexcept>
-#include <exception>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <filesystem>
+#	include <memory>
+#	include <expected>
+#	include <variant>
+#	include <stack>
+#	include <chrono>
+#	include <system_error>
+#	include <cerrno>
+#	include <cstring>
+#	include <stdexcept>
+#	include <exception>
+#endif
 
 export module lunas.file:directory;
 export import :attributes;
@@ -186,7 +190,7 @@ namespace lunas {
 				local_dir = lunas::local_directory(path, local_directory_options);
 			} catch (const std::exception& e) {
 				throw lunas::error(
-				    "couldn't open directory '" + path.string() + ", " + std::strerror(errno), lunas::error_type::opendir);
+				    "couldn't open directory '" + path.string() + ", " + e.what(), lunas::error_type::opendir);
 			}
 		}
 	}

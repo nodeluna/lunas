@@ -1,10 +1,14 @@
 module;
 
-#include <string>
-#include <string>
-#include <cstdint>
-#include <cmath>
-#include <print>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string>
+#	include <string>
+#	include <cstdint>
+#	include <cmath>
+#	include <print>
+#endif
 
 export module lunas.stats;
 import lunas.ipath;

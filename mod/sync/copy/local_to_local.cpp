@@ -1,18 +1,24 @@
 module;
 
-#include <string>
-#include <fstream>
-#include <filesystem>
-#include <queue>
-#include <expected>
-#include <thread>
-#include <mutex>
-#include <cstring>
-#include <cerrno>
-#include <cstdint>
-#include <condition_variable>
-#include <memory>
-#include <utility>
+#include <system_error>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string>
+#	include <fstream>
+#	include <filesystem>
+#	include <queue>
+#	include <expected>
+#	include <thread>
+#	include <mutex>
+#	include <cstring>
+#	include <cerrno>
+#	include <cstdint>
+#	include <condition_variable>
+#	include <memory>
+#	include <utility>
+#endif
 
 export module lunas.sync:local_to_local;
 export import :types;
@@ -151,7 +157,7 @@ namespace lunas {
 			std::error_code ec;
 			std::uintmax_t	src_size = std::filesystem::file_size(src, ec), dest_size = 0;
 			if (ec.value() != 0) {
-				std::string err = "couldn't get src size '" + src + "', " + std::strerror(errno);
+				std::string err = "couldn't get src size '" + src + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_get_file_size));
 			}
 
@@ -163,7 +169,7 @@ namespace lunas {
 
 			std::unique_ptr<std::fstream> src_file = std::make_unique<std::fstream>(src, std::ios::in | std::ios::binary);
 			if (src_file->is_open() == false) {
-				std::string err = "couldn't open src '" + src + "', " + std::strerror(errno);
+				std::string err = "couldn't open src '" + src + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_is_open));
 			}
 
@@ -279,7 +285,7 @@ namespace lunas {
 			std::error_code ec;
 			std::string	target = std::filesystem::read_symlink(src, ec);
 			if (ec.value() != 0) {
-				std::string err = "couldn't read symlink '" + src + "', " + std::strerror(errno);
+				std::string err = "couldn't read symlink '" + src + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_read_symlink));
 			}
 

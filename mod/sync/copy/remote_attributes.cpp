@@ -1,9 +1,13 @@
 module;
 
-#include <string>
-#include <memory>
-#include <expected>
-#include <variant>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <memory>
+#	include <expected>
+#	include <variant>
+#endif
 
 export module lunas.sync:remote_attributes;
 export import :types;

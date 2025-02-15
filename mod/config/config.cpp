@@ -1,8 +1,12 @@
 module;
 
-#include <expected>
-#include <print>
-#include <variant>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <expected>
+#	include <print>
+#	include <variant>
+#endif
 
 export module lunas.config;
 export import lunas.config.file;

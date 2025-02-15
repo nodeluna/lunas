@@ -1,15 +1,21 @@
 module;
 
-#include <string>
-#include <map>
-#include <expected>
-#include <array>
-#include <fstream>
-#include <stack>
-#include <cstdlib>
-#include <cstring>
-#include <cerrno>
-#include <print>
+#include <system_error>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string>
+#	include <map>
+#	include <expected>
+#	include <array>
+#	include <fstream>
+#	include <stack>
+#	include <cstdlib>
+#	include <cstring>
+#	include <cerrno>
+#	include <print>
+#endif
 
 export module lunas.config.file:luco;
 import lunas.stdout;

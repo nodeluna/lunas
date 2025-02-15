@@ -1,8 +1,14 @@
 module;
 
-#include <expected>
-#include <filesystem>
-#include <cstring>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <expected>
+#	include <filesystem>
+#	include <cstring>
+#	include <cerrno>
+#	include <system_error>
+#endif
 
 export module lunas.attributes:file_type;
 export import lunas.error;
@@ -39,9 +45,9 @@ namespace lunas {
 			status = std::filesystem::symlink_status(path, ec);
 
 		if (ec.value() != 0) {
-			std::string	  err = "couldn't get type of '" + path + "', " + std::strerror(errno);
-			lunas::error_type type =
-			    errno == ENOENT ? lunas::error_type::attributes_no_such_file : lunas::error_type::attributes_file_type;
+			std::string	  err  = "couldn't get type of '" + path + "', " + ec.message();
+			lunas::error_type type = ec == std::errc::no_such_file_or_directory ? lunas::error_type::attributes_no_such_file
+											    : lunas::error_type::attributes_file_type;
 			return std::unexpected(lunas::error(err, type));
 		}
 
@@ -74,7 +80,7 @@ namespace lunas {
 
 		return not exists;
 	err:
-		std::string err = "couldn't check 'is_broken_link' of '" + path + "', " + std::strerror(errno);
+		std::string err = "couldn't check 'is_broken_link' of '" + path + "', " + ec.message();
 		return std::unexpected(lunas::error(err, lunas::error_type::attributes_symlink_check));
 	}
 }

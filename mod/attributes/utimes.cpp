@@ -1,15 +1,19 @@
 module;
 
-#include <string>
-#include <ctime>
-#include <string>
-#include <expected>
-#include <variant>
-#include <cstring>
-#include <cstdint>
 #include <system_error>
 #include <sys/stat.h>
 #include <sys/time.h>
+#include <ctime>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <expected>
+#	include <variant>
+#	include <cstring>
+#	include <cstdint>
+#endif
 
 export module lunas.attributes:utimes;
 export import lunas.file_types;

@@ -1,9 +1,13 @@
 module;
 
-#include <string_view>
-#include <string>
-#include <print>
-#include <format>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string_view>
+#	include <string>
+#	include <print>
+#	include <format>
+#endif
 
 export module lunas.sftp:log;
 

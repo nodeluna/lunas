@@ -1,8 +1,12 @@
 module;
 
-#include <vector>
-#include <string>
-#include <cstdint>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <vector>
+#	include <string>
+#	include <cstdint>
+#endif
 
 export module lunas.file_table;
 export import lunas.file_types;

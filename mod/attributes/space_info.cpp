@@ -1,12 +1,16 @@
 module;
 
-#include <string>
-#include <filesystem>
-#include <expected>
-#include <cstdint>
-#include <cstring>
-#include <cerrno>
-#include <system_error>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <filesystem>
+#	include <expected>
+#	include <cstdint>
+#	include <cstring>
+#	include <cerrno>
+#	include <system_error>
+#endif
 
 export module lunas.attributes:space_info;
 export import lunas.error;
@@ -17,8 +21,8 @@ namespace fs = std::filesystem;
 export namespace lunas {
 	std::expected<std::uintmax_t, lunas::error> available_space(const std::string& path) {
 		std::error_code ec;
-		auto		err_func = [](const std::string& path) -> lunas::error {
-			   std::string err = "couldn't check partition space of '" + path + "', " + std::strerror(errno);
+		auto		err_func = [&ec](const std::string& path) -> lunas::error {
+			   std::string err = "couldn't check partition space of '" + path + "', " + ec.message();
 			   return lunas::error(err, lunas::error_type::attributes_space_info);
 		};
 

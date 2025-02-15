@@ -34,9 +34,9 @@ A syncing cli tool that can handle more than two directories locally and remotel
 
 ## dependencies
 
-clang >= 17
+* (clang >= 17) OR (clang >= 18.1.2 and libc++) for faster compliation
 
-lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
+* lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
 
 ## build
 

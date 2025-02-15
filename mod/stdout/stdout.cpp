@@ -1,9 +1,13 @@
 module;
 
-#include <print>
-#include <format>
-#include <string>
-#include <string_view>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <print>
+#	include <format>
+#	include <string>
+#	include <string_view>
+#endif
 
 export module lunas.stdout;
 

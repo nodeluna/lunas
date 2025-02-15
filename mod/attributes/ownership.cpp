@@ -1,13 +1,18 @@
 module;
 
-#include <string>
-#include <expected>
-#include <variant>
-#include <system_error>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <cerrno>
-#include <cstring>
+#include <system_error>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <expected>
+#	include <variant>
+#	include <cerrno>
+#	include <cstring>
+#endif
 
 export module lunas.attributes:ownership;
 export import lunas.error;

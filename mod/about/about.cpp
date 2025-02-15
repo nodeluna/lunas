@@ -1,6 +1,10 @@
 module;
 
-#include <string>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#endif
 
 export module lunas.about;
 

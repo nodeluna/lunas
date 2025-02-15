@@ -1,12 +1,16 @@
 module;
 
-#include <expected>
-#include <vector>
-#include <string>
-#include <print>
-#include <variant>
-#include <set>
-#include <cstdint>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <expected>
+#	include <vector>
+#	include <string>
+#	include <print>
+#	include <variant>
+#	include <set>
+#	include <cstdint>
+#endif
 
 export module lunas.presync:misc;
 

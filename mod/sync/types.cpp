@@ -1,14 +1,18 @@
 module;
 
-#include <cstdint>
-#include <ctime>
-#include <vector>
-#include <memory>
-#include <expected>
-#include <string>
-#include <iostream>
-#include <iomanip>
-#include <iostream>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <cstdint>
+#	include <ctime>
+#	include <vector>
+#	include <memory>
+#	include <expected>
+#	include <string>
+#	include <iostream>
+#	include <iomanip>
+#	include <iostream>
+#endif
 
 export module lunas.sync:types;
 export import lunas.file_types;

@@ -1,8 +1,12 @@
 module;
 
-#include <string>
-#include <expected>
-#include <filesystem>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string>
+#	include <expected>
+#	include <filesystem>
+#endif
 
 export module lunas.path;
 export import lunas.error;

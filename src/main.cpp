@@ -1,7 +1,11 @@
-#include <expected>
-#include <variant>
-#include <vector>
-#include <set>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <expected>
+#	include <variant>
+#	include <vector>
+#	include <set>
+#endif
 
 import lunas.sftp;
 import lunas.config;

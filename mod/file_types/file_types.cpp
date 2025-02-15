@@ -1,7 +1,11 @@
 module;
 
-#include <cstdint>
-#include <string>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <cstdint>
+#	include <string>
+#endif
 
 export module lunas.file_types;
 

@@ -1,10 +1,14 @@
 module;
 
-#include <filesystem>
-#include <string>
-#include <expected>
-#include <variant>
-#include <memory>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <filesystem>
+#	include <string>
+#	include <expected>
+#	include <variant>
+#	include <memory>
+#endif
 
 export module lunas.sync:remove;
 export import :misc;

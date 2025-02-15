@@ -1,9 +1,13 @@
 module;
 
-#include <memory>
-#include <expected>
-#include <functional>
-#include <filesystem>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <memory>
+#	include <expected>
+#	include <functional>
+#	include <filesystem>
+#endif
 
 export module lunas.sync:misc;
 export import :types;

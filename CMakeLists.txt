@@ -1,6 +1,23 @@
 cmake_minimum_required(VERSION 3.28)
 
-project(lunas)
+execute_process(
+	COMMAND clang -print-file-name=libc++.modules.json
+	OUTPUT_VARIABLE IMPORT_STD_PATH
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+if (EXISTS "${IMPORT_STD_PATH}")
+	set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
+	set(CMAKE_CXX_STANDARD_REQUIRED OFF)
+	set(CMAKE_CXX_MODULE_STD ON)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+	add_definitions(-DIMPORT_STD_IS_SUPPORTED=1)
+	message("== import std; is supported")
+else()
+	message("[X] import std; is NOT supported. it should compile but slower")
+endif()
+
+project(lunas LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
 add_compile_options(-Wall -Wextra -pedantic -O1)

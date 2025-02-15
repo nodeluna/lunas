@@ -1,9 +1,13 @@
 module;
 
-#include <expected>
-#include <vector>
-#include <variant>
-#include <set>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <expected>
+#	include <vector>
+#	include <variant>
+#	include <set>
+#endif
 
 export module lunas.presync;
 export import :misc;

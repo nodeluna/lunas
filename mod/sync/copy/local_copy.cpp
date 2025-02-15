@@ -1,7 +1,11 @@
 module;
 
-#include <expected>
-#include <string>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <expected>
+#	include <string>
+#endif
 
 export module lunas.sync:local_copy;
 export import :types;

@@ -1,14 +1,20 @@
 module;
 
-#include <string>
-#include <expected>
-#include <variant>
-#include <memory>
-#include <filesystem>
-#include <stdexcept>
-#include <cstring>
+#include <system_error>
 #include <sys/stat.h>
-#include <utility>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <expected>
+#	include <variant>
+#	include <memory>
+#	include <filesystem>
+#	include <stdexcept>
+#	include <cstring>
+#	include <utility>
+#endif
 
 export module lunas.file:attributes;
 

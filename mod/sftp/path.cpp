@@ -1,7 +1,11 @@
 module;
 
-#include <string>
-#include <filesystem>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <filesystem>
+#endif
 
 export module lunas.sftp:path;
 

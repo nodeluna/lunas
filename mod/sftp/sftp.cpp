@@ -1,17 +1,22 @@
 module;
 
-#include <string_view>
-#include <string>
-#include <memory>
-#include <expected>
-#include <iostream>
-#include <print>
-#include <filesystem>
-#include <thread>
 #include <chrono>
-#include <variant>
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string_view>
+#	include <string>
+#	include <memory>
+#	include <expected>
+#	include <iostream>
+#	include <print>
+#	include <filesystem>
+#	include <thread>
+#	include <variant>
+#endif
 
 export module lunas.sftp;
 export import :attributes;

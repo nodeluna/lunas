@@ -1,8 +1,12 @@
 module;
 
-#include <string>
-#include <print>
-#include <cmath>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <print>
+#	include <cmath>
+#endif
 
 export module lunas.sync:stdout;
 export import :types;

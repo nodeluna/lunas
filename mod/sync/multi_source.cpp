@@ -1,11 +1,15 @@
 module;
 
-#include <set>
-#include <expected>
-#include <variant>
-#include <vector>
-#include <ctime>
-#include <string>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <set>
+#	include <expected>
+#	include <variant>
+#	include <vector>
+#	include <ctime>
+#	include <string>
+#endif
 
 export module lunas.sync:multi_source;
 export import :types;

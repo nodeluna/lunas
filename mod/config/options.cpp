@@ -1,8 +1,12 @@
 module;
 
-#include <string>
-#include <unordered_set>
-#include <cstdint>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string>
+#	include <unordered_set>
+#	include <cstdint>
+#endif
 
 export module lunas.config.options;
 export import lunas.file_types;

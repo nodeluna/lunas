@@ -1,9 +1,14 @@
 module;
 
-#include <string_view>
-#include <string>
-#include <cstdint>
 #include <libssh/sftp.h>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <string_view>
+#	include <string>
+#	include <cstdint>
+#endif
 
 export module lunas.sftp:attributes;
 export import lunas.file_types;

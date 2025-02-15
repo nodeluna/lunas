@@ -1,12 +1,16 @@
 module;
 
-#include <set>
-#include <expected>
-#include <variant>
-#include <ctime>
-#include <string>
-#include <cstddef>
-#include <exception>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std.compat;
+#else
+#	include <set>
+#	include <expected>
+#	include <variant>
+#	include <ctime>
+#	include <string>
+#	include <cstddef>
+#	include <exception>
+#endif
 
 export module lunas.sync;
 import :types;

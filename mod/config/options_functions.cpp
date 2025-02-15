@@ -1,10 +1,14 @@
 module;
 
-#include <string>
-#include <unordered_map>
-#include <functional>
-#include <expected>
-#include <variant>
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <unordered_map>
+#	include <functional>
+#	include <expected>
+#	include <variant>
+#endif
 
 export module lunas.config.options.functions;
 import lunas.config.filler;
