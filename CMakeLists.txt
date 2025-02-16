@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28)
 
 execute_process(
-	COMMAND clang -print-file-name=libc++.modules.json
+	COMMAND "${CMAKE_CXX_COMPILER}" -print-file-name=libc++.modules.json
 	OUTPUT_VARIABLE IMPORT_STD_PATH
 	OUTPUT_STRIP_TRAILING_WHITESPACE
 )
@@ -61,7 +61,7 @@ add_custom_target(local
 )
 
 install(
-	TARGETS ${PROJECT_NAME} DESTINATION bin
+	TARGETS ${PROJECT_NAME}
 )
 
 install(

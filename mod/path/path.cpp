@@ -55,7 +55,7 @@ namespace lunas {
 		}
 
 		std::expected<std::string, lunas::error> resolve_relative_path(std::string path, std::string cwd) {
-			if (not path.empty() && path.size() > 3 && path.substr(0, 3) != "../")
+			if (not path.empty() && path.size() > 3 && path.front() == std::filesystem::path::preferred_separator)
 				return path;
 
 			path::pop_seperator(cwd);
