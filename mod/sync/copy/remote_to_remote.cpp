@@ -127,21 +127,13 @@ namespace lunas {
 					return std::unexpected(ok.error());
 			}
 
-			std::uint64_t buffer_size = 0;
-			{
-				auto dest_limits = dest_sftp->limits();
-				if (not dest_limits)
-					return std::unexpected(dest_limits.error());
-				buffer_size = dest_limits.value()->max_write_length();
-			}
-			{
-				auto src_limits = src_sftp->limits();
-				if (not src_limits)
-					return std::unexpected(src_limits.error());
+			auto dest_limits = dest_sftp->limits();
+			if (not dest_limits)
+				return std::unexpected(dest_limits.error());
 
-				if (src_limits.value()->max_read_length() < buffer_size)
-					buffer_size = src_limits.value()->max_read_length();
-			}
+			auto src_limits = src_sftp->limits();
+			if (not src_limits)
+				return std::unexpected(src_limits.error());
 
 			std::queue<buffque> rqueue;
 			std::queue<buffque> wqueue;
@@ -156,9 +148,10 @@ namespace lunas {
 
 			while (dest_size < src_size) {
 				while (read_requests_sent < max_requests && total_read_bytes_requested < src_size) {
-					struct buffque bq(buffer_size);
+					struct buffque bq(
+					    std::min(src_limits.value()->max_read_length(), dest_limits.value()->max_write_length()));
 
-					bq.aio = src_file.value()->aio_begin_read(buffer_size);
+					bq.aio = src_file.value()->aio_begin_read(bq.buffer.size());
 					if (not bq.aio) {
 						return std::unexpected(bq.aio.error());
 					} else if (bq.aio.value()->get_bytes_requested() == 0)
@@ -175,7 +168,8 @@ namespace lunas {
 					goto write;
 
 			read_again:
-				read_done = src_file.value()->aio_wait_read(rqueue.front().aio.value(), rqueue.front().buffer, buffer_size);
+				read_done = src_file.value()->aio_wait_read(
+				    rqueue.front().aio.value(), rqueue.front().buffer, rqueue.front().aio.value()->get_bytes_requested());
 				if (not read_done && read_done.error().value() == lunas::error_type::ssh_again)
 					goto read_again;
 				else if (not read_done) {

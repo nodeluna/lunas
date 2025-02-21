@@ -1,11 +1,15 @@
 SRCS := $(wildcard src/*.cpp)
 MODS := $(shell find mod -name "*.cpp")
 DIRS = build bin
+CMAKE_CMD=cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++ -Wno-dev
 
 all:
-	@cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++ -Wno-dev
+	@$(CMAKE_CMD) -DCMAKE_BUILD_TYPE=Release
 	@ninja -C build
 
+debug:
+	@$(CMAKE_CMD) -DCMAKE_BUILD_TYPE=Debug
+	@ninja -C build
 
 install: 
 	@ninja -C build install

@@ -50,8 +50,7 @@ target_sources(${PROJECT_NAME}
 	PUBLIC
 	FILE_SET CXX_MODULES
 	BASE_DIRS ${mods_dir}
-	FILES
-	${MODS}
+	FILES ${MODS}
 )
 
 add_custom_target(local
@@ -65,7 +64,8 @@ install(
 )
 
 install(
-	FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/${PROJECT_NAME}.1 DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1
+	FILES ${CMAKE_CURRENT_SOURCE_DIR}/man/${PROJECT_NAME}.1
+	DESTINATION ${CMAKE_INSTALL_PREFIX}/man/man1
 )
 
 add_custom_target("uninstall"
