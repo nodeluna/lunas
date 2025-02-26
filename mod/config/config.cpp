@@ -26,19 +26,11 @@ export namespace lunas {
 namespace lunas {
 	namespace config {
 		std::expected<struct lunas::parsed_data, lunas::error> parse_cliarg(const int argc, const char* argv[]) {
-			std::expected<struct cliarg::cliopts, lunas::error> parsed_data = lunas::cliarg::fillopts(argc, argv);
+			std::expected<struct cliarg::cliopts, lunas::error> parsed_data = lunas::cliarg::fillopts(argc, argv, lunas::config_file::preset);
 			if (not parsed_data)
 				return std::unexpected(parsed_data.error());
 
 			struct cliarg::cliopts& cliopts = parsed_data.value();
-			if (auto ok = lunas::config_file::preset("global", cliopts.options, cliopts.ipaths); not ok)
-				return std::unexpected(ok.error());
-
-			for (auto& preset : cliopts.presets) {
-				auto ok = lunas::config_file::preset(preset, cliopts.options, cliopts.ipaths);
-				if (not ok)
-					return std::unexpected(ok.error());
-			}
 
 			struct lunas::parsed_data data;
 

@@ -33,7 +33,12 @@ export namespace lunas {
 				std::vector<std::string>								     presets;
 		};
 
-		std::expected<struct cliopts, lunas::error> fillopts(const int& argc, const char* argv[]);
+		using expect = std::expected<std::monostate, lunas::error>;
+		using options = lunas::config::options;
+		using paths_vec = std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>;
+
+		std::expected<struct cliopts, lunas::error> fillopts(const int& argc, const char* argv[],
+				std::function<expect(const std::string&, options&, paths_vec&)> config_file_preset);
 	}
 }
 
@@ -98,8 +103,11 @@ namespace lunas {
 			return rpath;
 		}
 #endif // REMOTE_ENABLED
-
-		std::expected<struct cliopts, lunas::error> fillopts(const int& argc, const char* argv[]) {
+		using expect = std::expected<std::monostate, lunas::error>;
+		using options = lunas::config::options;
+		using paths_vec = std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>;
+		std::expected<struct cliopts, lunas::error> fillopts(const int& argc, const char* argv[],
+				std::function<expect(const std::string&, options&, paths_vec&)> config_file_preset) {
 
 			auto	       lpaths_options = lunas::config::get_lpaths_options();
 			auto	       rpaths_options = lunas::config::get_rpaths_options();
@@ -108,15 +116,25 @@ namespace lunas {
 			auto	       info	      = lunas::config::get_info_options();
 			struct cliopts cliopts;
 
+			auto ok = config_file_preset("global", cliopts.options, cliopts.ipaths);
+			if (not ok)
+				return std::unexpected(ok.error());
+
 			for (int index = 1; index < argc; index++) {
 				std::string option = argv[index];
 
 				if (option == "-c" || option == "--config") {
-					auto ok = next_arg_exists(argc, argv, index);
-					if (not ok)
-						return std::unexpected(ok.error());
-					std::string argument = argv[index + 1];
-					cliopts.presets.push_back(argument);
+					{
+						auto ok = next_arg_exists(argc, argv, index);
+						if (not ok)
+							return std::unexpected(ok.error());
+					}
+					{
+						std::string argument = argv[index + 1];
+						auto ok = config_file_preset(argument, cliopts.options, cliopts.ipaths);
+						if (not ok)
+							return std::unexpected(ok.error());
+					}
 					index++;
 				} else if (auto itr0 = lpaths_options.find(option); itr0 != lpaths_options.end()) {
 					auto ok = next_arg_exists(argc, argv, index);
