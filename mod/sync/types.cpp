@@ -16,7 +16,6 @@ import std.compat;
 
 export module lunas.sync:types;
 export import lunas.file_types;
-export import lunas.file_types;
 export import lunas.sftp;
 export import lunas.config.options;
 export import lunas.stats;

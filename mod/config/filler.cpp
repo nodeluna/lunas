@@ -355,7 +355,7 @@ export namespace lunas {
 					{	 "all",	attributes_all},
 				    };
 
-				for (auto it = data.begin(); not data.empty() && it != data.end(); ++it) {
+				for (auto it = data.begin(); it != data.end(); ++it) {
 					if (*it != ',' && *it != '=') {
 						temp += *it;
 						if (std::next(it) != data.end())
@@ -365,7 +365,7 @@ export namespace lunas {
 					auto itr = attributes_options.find(temp);
 					if (itr != attributes_options.end()) {
 						temp = "";
-						if (*it == ',')
+						if (*it == ',' || std::next(it) == data.end())
 							itr->second("on", options);
 						else if (*it == '=') {
 							std::string arg;

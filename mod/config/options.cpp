@@ -35,7 +35,6 @@ export namespace lunas {
 				std::unordered_set<std::string> exclude;
 				std::unordered_set<std::string> exclude_pattern;
 				bool				dry_run		  = false;
-				bool				mkdir		  = false;
 				bool				progress_bar	  = true;
 				bool				remove_extra	  = false;
 				lunas::follow_symlink		follow_symlink	  = lunas::follow_symlink::no;
