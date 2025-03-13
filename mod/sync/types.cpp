@@ -69,6 +69,15 @@ export namespace lunas {
 			const lunas::config::options& options;
 			const lunas::progress_stats   progress_stats;
 	};
+
+	enum class ownership_type {
+		uid,
+		gid,
+	};
+
+	bool no_ownership_value(auto& options);
+
+	int ownership_value(auto& options, int uid, enum ownership_type type);
 }
 
 namespace lunas {
@@ -121,4 +130,32 @@ namespace lunas {
 
 		lock = false;
 	}
+
+	bool no_ownership_value(auto& options) {
+		if (not options.attributes_uid_value && options.attributes_uid)
+			return true;
+		else if (not options.attributes_gid_value && options.attributes_gid)
+			return true;
+		return false;
+	}
+
+	int ownership_value(auto& options, int uid, enum ownership_type type) {
+		if (type == ownership_type::uid) {
+			if (not options.attributes_uid)
+				return -1;
+			else if (options.attributes_uid_value)
+				return *options.attributes_uid_value;
+			else
+				return uid;
+		} else if (type == ownership_type::gid) {
+			if (not options.attributes_gid)
+				return -1;
+			else if (options.attributes_gid_value)
+				return *options.attributes_gid_value;
+			else
+				return uid;
+		} else
+			return -1;
+	}
+
 }

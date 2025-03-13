@@ -15,20 +15,22 @@ import lunas.sftp;
 export namespace lunas {
 	namespace config {
 		struct path_options {
-				bool	       quiet		 = false;
-				bool	       verbose		 = false;
-				bool	       mkdir		 = false;
-				bool	       fsync		 = false;
-				bool	       no_broken_symlink = false;
-				bool	       resume		 = true;
-				bool	       checksum		 = false;
-				bool	       compression	 = false;
-				int	       compression_level = 5;
-				bool	       attributes_uid	 = false;
-				bool	       attributes_gid	 = false;
-				bool	       attributes_mtime	 = true;
-				bool	       attributes_atime	 = false;
-				std::uintmax_t minimum_space	 = 1073741824;
+				bool		   quiet	     = false;
+				bool		   verbose	     = false;
+				bool		   mkdir	     = false;
+				bool		   fsync	     = false;
+				bool		   no_broken_symlink = false;
+				bool		   resume	     = true;
+				bool		   checksum	     = false;
+				bool		   compression	     = false;
+				int		   compression_level = 5;
+				bool		   attributes_uid    = false;
+				bool		   attributes_gid    = false;
+				std::optional<int> attributes_uid_value;
+				std::optional<int> attributes_gid_value;
+				bool		   attributes_mtime = true;
+				bool		   attributes_atime = false;
+				std::uintmax_t	   minimum_space    = 1073741824;
 		};
 
 		struct options : public path_options {

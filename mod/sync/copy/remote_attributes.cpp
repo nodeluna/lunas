@@ -46,13 +46,15 @@ namespace lunas {
 			if (not misc.options.attributes_uid && not misc.options.attributes_gid)
 				return std::monostate();
 
-			auto own = lunas::ownership::get(src, misc.options.follow_symlink);
+			std::expected<lunas::ownership::own, lunas::error> own;
+			if (no_ownership_value(misc.options))
+				own = lunas::ownership::get(src, misc.options.follow_symlink);
 			if (not own)
 				return std::unexpected(own.error());
 
 			struct lunas::sftp::owner owner = {
-			    .uid = misc.options.attributes_uid ? own.value().uid : -1,
-			    .gid = misc.options.attributes_gid ? own.value().gid : -1,
+			    .uid = ownership_value(misc.options, own.value().uid, ownership_type::uid),
+			    .gid = ownership_value(misc.options, own.value().gid, ownership_type::gid),
 			};
 
 			auto ok2 = sftp->set_ownership(dest, owner, misc.options.follow_symlink);
@@ -67,13 +69,15 @@ namespace lunas {
 			if (not misc.options.attributes_uid && not misc.options.attributes_gid)
 				return std::monostate();
 
-			auto own = sftp->get_ownership(src, misc.options.follow_symlink);
+			std::expected<lunas::sftp::owner, lunas::error> own;
+			if (no_ownership_value(misc.options))
+				own = sftp->get_ownership(src, misc.options.follow_symlink);
 			if (not own)
 				return std::unexpected(own.error());
 
 			struct lunas::ownership::own owner = {
-			    .uid = misc.options.attributes_uid ? own.value().uid : -1,
-			    .gid = misc.options.attributes_gid ? own.value().gid : -1,
+			    .uid = ownership_value(misc.options, own.value().uid, ownership_type::uid),
+			    .gid = ownership_value(misc.options, own.value().gid, ownership_type::gid),
 			};
 
 			auto ok = lunas::ownership::set(dest, owner, misc.options.follow_symlink);
@@ -88,11 +92,18 @@ namespace lunas {
 			if (not misc.options.attributes_uid && not misc.options.attributes_gid)
 				return std::monostate();
 
-			auto own = src_sftp->get_ownership(src, misc.options.follow_symlink);
+			std::expected<lunas::sftp::owner, lunas::error> own;
+			if (no_ownership_value(misc.options))
+				own = src_sftp->get_ownership(src, misc.options.follow_symlink);
 			if (not own)
 				return std::unexpected(own.error());
 
-			auto ok = dest_sftp->set_ownership(dest, own.value(), misc.options.follow_symlink);
+			struct lunas::sftp::owner owner = {
+			    .uid = ownership_value(misc.options, own.value().uid, ownership_type::uid),
+			    .gid = ownership_value(misc.options, own.value().gid, ownership_type::gid),
+			};
+
+			auto ok = dest_sftp->set_ownership(dest, owner, misc.options.follow_symlink);
 			if (not ok) {
 				return std::unexpected(ok.error());
 			}

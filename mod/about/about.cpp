@@ -134,6 +134,7 @@ export namespace lunas {
 		    "    [-a, --attributes] <own,gid=off,uid=on,utimes,atime,mtime,all>\n"
 		    "        sync file attributes. own, ownership, is for uid and gid. utimes is for atime and mtime. all is for all "
 		    "attributes\n"
+		    "        uid, gid and own can be set manually. uid=NUMBER,gid=1000. own=1000 sets both uid AND gid\n"
 		    "        mtime is enabled by default, to disable it --attributes mtime=off\n"
 		    "\n"
 		    "    [-ms, --minimum-space] <sizeUnit>\n"

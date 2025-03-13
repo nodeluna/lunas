@@ -258,9 +258,13 @@ export namespace lunas {
 			    const std::string& data, lunas::config::options& options) {
 				if (data == "on")
 					options.attributes_uid = true;
-				else if (data == "off")
-					options.attributes_uid = false;
-				else
+				else if (data == "off") {
+					options.attributes_uid	     = false;
+					options.attributes_uid_value = std::nullopt;
+				} else if (is_num(data)) {
+					options.attributes_uid	     = true;
+					options.attributes_uid_value = std::stoi(data);
+				} else
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
 				return std::monostate();
 			}
@@ -269,9 +273,13 @@ export namespace lunas {
 			    const std::string& data, lunas::config::options& options) {
 				if (data == "on")
 					options.attributes_gid = true;
-				else if (data == "off")
-					options.attributes_gid = false;
-				else
+				else if (data == "off") {
+					options.attributes_gid	     = false;
+					options.attributes_gid_value = std::nullopt;
+				} else if (is_num(data)) {
+					options.attributes_gid	     = true;
+					options.attributes_gid_value = std::stoi(data);
+				} else
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
 				return std::monostate();
 			}
@@ -282,10 +290,19 @@ export namespace lunas {
 					options.attributes_uid = true;
 					options.attributes_gid = true;
 				} else if (data == "off") {
-					options.attributes_uid = false;
-					options.attributes_gid = false;
-				} else
+					options.attributes_uid	     = false;
+					options.attributes_gid	     = false;
+					options.attributes_uid_value = std::nullopt;
+					options.attributes_gid_value = std::nullopt;
+				} else if (is_num(data)) {
+					options.attributes_uid	     = true;
+					options.attributes_uid_value = std::stoi(data);
+					options.attributes_gid	     = true;
+					options.attributes_gid_value = std::stoi(data);
+				} else {
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
+
 				return std::monostate();
 			}
 

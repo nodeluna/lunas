@@ -37,11 +37,18 @@ namespace lunas {
 			if (not misc.options.attributes_uid && not misc.options.attributes_gid)
 				return std::monostate();
 
-			auto own = lunas::ownership::get(src, misc.options.follow_symlink);
+			std::expected<lunas::ownership::own, lunas::error> own;
+			if (no_ownership_value(misc.options))
+				own = lunas::ownership::get(src, misc.options.follow_symlink);
 			if (not own)
 				return std::unexpected(own.error());
 
-			auto ok = lunas::ownership::set(dest, own.value(), misc.options.follow_symlink);
+			struct lunas::ownership::own owner = {
+			    .uid = ownership_value(misc.options, own.value().uid, ownership_type::uid),
+			    .gid = ownership_value(misc.options, own.value().gid, ownership_type::gid),
+			};
+
+			auto ok = lunas::ownership::set(dest, owner, misc.options.follow_symlink);
 			if (not ok)
 				return std::unexpected(ok.error());
 
