@@ -234,6 +234,16 @@ export namespace lunas {
 				return std::monostate();
 			}
 
+			std::expected<std::monostate, lunas::error> link(const std::string& data, lunas::config::options& options) {
+				if (data == "on")
+					options.hardlink_regular_files = true;
+				else if (data == "off")
+					options.hardlink_regular_files = false;
+				else
+					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				return std::monostate();
+			}
+
 			std::expected<std::monostate, lunas::error> resume(const std::string& data, lunas::config::options& options) {
 				if (data == "on")
 					options.resume = true;

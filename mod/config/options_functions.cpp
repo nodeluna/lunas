@@ -75,6 +75,10 @@ export namespace lunas {
 				{"--compression",	config::filler::compression	},
 				{"C",			config::filler::compression	},
 				{"compression",		config::filler::compression	},
+				{"--link",		config::filler::link		},
+				{"-l",			config::filler::link		},
+				{"link",		config::filler::link		},
+				{"l",			config::filler::link		},
 			};
 
 			// clang-format on 

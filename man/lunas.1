@@ -33,11 +33,15 @@ For convenient syncing of recurring operations, lunas has a simple-to-use config
 
 .SH USAGE
 
-.B lunas -p dir1 -p dir2 -r user@ip:dir3 -rd user2@ip2:dir4 --update --compression --compression-level 9
+.B lunas -p dir1 -p dir2 -r user@ip:dir3     # -p, -r are for two-ways syncing '-p' for local dirs, '-r' for remote dirs
 .br
-.B lunas -s dir1 -rd user@ip:dir2 --update --compression --compression-level 9
+.B lunas -s dir1 -rd user@ip:dir2            # -s local source, -rs remote src, -d local dest, -rd remote dest
 .br
-.B lunas --config preset_name --update off --compression-level 9
+.B lunas -s dir1 -rd user@ip:dir2 -u         # -u/--update overwrite older files with newer ones based on their mtime
+.br
+.B lunas -s dir1 -rd user@ip:dir2 -rb        # -rb/--rollback overwrite newer files with older ones based on their mtime
+.br
+.B lunas -c preset                           # -c/--config preset with predefined options to be synced. check the man page 'CONFIG FILE' section
 
 .SH OPTIONS
 .TP
@@ -155,6 +159,11 @@ follow symlinks. sync the target the symlink is pointing to instead of the symli
 .B [-B, --no-broken-link]
 
 don't sync broken symlinks 
+
+.TP
+.B [-l, --link]
+
+hardlink regular files instead of copying them (works on local to local)
 
 .TP
 .B [-P, --progress]

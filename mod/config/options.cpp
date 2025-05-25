@@ -6,6 +6,7 @@ import std.compat;
 #	include <string>
 #	include <unordered_set>
 #	include <cstdint>
+#	include <optional>
 #endif
 
 export module lunas.config.options;
@@ -28,9 +29,10 @@ export namespace lunas {
 				bool		   attributes_gid    = false;
 				std::optional<int> attributes_uid_value;
 				std::optional<int> attributes_gid_value;
-				bool		   attributes_mtime = true;
-				bool		   attributes_atime = false;
-				std::uintmax_t	   minimum_space    = 1073741824;
+				bool		   attributes_mtime	  = true;
+				bool		   attributes_atime	  = false;
+				bool		   hardlink_regular_files = false;
+				std::uintmax_t	   minimum_space	  = 1073741824;
 		};
 
 		struct options : public path_options {

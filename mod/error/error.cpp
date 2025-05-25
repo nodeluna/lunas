@@ -102,6 +102,7 @@ export namespace lunas {
 		sync_size_mismatch	  = 100,
 		sync_read_symlink	  = 101,
 		sync_get_file_size	  = 102,
+		sync_hardlink		  = 103,
 	};
 
 	class error {

@@ -66,6 +66,8 @@ export namespace lunas {
 	namespace local_to_local {
 		std::expected<struct syncstat, lunas::error> copy(
 		    const std::string& src, const std::string& dest, const struct syncmisc& misc);
+		std::expected<struct syncstat, lunas::error> link(
+		    const std::string& src, const std::string& dest, const struct syncmisc& misc);
 		std::expected<struct syncstat, lunas::error> rfile(
 		    const std::string& src, const std::string& dest, const struct syncmisc& misc);
 		std::expected<struct syncstat, lunas::error> mkdir(
@@ -130,7 +132,10 @@ namespace lunas {
 		    const std::string& src, const std::string& dest, const struct syncmisc& misc) {
 			std::expected<struct syncstat, lunas::error> syncstat;
 
-			if (misc.file_type == lunas::file_types::regular_file || misc.file_type == lunas::file_types::resume_regular_file) {
+			if (misc.file_type == lunas::file_types::regular_file && misc.options.hardlink_regular_files) {
+				syncstat = local_to_local::link(src, dest, misc);
+			} else if (misc.file_type == lunas::file_types::regular_file ||
+				   misc.file_type == lunas::file_types::resume_regular_file) {
 				auto func = [&](const std::string& dest_lspart) -> std::expected<struct syncstat, lunas::error> {
 					auto syncstat = local_to_local::rfile(src, dest_lspart, misc);
 					if (syncstat)
@@ -149,6 +154,34 @@ namespace lunas {
 				    lunas::error("can't sync special file '" + src + "'", lunas::error_type::sync_special_file_ignored));
 
 			return syncstat;
+		}
+
+		std::expected<struct syncstat, lunas::error> link(
+		    const std::string& src, const std::string& dest, const struct syncmisc& misc) {
+			struct syncstat syncstat;
+			if (misc.options.dry_run) {
+				syncstat.code = lunas::sync_code::success;
+				return syncstat;
+			}
+
+			std::error_code ec;
+			if (std::filesystem::exists(dest, ec)) {
+				std::filesystem::remove(dest, ec);
+				if (ec.value() != 0) {
+					std::string err = "couldn't overwrite '" + dest + "', " + ec.message();
+					return std::unexpected(lunas::error(err, lunas::error_type::sync_hardlink));
+				}
+			}
+
+			std::filesystem::create_hard_link(src, dest, ec);
+			if (ec.value() != 0) {
+				std::string err = "couldn't hardlink '" + dest + "', " + ec.message();
+				return std::unexpected(lunas::error(err, lunas::error_type::sync_hardlink));
+			} else {
+				syncstat.code	     = lunas::sync_code::success;
+				syncstat.copied_size = 0;
+				return syncstat;
+			}
 		}
 
 		std::expected<struct syncstat, lunas::error> rfile(
