@@ -55,7 +55,10 @@ namespace lunas {
 			if (more_than_one_source(ipaths)) {
 				lunas::println(cliopts.options.quiet, "--> reading directory {}", ipaths[index].path);
 				auto ok = lunas::presync::readdir(content.files_table, ipaths[index].path, data);
-				if (not ok)
+			
+				if (not ok && ok.error().value() == lunas::error_type::no_such_file && cliopts.options.dry_run)
+					continue;
+				else if (not ok)
 					return std::unexpected(ok.error());
 			}
 		}
