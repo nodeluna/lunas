@@ -142,7 +142,7 @@ namespace lunas {
 					if (not ok)
 						return std::unexpected(ok.error());
 					std::string argument = argv[index + 1];
-					cliopts.ipaths.push_back(itr0->second(argument));
+					cliopts.ipaths.emplace_back(itr0->second(argument));
 					index++;
 #ifdef REMOTE_ENABLED
 				} else if (auto itr1 = rpaths_options.find(option); itr1 != rpaths_options.end()) {
@@ -153,7 +153,7 @@ namespace lunas {
 					auto		      remote_path = fill_remote_path(argc, argv, index, srcdest);
 					if (not remote_path)
 						return std::unexpected(remote_path.error());
-					cliopts.ipaths.push_back(std::move(remote_path.value()));
+					cliopts.ipaths.emplace_back(std::move(remote_path.value()));
 #endif // REMOTE_ENABLED
 				} else if (auto itr2 = onoff_options.find(option); itr2 != onoff_options.end()) {
 					auto	    ok = next_arg_exists(argc, argv, index);

@@ -75,7 +75,7 @@ namespace lunas {
 			}
 
 			if (not directory.value()->eof())
-				return std::unexpected(lunas::error("", lunas::error_type::readdir_eof));
+				return std::unexpected(lunas::error("didn't reach eof", lunas::error_type::readdir_eof));
 
 			return std::monostate();
 		}

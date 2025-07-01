@@ -33,7 +33,7 @@ import lunas.error;
 #endif
 
 export namespace lunas {
-	enum class time_type : uint8_t {
+	enum class time_type {
 		atime  = 1,
 		mtime  = 2,
 		utimes = 3,
