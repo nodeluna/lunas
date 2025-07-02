@@ -1,5 +1,7 @@
 module;
 
+#include <cassert>
+
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -20,6 +22,8 @@ export import lunas.ipath;
 export import lunas.file_table;
 export import lunas.file_types;
 export import lunas.stdout;
+export import lunas.file;
+import lunas.stats;
 
 export namespace lunas {
 	std::expected<size_t, lunas::error> get_src(const lunas::file_table& file_table, const struct lunas::parsed_data& data)
@@ -117,6 +121,31 @@ export namespace lunas {
 			 dest.metadata.file_type != src.metadata.file_type)
 		{
 			return std::unexpected(lunas::error_type::dest_check_type_conflict);
+		}
+		else if (data.options.minimum_space)
+		{
+			assert(src.file_size != std::nullopt);
+			assert(data.options.minimum_space != std::nullopt);
+			if (data.options.hardlink_regular_files && not data.get_ipath(src.index).is_remote() &&
+			    not data.get_ipath(dest.index).is_remote())
+			{
+				return std::monostate();
+			}
+
+			auto partition = lunas::get_partition(data.get_ipath(dest.index).sftp, data.get_ipath(dest.index).path);
+			if (not partition)
+			{
+				lunas::printerr("{}", partition.error().message());
+				return std::unexpected(partition.error().value());
+			}
+
+			if ((partition.value()->available() - *src.file_size) < *data.options.minimum_space)
+			{
+				lunas::printerr("partition '{}' is getting full: {}. file size: {}. minimum-space: {}",
+				    data.get_ipath(dest.index).path, size_units(partition.value()->available()), size_units(*src.file_size),
+				    size_units(*data.options.minimum_space));
+				return std::unexpected(lunas::error_type::partition_info);
+			}
 		}
 
 		return std::monostate();

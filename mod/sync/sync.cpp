@@ -120,7 +120,7 @@ export namespace lunas {
 				}
 				progress_stats.total_to_be_synced = progress_stats.total_synced;
 
-				ok = check_dest_and_sync(file_metadata(src_file->path, src_metadata, src_index),
+				ok = check_dest_and_sync(file_metadata(src_file->path, src_metadata, src_index, src_file->file_size),
 				    file_metadata(dest_path, dest_metadata, dest_index), data, progress_stats);
 				if (not ok)
 				{

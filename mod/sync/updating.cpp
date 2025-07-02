@@ -9,6 +9,8 @@ import std.compat;
 #	include <vector>
 #	include <ctime>
 #	include <string>
+#	include <cstdint>
+#	include <optional>
 #endif
 
 export module lunas.sync:updating;
@@ -21,6 +23,7 @@ export import lunas.ipath;
 export import lunas.file_table;
 export import lunas.file_types;
 export import lunas.stdout;
+export import lunas.file;
 
 export namespace lunas {
 	std::expected<std::monostate, lunas::error> check_dest_and_sync(const struct file_metadata src, const struct file_metadata& dest,
@@ -82,15 +85,27 @@ export namespace lunas {
 	    struct lunas::parsed_data& data, struct progress_stats& progress_stats)
 	{
 
-		const auto& src_metadata = file_table.metadatas.at(src_index);
-		const auto& ipaths	 = data.get_ipaths();
-		size_t	    dest_index	 = 0;
+		const auto&		      src_metadata = file_table.metadatas.at(src_index);
+		const auto&		      ipaths	   = data.get_ipaths();
+		size_t			      dest_index   = 0;
+		std::optional<std::uintmax_t> src_size	   = std::nullopt;
+		const std::string	      src	   = ipaths.at(src_index).path + file_table.path;
+
+		if (data.options.minimum_space)
+		{
+			auto attr = lunas::get_attributes(ipaths.at(src_index).sftp, src, data.options.follow_symlink);
+			if (not attr)
+			{
+				return std::unexpected(attr.error());
+			}
+			src_size = attr.value()->file_size();
+		}
+
 		for (const auto& dest_metadata : file_table.metadatas)
 		{
-			const std::string src  = ipaths.at(src_index).path + file_table.path;
 			const std::string dest = ipaths.at(dest_index).path + file_table.path;
 
-			auto ok = check_dest_and_sync(file_metadata(src, src_metadata, src_index),
+			auto ok = check_dest_and_sync(file_metadata(src, src_metadata, src_index, src_size),
 			    file_metadata(dest, dest_metadata, dest_index), data, progress_stats);
 			if (not ok)
 			{

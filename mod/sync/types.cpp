@@ -78,12 +78,14 @@ export namespace lunas {
 	};
 
 	struct file_metadata {
-			const std::string&     path;
-			const lunas::metadata& metadata;
-			const size_t&	       index;
+			const std::string&		    path;
+			const lunas::metadata&		    metadata;
+			const size_t&			    index;
+			const std::optional<std::uintmax_t> file_size;
 
-			file_metadata(const std::string& path, const lunas::metadata& metadata, const size_t& index)
-			    : path(path), metadata(metadata), index(index)
+			file_metadata(const std::string& path, const lunas::metadata& metadata, const size_t& index,
+			    std::optional<std::uintmax_t> size = std::nullopt)
+			    : path(path), metadata(metadata), index(index), file_size(size)
 			{
 			}
 	};

@@ -32,7 +32,7 @@ export namespace lunas {
 				bool			      attributes_mtime	     = true;
 				bool			      attributes_atime	     = false;
 				bool			      hardlink_regular_files = false;
-				std::optional<std::uintmax_t> minimum_space	     = 1073741824;
+				std::optional<std::uintmax_t> minimum_space	     = std::nullopt;
 		};
 
 		struct options : public path_options {

@@ -143,7 +143,7 @@ export namespace lunas {
 		    "    [-ms, --minimum-space] <sizeUnit>\n"
 		    "        prevent a partition from filling up by setting a threshold to prevent syncing files to it once it's reached. "
 		    "default "
-		    "is 1GiB\n"
+		    "is off\n"
 		    "        example: -p dir -p dir2 -ms 0.5Tib\n"
 		    "        example: -p dir -p dir2 -ms 100mib\n"
 		    "\n"
