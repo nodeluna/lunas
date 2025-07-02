@@ -21,7 +21,8 @@ import :log;
 namespace fs = std::filesystem;
 typedef int auth_response;
 
-export namespace lunas {
+export namespace lunas
+{
 	enum class ssh_log_level {
 		no_log	  = SSH_LOG_NOLOG,
 		warning	  = SSH_LOG_WARNING,
@@ -76,7 +77,8 @@ export namespace lunas {
 	};
 }
 
-namespace lunas {
+namespace lunas
+{
 	ssh::ssh(const struct session_data& data)
 	{
 		session_data = data;
@@ -98,8 +100,8 @@ namespace lunas {
 		this->set_options(m_ssh, SSH_OPTIONS_LOG_VERBOSITY, &session_data.options.log_level, "log level");
 		if (session_data.options.compression_level > 0)
 		{
-			this->set_options(
-			    m_ssh, SSH_OPTIONS_COMPRESSION_LEVEL, &session_data.options.compression_level, "compression level");
+			this->set_options(m_ssh, SSH_OPTIONS_COMPRESSION_LEVEL, &session_data.options.compression_level,
+					  "compression level");
 			this->set_options(m_ssh, SSH_OPTIONS_COMPRESSION, ( void* ) "yes", "compression");
 		}
 
@@ -371,12 +373,12 @@ namespace lunas {
 
 				throw std::runtime_error("\n" + err);
 			case SSH_KNOWN_HOSTS_OTHER:
-				err = fmt::err_color(
-				    "-[X] the server for '" + ip + "' gave a key of type while we had another type! possible attack!");
+				err = fmt::err_color("-[X] the server for '" + ip +
+						     "' gave a key of type while we had another type! possible attack!");
 				throw std::runtime_error("\n" + err);
 			case SSH_KNOWN_HOSTS_ERROR:
-				err = fmt::err_color(
-				    "error while checking the server '" + ip + "', is the publickey valid? " + ssh_get_error(ssh));
+				err = fmt::err_color("error while checking the server '" + ip + "', is the publickey valid? " +
+						     ssh_get_error(ssh));
 				throw std::runtime_error("\n" + err);
 			case SSH_KNOWN_HOSTS_UNKNOWN:
 			case SSH_KNOWN_HOSTS_NOT_FOUND:

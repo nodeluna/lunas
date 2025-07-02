@@ -11,7 +11,8 @@ import std.compat;
 export module lunas.file_table;
 export import lunas.file_types;
 
-export namespace lunas {
+export namespace lunas
+{
 	struct metadata {
 			time_t		  mtime	    = 0;
 			lunas::file_types file_type = lunas::file_types::not_found;
@@ -22,7 +23,7 @@ export namespace lunas {
 			mutable std::vector<struct metadata> metadatas;
 
 			file_table(const std::string& name_, const struct metadata& metadata, const size_t input_path_index,
-			    const size_t files_count)
+				   const size_t files_count)
 			    : path(name_)
 			{
 

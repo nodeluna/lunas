@@ -13,7 +13,8 @@ import std;
 
 export module lunas.sftp:parition;
 
-export namespace lunas {
+export namespace lunas
+{
 	class sftp_partition {
 		private:
 			sftp_statvfs_t statvfs = NULL;
@@ -26,7 +27,8 @@ export namespace lunas {
 	};
 }
 
-namespace lunas {
+namespace lunas
+{
 	sftp_partition::sftp_partition(const sftp_session& sftp, const std::filesystem::path& path)
 	{
 		assert(sftp != NULL);

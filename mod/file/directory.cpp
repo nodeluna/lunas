@@ -26,7 +26,8 @@ export import lunas.error;
 export import lunas.stdout;
 export import lunas.file_types;
 
-export namespace lunas {
+export namespace lunas
+{
 	struct directory_options {
 			lunas::follow_symlink follow_symlink	= lunas::follow_symlink::no;
 			bool		      no_broken_symlink = false;
@@ -41,8 +42,8 @@ export namespace lunas {
 			local_directory();
 			local_directory(const std::filesystem::path path, const std::filesystem::directory_options& options);
 
-			static std::expected<local_directory, lunas::error> init(
-			    const std::filesystem::path& path, const struct directory_options& options)
+			static std::expected<local_directory, lunas::error> init(const std::filesystem::path&	 path,
+										 const struct directory_options& options)
 			{
 				try
 				{
@@ -89,16 +90,17 @@ export namespace lunas {
 
 		public:
 			directory(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path path,
-			    const struct directory_options& options);
+				  const struct directory_options& options);
 			bool							   eof();
 			[[nodiscard]] std::expected<directory_entry, lunas::error> read();
 	};
 
-	std::expected<std::unique_ptr<lunas::directory>, lunas::error> opendir(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path path, const lunas::directory_options& options);
+	std::expected<std::unique_ptr<lunas::directory>, lunas::error>
+	opendir(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path path, const lunas::directory_options& options);
 }
 
-namespace lunas {
+namespace lunas
+{
 	local_directory::local_directory()
 	{
 	}
@@ -252,8 +254,8 @@ namespace lunas {
 		return abstract_entry;
 	}
 
-	directory::directory(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path path, const struct directory_options& options)
+	directory::directory(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path path,
+			     const struct directory_options& options)
 	    : sftp(sftp), directory_options(options)
 	{
 		if (sftp != nullptr)
@@ -413,8 +415,8 @@ namespace lunas {
 		}
 	}
 
-	std::expected<std::unique_ptr<lunas::directory>, lunas::error> opendir(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path path, const lunas::directory_options& options)
+	std::expected<std::unique_ptr<lunas::directory>, lunas::error>
+	opendir(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path path, const lunas::directory_options& options)
 	{
 		try
 		{

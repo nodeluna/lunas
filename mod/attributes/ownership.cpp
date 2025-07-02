@@ -18,21 +18,25 @@ export module lunas.attributes:ownership;
 export import lunas.error;
 export import lunas.file_types;
 
-export namespace lunas {
-	namespace ownership {
+export namespace lunas
+{
+	namespace ownership
+	{
 		struct own {
 				int uid = -1;
 				int gid = -1;
 		};
 
 		std::expected<struct own, lunas::error>	    get(const std::string& path, lunas::follow_symlink follow);
-		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, const struct own& own, lunas::follow_symlink follow);
+		std::expected<std::monostate, lunas::error> set(const std::string& path, const struct own& own,
+								lunas::follow_symlink follow);
 	}
 }
 
-namespace lunas {
-	namespace ownership {
+namespace lunas
+{
+	namespace ownership
+	{
 		std::expected<struct own, lunas::error> get(const std::string& path, lunas::follow_symlink follow)
 		{
 			struct own  own;
@@ -57,8 +61,8 @@ namespace lunas {
 			return own;
 		}
 
-		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, const struct own& own, lunas::follow_symlink follow)
+		std::expected<std::monostate, lunas::error> set(const std::string& path, const struct own& own,
+								lunas::follow_symlink follow)
 		{
 			int rc = 0;
 

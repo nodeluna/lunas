@@ -12,7 +12,8 @@ import std;
 
 export module lunas.error;
 
-export namespace lunas {
+export namespace lunas
+{
 	enum class error_type {
 		none = 0,
 
@@ -125,7 +126,8 @@ export namespace lunas {
 	};
 }
 
-namespace lunas {
+namespace lunas
+{
 	error::error(const std::string_view& message, const enum error_type type) : msg(message), type(type)
 	{
 	}

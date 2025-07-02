@@ -11,14 +11,16 @@ import std;
 
 export module lunas.exclude;
 
-export namespace lunas {
+export namespace lunas
+{
 	bool exclude(const std::string& path, const std::unordered_set<std::string>& exclude_files,
-	    const std::unordered_set<std::string>& exclude_pattern);
+		     const std::unordered_set<std::string>& exclude_pattern);
 }
 
-namespace lunas {
+namespace lunas
+{
 	bool exclude(const std::string& path, const std::unordered_set<std::string>& exclude_files,
-	    const std::unordered_set<std::string>& exclude_pattern)
+		     const std::unordered_set<std::string>& exclude_pattern)
 	{
 
 		if (exclude_files.empty() && exclude_pattern.empty())
@@ -33,8 +35,9 @@ namespace lunas {
 			{
 				return true;
 			}
-			bool excluded = std::ranges::any_of(exclude_files, [&](const std::string& x_path)
-			    { return path.size() > x_path.size() && path.substr(0, x_path.size()) == x_path; });
+			bool excluded =
+			    std::ranges::any_of(exclude_files, [&](const std::string& x_path)
+						{ return path.size() > x_path.size() && path.substr(0, x_path.size()) == x_path; });
 			if (excluded)
 			{
 				return true;
@@ -48,8 +51,8 @@ namespace lunas {
 			{
 				return true;
 			}
-			bool excluded = std::ranges::any_of(
-			    exclude_pattern, [&](const std::string& x_pattern) { return path.find(x_pattern) != path.npos; });
+			bool excluded = std::ranges::any_of(exclude_pattern, [&](const std::string& x_pattern)
+							    { return path.find(x_pattern) != path.npos; });
 			if (excluded)
 			{
 				return true;

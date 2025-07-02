@@ -17,22 +17,25 @@ export import lunas.ipath;
 export import lunas.cppfs;
 export import lunas.stdout;
 
-export namespace lunas {
+export namespace lunas
+{
 	size_t get_src_hash(const std::string& src, const unsigned long int& src_mtime);
 
 	std::string get_dest_hash(const std::string& dest, const size_t& src_mtimepath_hash);
 
 	auto regular_file_sync(const std::string& src, const std::string& dest, const time_t& src_mtime,
-	    std::function<std::expected<syncstat, lunas::error>(const std::string&)> func) -> std::expected<syncstat, lunas::error>;
+			       std::function<std::expected<syncstat, lunas::error>(const std::string&)> func)
+	    -> std::expected<syncstat, lunas::error>;
 
 	std::string dest_lspart(const std::string& dest, size_t src_quick_hash);
 
 	std::expected<std::uintmax_t, lunas::error> file_size(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path);
 
-	namespace remote {
+	namespace remote
+	{
 		struct original_name {
 				original_name(const std::unique_ptr<lunas::sftp>& session, const std::string& dest_lspart,
-				    const std::string& original_name, lunas::sync_code& code);
+					      const std::string& original_name, lunas::sync_code& code);
 				~original_name();
 
 			private:
@@ -43,10 +46,11 @@ export namespace lunas {
 		};
 	}
 
-	namespace local {
+	namespace local
+	{
 		struct original_name {
-				original_name(
-				    const std::string& dest_lspart, const std::string& original_name, lunas::sync_code& code, bool dry_run);
+				original_name(const std::string& dest_lspart, const std::string& original_name, lunas::sync_code& code,
+					      bool dry_run);
 				~original_name();
 
 			private:
@@ -58,10 +62,11 @@ export namespace lunas {
 	}
 
 	void register_synced_stats(const struct syncstat& syncstat, lunas::file_types file_type, lunas::ipath::input_path& ipath,
-	    struct progress_stats& progress_stats);
+				   struct progress_stats& progress_stats);
 }
 
-namespace lunas {
+namespace lunas
+{
 	size_t get_src_hash(const std::string& src, const unsigned long int& src_mtime)
 	{
 		return std::hash<std::string>{}(src + std::to_string(src_mtime));
@@ -97,7 +102,8 @@ namespace lunas {
 	}
 
 	auto regular_file_sync(const std::string& src, const std::string& dest, const time_t& src_mtime,
-	    std::function<std::expected<syncstat, lunas::error>(const std::string&)> func) -> std::expected<syncstat, lunas::error>
+			       std::function<std::expected<syncstat, lunas::error>(const std::string&)> func)
+	    -> std::expected<syncstat, lunas::error>
 	{
 		std::string dest_lspart_path = dest_lspart(src, dest, src_mtime);
 		return func(dest_lspart_path);
@@ -115,9 +121,10 @@ namespace lunas {
 		}
 	}
 
-	namespace remote {
+	namespace remote
+	{
 		original_name::original_name(const std::unique_ptr<lunas::sftp>& session, const std::string& dest_lspart,
-		    const std::string& original_name, lunas::sync_code& code)
+					     const std::string& original_name, lunas::sync_code& code)
 		    : sftp(session), lspart(dest_lspart), dest(original_name), synccode(code)
 		{
 		}
@@ -138,9 +145,10 @@ namespace lunas {
 		}
 	}
 
-	namespace local {
-		original_name::original_name(
-		    const std::string& dest_lspart, const std::string& original_name, lunas::sync_code& code, bool dry_run)
+	namespace local
+	{
+		original_name::original_name(const std::string& dest_lspart, const std::string& original_name, lunas::sync_code& code,
+					     bool dry_run)
 		    : lspart(dest_lspart), dest(original_name), synccode(code), dry_run(dry_run)
 		{
 		}
@@ -167,7 +175,7 @@ namespace lunas {
 	}
 
 	void register_synced_stats(const struct syncstat& syncstat, lunas::file_types file_type, lunas::ipath::input_path& ipath,
-	    struct progress_stats& progress_stats)
+				   struct progress_stats& progress_stats)
 	{
 		if (syncstat.code != lunas::sync_code::success)
 		{

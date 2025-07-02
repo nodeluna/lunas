@@ -16,10 +16,12 @@ export import lunas.error;
 import lunas.attributes;
 import lunas.cppfs;
 
-export namespace lunas {
-	namespace file_operations {
-		std::expected<std::monostate, lunas::error> mkdir(
-		    const std::unique_ptr<lunas::sftp>& sftp, const std::string& path, bool dry_run)
+export namespace lunas
+{
+	namespace file_operations
+	{
+		std::expected<std::monostate, lunas::error> mkdir(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path,
+								  bool dry_run)
 		{
 			if (sftp != nullptr)
 			{

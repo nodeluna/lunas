@@ -25,7 +25,8 @@ export import lunas.stdout;
 export import lunas.file;
 import lunas.stats;
 
-export namespace lunas {
+export namespace lunas
+{
 	std::expected<size_t, lunas::error> get_src(const lunas::file_table& file_table, const struct lunas::parsed_data& data)
 	{
 		time_t src_mtime	   = 0;
@@ -89,8 +90,8 @@ export namespace lunas {
 		return src_index;
 	}
 
-	std::expected<std::monostate, enum lunas::error_type> check_dest(
-	    const struct file_metadata& src, const struct file_metadata& dest, struct lunas::parsed_data& data)
+	std::expected<std::monostate, enum lunas::error_type> check_dest(const struct file_metadata& src, const struct file_metadata& dest,
+									 struct lunas::parsed_data& data)
 	{
 		if (src.index == dest.index)
 		{
@@ -142,8 +143,8 @@ export namespace lunas {
 			if ((partition.value()->available() - *src.file_size) < *data.options.minimum_space)
 			{
 				lunas::printerr("partition '{}' is getting full: {}. file size: {}. minimum-space: {}",
-				    data.get_ipath(dest.index).path, size_units(partition.value()->available()), size_units(*src.file_size),
-				    size_units(*data.options.minimum_space));
+						data.get_ipath(dest.index).path, size_units(partition.value()->available()),
+						size_units(*src.file_size), size_units(*data.options.minimum_space));
 				return std::unexpected(lunas::error_type::partition_info);
 			}
 		}

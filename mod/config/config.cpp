@@ -17,14 +17,18 @@ import lunas.stdout;
 import lunas.error;
 import lunas.path;
 
-export namespace lunas {
-	namespace config {
+export namespace lunas
+{
+	namespace config
+	{
 		std::expected<struct lunas::parsed_data, lunas::error> parse_cliarg(const int argc, const char* argv[]);
 	}
 }
 
-namespace lunas {
-	namespace config {
+namespace lunas
+{
+	namespace config
+	{
 		std::expected<struct lunas::parsed_data, lunas::error> parse_cliarg(const int argc, const char* argv[])
 		{
 			std::expected<struct cliarg::cliopts, lunas::error> parsed_data =

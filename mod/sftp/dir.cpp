@@ -17,7 +17,8 @@ export import :attributes;
 import :error;
 import :log;
 
-export namespace lunas {
+export namespace lunas
+{
 	class sftp_dir {
 		private:
 			::sftp_dir m_dir = NULL;
@@ -31,7 +32,8 @@ export namespace lunas {
 	};
 }
 
-namespace lunas {
+namespace lunas
+{
 	sftp_dir::sftp_dir(const sftp_session& sftp, const std::string& path) : m_dir(sftp_opendir(sftp, path.c_str()))
 	{
 		if (m_dir == NULL)

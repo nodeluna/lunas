@@ -12,7 +12,8 @@ export module lunas.presync.fill_tree:types;
 import lunas.config.options;
 import lunas.ipath;
 
-export namespace lunas {
+export namespace lunas
+{
 	struct fill_tree_type {
 			const struct lunas::ipath::input_path* ipath	    = nullptr;
 			size_t				       path_index   = std::numeric_limits<size_t>::max();
@@ -20,9 +21,10 @@ export namespace lunas {
 			const lunas::config::options*	       options	    = nullptr;
 	};
 
-	namespace presync {
-		fill_tree_type prepare_fill_tree_data(
-		    const struct lunas::ipath::input_path* ipath, size_t index, size_t ipaths_count, const lunas::config::options* options)
+	namespace presync
+	{
+		fill_tree_type prepare_fill_tree_data(const struct lunas::ipath::input_path* ipath, size_t index, size_t ipaths_count,
+						      const lunas::config::options* options)
 		{
 
 			struct fill_tree_type data;

@@ -25,9 +25,11 @@ export import lunas.file_types;
 export import lunas.stdout;
 export import lunas.file;
 
-export namespace lunas {
+export namespace lunas
+{
 	std::expected<std::monostate, lunas::error> check_dest_and_sync(const struct file_metadata src, const struct file_metadata& dest,
-	    struct lunas::parsed_data& data, struct progress_stats& progress_stats)
+									struct lunas::parsed_data& data,
+									struct progress_stats&	   progress_stats)
 	{
 
 		const auto& ipaths = data.get_ipaths();
@@ -82,7 +84,7 @@ export namespace lunas {
 	}
 
 	std::expected<std::monostate, lunas::error> updating(const lunas::file_table& file_table, const size_t src_index,
-	    struct lunas::parsed_data& data, struct progress_stats& progress_stats)
+							     struct lunas::parsed_data& data, struct progress_stats& progress_stats)
 	{
 
 		const auto&		      src_metadata = file_table.metadatas.at(src_index);
@@ -106,7 +108,7 @@ export namespace lunas {
 			const std::string dest = ipaths.at(dest_index).path + file_table.path;
 
 			auto ok = check_dest_and_sync(file_metadata(src, src_metadata, src_index, src_size),
-			    file_metadata(dest, dest_metadata, dest_index), data, progress_stats);
+						      file_metadata(dest, dest_metadata, dest_index), data, progress_stats);
 			if (not ok)
 			{
 				if (ok.error().value() == lunas::error_type::dest_check_type_conflict)

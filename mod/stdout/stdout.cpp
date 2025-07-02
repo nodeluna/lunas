@@ -11,7 +11,8 @@ import std.compat;
 
 export module lunas.stdout;
 
-export namespace lunas {
+export namespace lunas
+{
 	template<typename... args_t>
 	void printerr(std::format_string<args_t...> fmt, args_t&&... args)
 	{

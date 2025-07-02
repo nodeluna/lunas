@@ -20,8 +20,10 @@ import std.compat;
 export module lunas.config.file:luco;
 import lunas.stdout;
 
-export namespace lunas {
-	namespace config_file {
+export namespace lunas
+{
+	namespace config_file
+	{
 		class luco {
 			public:
 				explicit luco(const std::string& path);
@@ -55,8 +57,10 @@ export namespace lunas {
 	}
 }
 
-namespace lunas {
-	namespace config_file {
+namespace lunas
+{
+	namespace config_file
+	{
 		enum token_type {
 			NEST_NAME		     = 1 << 0,
 			OPTION_VALUE		     = 1 << 1,
@@ -71,7 +75,8 @@ namespace lunas {
 			UNKNOWN			     = 1 << 10
 		};
 
-		namespace lstring {
+		namespace lstring
+		{
 			constexpr char newline	= '\n';
 			constexpr char newline2 = ';';
 
@@ -188,7 +193,6 @@ namespace lunas {
 
 				return index;
 			}
-
 		}
 
 		luco::luco(const std::string& path)
@@ -457,7 +461,7 @@ namespace lunas {
 			{
 				luco::strerror("duplicate nest '" + nest_name.substr(0, nest_name.size() - 2) +
 						   "' line: " + std::to_string(line_number),
-				    -1);
+					       -1);
 				return false;
 			}
 			return true;
@@ -481,10 +485,10 @@ namespace lunas {
 						skipping_nest	      = true;
 						auto	    nest_name = reg_nest(data, i);
 						std::string nest_val  = nest_name ? nest_name.value() : nest_name.error();
-						nest_stack.push(
-						    {nest_val.find("::") != nest_val.npos ? nest_val.substr(0, nest_val.size() - 2)
-											  : nest_val,
-							line_number});
+						nest_stack.push({nest_val.find("::") != nest_val.npos
+								     ? nest_val.substr(0, nest_val.size() - 2)
+								     : nest_val,
+								 line_number});
 					}
 					if (tokentype & token_type::END_NEST)
 					{
@@ -506,7 +510,7 @@ namespace lunas {
 					nest_stack.push({nest_name.value().find("::") != nest_name.value().npos
 							     ? nest_name.value().substr(0, nest_name.value().size() - 2)
 							     : nest_name.value(),
-					    line_number});
+							 line_number});
 
 					luco::duplicate_nested_nest(parent_nest, nest_name.value());
 					ldata.insert(std::make_pair(parent_nest + nest_name.value(), ""));
@@ -521,8 +525,8 @@ namespace lunas {
 					}
 					else if (pair.second.empty())
 					{
-						luco::strerror(
-						    "empty option '" + pair.first + "' line: " + std::to_string(line_number), -1);
+						luco::strerror("empty option '" + pair.first + "' line: " + std::to_string(line_number),
+							       -1);
 					}
 					ldata.insert(std::make_pair(parent_nest + pair.first, pair.second));
 				}
@@ -530,8 +534,8 @@ namespace lunas {
 				{
 					if (nest_stack.empty())
 					{
-						luco::strerror(
-						    "formatting error: extra seperator, line: " + std::to_string(line_number), -1);
+						luco::strerror("formatting error: extra seperator, line: " + std::to_string(line_number),
+							       -1);
 					}
 					else
 					{
@@ -551,7 +555,7 @@ namespace lunas {
 			{
 				luco::strerror("missing closing bracket in nest '" + nest_stack.top().first +
 						   "' line: " + std::to_string(nest_stack.top().second),
-				    -1);
+					       -1);
 			}
 
 			return ldata;

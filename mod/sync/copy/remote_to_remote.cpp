@@ -23,31 +23,40 @@ import lunas.config.options;
 import lunas.stdout;
 
 #ifdef REMOTE_ENABLED
-export namespace lunas {
-	namespace remote_to_remote {
+export namespace lunas
+{
+	namespace remote_to_remote
+	{
 		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc);
+								  const std::unique_ptr<lunas::sftp>& src_sftp,
+								  const std::unique_ptr<lunas::sftp>& dest_sftp,
+								  const struct syncmisc&	      misc);
 
 		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc);
+								   const std::unique_ptr<lunas::sftp>& src_sftp,
+								   const std::unique_ptr<lunas::sftp>& dest_sftp,
+								   const struct syncmisc&	       misc);
 
 		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc);
+								   const std::unique_ptr<lunas::sftp>& src_sftp,
+								   const std::unique_ptr<lunas::sftp>& dest_sftp,
+								   const struct syncmisc&	       misc);
 
 		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc);
+								     const std::unique_ptr<lunas::sftp>& src_sftp,
+								     const std::unique_ptr<lunas::sftp>& dest_sftp,
+								     const struct syncmisc&		 misc);
 	}
 }
 
-namespace lunas {
-	namespace remote_to_remote {
+namespace lunas
+{
+	namespace remote_to_remote
+	{
 		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc)
+								  const std::unique_ptr<lunas::sftp>& src_sftp,
+								  const std::unique_ptr<lunas::sftp>& dest_sftp,
+								  const struct syncmisc&	      misc)
 		{
 
 			std::expected<struct syncstat, lunas::error> syncstat;
@@ -85,8 +94,9 @@ namespace lunas {
 		}
 
 		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc)
+								   const std::unique_ptr<lunas::sftp>& src_sftp,
+								   const std::unique_ptr<lunas::sftp>& dest_sftp,
+								   const struct syncmisc&	       misc)
 		{
 			struct syncstat syncstat;
 
@@ -213,8 +223,8 @@ namespace lunas {
 				}
 
 			read_again:
-				read_done = src_file.value()->aio_wait_read(
-				    rqueue.front().aio.value(), rqueue.front().buffer, rqueue.front().aio.value()->get_bytes_requested());
+				read_done = src_file.value()->aio_wait_read(rqueue.front().aio.value(), rqueue.front().buffer,
+									    rqueue.front().aio.value()->get_bytes_requested());
 				if (not read_done && read_done.error().value() == lunas::error_type::ssh_again)
 				{
 					goto read_again;
@@ -295,8 +305,9 @@ namespace lunas {
 		}
 
 		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc)
+								   const std::unique_ptr<lunas::sftp>& src_sftp,
+								   const std::unique_ptr<lunas::sftp>& dest_sftp,
+								   const struct syncmisc&	       misc)
 		{
 			struct syncstat syncstat;
 			if (misc.options.dry_run)
@@ -332,8 +343,9 @@ namespace lunas {
 		}
 
 		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc)
+								     const std::unique_ptr<lunas::sftp>& src_sftp,
+								     const std::unique_ptr<lunas::sftp>& dest_sftp,
+								     const struct syncmisc&		 misc)
 		{
 			struct syncstat syncstat;
 			if (misc.options.dry_run)
@@ -367,6 +379,5 @@ namespace lunas {
 			return syncstat;
 		}
 	}
-
 }
 #endif // REMOTE_ENABLED

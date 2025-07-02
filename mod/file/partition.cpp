@@ -15,7 +15,8 @@ export module lunas.file:partition;
 export import lunas.sftp;
 export import lunas.error;
 
-export namespace lunas {
+export namespace lunas
+{
 	class partition {
 		private:
 			std::variant<std::unique_ptr<lunas::sftp_partition>, std::filesystem::space_info> _partition;
@@ -26,12 +27,12 @@ export namespace lunas {
 			std::uintmax_t capacity();
 	};
 
-	std::expected<std::unique_ptr<lunas::partition>, lunas::error> get_partition(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path);
-
+	std::expected<std::unique_ptr<lunas::partition>, lunas::error> get_partition(const std::unique_ptr<lunas::sftp>& sftp,
+										     const std::filesystem::path&	 path);
 }
 
-namespace lunas {
+namespace lunas
+{
 	partition::partition(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path path)
 	{
 		if (sftp != nullptr)
@@ -83,8 +84,8 @@ namespace lunas {
 		}
 	}
 
-	std::expected<std::unique_ptr<lunas::partition>, lunas::error> get_partition(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path)
+	std::expected<std::unique_ptr<lunas::partition>, lunas::error> get_partition(const std::unique_ptr<lunas::sftp>& sftp,
+										     const std::filesystem::path&	 path)
 	{
 		try
 		{

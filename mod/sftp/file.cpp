@@ -19,7 +19,8 @@ export import :error;
 import :log;
 export import lunas.error;
 
-export namespace lunas {
+export namespace lunas
+{
 	class sftp_file;
 
 	class sftp_aio {
@@ -45,20 +46,21 @@ export namespace lunas {
 			sftp_file(const sftp_session& sftp, const std::string& path, int access_type, mode_t mode);
 			sftp_file(const sftp_session& sftp, const std::string& path, int access_type, std::filesystem::perms mode);
 			~sftp_file();
-			[[nodiscard]] std::expected<std::unique_ptr<lunas::sftp_aio>, lunas::error> aio_begin_write(
-			    const std::vector<char>& buffer, size_t length);
+			[[nodiscard]] std::expected<std::unique_ptr<lunas::sftp_aio>, lunas::error>
+								       aio_begin_write(const std::vector<char>& buffer, size_t length);
 			[[nodiscard]] std::expected<int, lunas::error> aio_wait_write(std::unique_ptr<lunas::sftp_aio>& aio);
 
 			[[nodiscard]] std::expected<std::unique_ptr<lunas::sftp_aio>, lunas::error> aio_begin_read(size_t length);
-			[[nodiscard]] std::expected<int, lunas::error>				    aio_wait_read(
-							 std::unique_ptr<lunas::sftp_aio>& aio, std::vector<char>& buffer, size_t length);
+			[[nodiscard]] std::expected<int, lunas::error> aio_wait_read(std::unique_ptr<lunas::sftp_aio>& aio,
+										     std::vector<char>& buffer, size_t length);
 
 			std::expected<std::monostate, lunas::error> fsync();
 			std::expected<std::monostate, lunas::error> seek64(uint64_t new_offset);
 	};
 }
 
-namespace lunas {
+namespace lunas
+{
 	sftp_aio::sftp_aio()
 	{
 	}
@@ -113,8 +115,8 @@ namespace lunas {
 		}
 	}
 
-	[[nodiscard]] std::expected<std::unique_ptr<lunas::sftp_aio>, lunas::error> sftp_file::aio_begin_write(
-	    const std::vector<char>& buffer, size_t length)
+	[[nodiscard]] std::expected<std::unique_ptr<lunas::sftp_aio>, lunas::error>
+	sftp_file::aio_begin_write(const std::vector<char>& buffer, size_t length)
 	{
 		std::unique_ptr<lunas::sftp_aio> aio		 = std::make_unique<lunas::sftp_aio>();
 		int				 bytes_requested = sftp_aio_begin_write(file, buffer.data(), length, aio->get_aio_handle());
@@ -156,8 +158,8 @@ namespace lunas {
 		return aio;
 	}
 
-	[[nodiscard]] std::expected<int, lunas::error> sftp_file::aio_wait_read(
-	    std::unique_ptr<lunas::sftp_aio>& aio, std::vector<char>& buffer, size_t length)
+	[[nodiscard]] std::expected<int, lunas::error> sftp_file::aio_wait_read(std::unique_ptr<lunas::sftp_aio>& aio,
+										std::vector<char>& buffer, size_t length)
 	{
 		int bytes_written = sftp_aio_wait_read(aio->get_aio_handle(), buffer.data(), length);
 

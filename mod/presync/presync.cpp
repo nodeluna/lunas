@@ -19,11 +19,13 @@ import lunas.error;
 import lunas.ipath;
 import lunas.stdout;
 
-export namespace lunas {
+export namespace lunas
+{
 	std::expected<std::variant<lunas::content, std::monostate>, lunas::error> presync_operations(const lunas::parsed_data& cliopts);
 }
 
-namespace lunas {
+namespace lunas
+{
 	bool more_than_one_source(const std::vector<lunas::ipath::input_path>& ipaths)
 	{
 		bool found_source = false;

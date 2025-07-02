@@ -24,9 +24,12 @@ import lunas.stdout;
 import lunas.error;
 import lunas.file_types;
 
-export namespace lunas {
-	namespace config {
-		namespace filler {
+export namespace lunas
+{
+	namespace config
+	{
+		namespace filler
+		{
 			bool is_num(const std::string& x)
 			{
 				return std::all_of(x.begin(), x.end(), [](char c) { return std::isdigit(c); });
@@ -36,22 +39,22 @@ export namespace lunas {
 			{
 				bool has_decimal = false;
 				return std::all_of(x.begin(), x.end(),
-				    [&](char c)
-				    {
-					    if (std::isdigit(c))
-					    {
-						    return true;
-					    }
-					    else if (c == '.' && not has_decimal)
-					    {
-						    has_decimal = true;
-						    return true;
-					    }
-					    else
-					    {
-						    return false;
-					    }
-				    });
+						   [&](char c)
+						   {
+							   if (std::isdigit(c))
+							   {
+								   return true;
+							   }
+							   else if (c == '.' && not has_decimal)
+							   {
+								   has_decimal = true;
+								   return true;
+							   }
+							   else
+							   {
+								   return false;
+							   }
+						   });
 			}
 
 			struct lunas::ipath::local_path fill_local_path(const std::string& argument, const lunas::ipath::srcdest& srcdest)
@@ -100,8 +103,8 @@ export namespace lunas {
 				return lunas::ipath::srcdest::dest;
 			}
 
-			std::expected<std::monostate, lunas::error> compression_level(
-			    const std::string& data, lunas::config::options& options)
+			std::expected<std::monostate, lunas::error> compression_level(const std::string&      data,
+										      lunas::config::options& options)
 			{
 				if (is_num(data) == false)
 				{
@@ -206,8 +209,8 @@ export namespace lunas {
 				return std::monostate();
 			}
 
-			std::expected<std::monostate, lunas::error> exclude_pattern(
-			    const std::string& data, lunas::config::options& options)
+			std::expected<std::monostate, lunas::error> exclude_pattern(const std::string&	    data,
+										    lunas::config::options& options)
 			{
 				std::string path = data;
 				lunas::path::pop_seperator(path);
@@ -462,8 +465,8 @@ export namespace lunas {
 				return std::monostate();
 			}
 
-			std::expected<std::monostate, lunas::error> attributes_atime(
-			    const std::string& data, lunas::config::options& options)
+			std::expected<std::monostate, lunas::error> attributes_atime(const std::string&	     data,
+										     lunas::config::options& options)
 			{
 				if (data == "on")
 				{
@@ -480,8 +483,8 @@ export namespace lunas {
 				return std::monostate();
 			}
 
-			std::expected<std::monostate, lunas::error> attributes_mtime(
-			    const std::string& data, lunas::config::options& options)
+			std::expected<std::monostate, lunas::error> attributes_mtime(const std::string&	     data,
+										     lunas::config::options& options)
 			{
 				if (data == "on")
 				{
@@ -498,8 +501,8 @@ export namespace lunas {
 				return std::monostate();
 			}
 
-			std::expected<std::monostate, lunas::error> attributes_utimes(
-			    const std::string& data, lunas::config::options& options)
+			std::expected<std::monostate, lunas::error> attributes_utimes(const std::string&      data,
+										      lunas::config::options& options)
 			{
 				if (data == "on")
 				{
@@ -548,11 +551,11 @@ export namespace lunas {
 								    const std::string& data, lunas::config::options& options)>>
 				    attributes_options = {
 					{	 "own",	attributes_own},
-					{	 "uid",	attributes_uid},
-					{	 "gid",	attributes_gid},
+					     {   "uid",    attributes_uid},
+					  {   "gid",	  attributes_gid},
 					{ "atime",  attributes_atime},
-					{ "mtime",  attributes_mtime},
-					{"utimes", attributes_utimes},
+					     { "mtime",  attributes_mtime},
+					  {"utimes", attributes_utimes},
 					{	 "all",	attributes_all},
 				    };
 
@@ -580,21 +583,21 @@ export namespace lunas {
 							std::string arg;
 							bool	    found_seperator = false;
 							std::ranges::for_each(++it, data.end(),
-							    [&](const char c)
-							    {
-								    if (c != '=' && c != ',' && not found_seperator)
-								    {
-									    if (std::next(it) != data.end())
-									    {
-										    ++it;
-									    }
-									    arg += c;
-								    }
-								    else
-								    {
-									    found_seperator = true;
-								    }
-							    });
+									      [&](const char c)
+									      {
+										      if (c != '=' && c != ',' && not found_seperator)
+										      {
+											      if (std::next(it) != data.end())
+											      {
+												      ++it;
+											      }
+											      arg += c;
+										      }
+										      else
+										      {
+											      found_seperator = true;
+										      }
+									      });
 							if (not itr->second(arg, options))
 							{
 								std::string err = "invalid argument '" + arg +
@@ -713,7 +716,7 @@ export namespace lunas {
 				{
 					lunas::warn("invalid ssh log level '{}'. valid levels [nolog, warning, protocol, packet, "
 						    "functions] default is nolog",
-					    data);
+						    data);
 					exit(1);
 				}
 
@@ -740,7 +743,8 @@ export namespace lunas {
 			}
 		}
 
-		namespace info {
+		namespace info
+		{
 			void author(void)
 			{
 				std::println("{}", lunas::about::author);

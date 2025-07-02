@@ -20,22 +20,24 @@ import lunas.file;
 import lunas.exclude;
 import lunas.cppfs;
 
-export namespace lunas {
-	std::expected<std::monostate, lunas::error> remove(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::string& path, lunas::file_types file_type, bool dry_run);
+export namespace lunas
+{
+	std::expected<std::monostate, lunas::error> remove(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path,
+							   lunas::file_types file_type, bool dry_run);
 
-	std::expected<std::uintmax_t, lunas::error> get_size_and_remove(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::string& path, lunas::file_types file_type, bool dry_run);
+	std::expected<std::uintmax_t, lunas::error> get_size_and_remove(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path,
+									lunas::file_types file_type, bool dry_run);
 
 	void register_remove(const std::uintmax_t& file_size, lunas::file_types file_type, lunas::ipath::input_path& ipath);
 
-	std::expected<std::monostate, lunas::error> remove_extra(
-	    struct lunas::parsed_data& data, const std::string& path, const size_t& src_index, const size_t& dest_index);
+	std::expected<std::monostate, lunas::error> remove_extra(struct lunas::parsed_data& data, const std::string& path,
+								 const size_t& src_index, const size_t& dest_index);
 }
 
-namespace lunas {
-	std::expected<std::monostate, lunas::error> remove(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::string& path, lunas::file_types file_type, bool dry_run)
+namespace lunas
+{
+	std::expected<std::monostate, lunas::error> remove(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path,
+							   lunas::file_types file_type, bool dry_run)
 	{
 
 		if (sftp != nullptr)
@@ -69,8 +71,8 @@ namespace lunas {
 		return std::monostate();
 	}
 
-	std::expected<std::uintmax_t, lunas::error> get_size_and_remove(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::string& path, lunas::file_types file_type, bool dry_run)
+	std::expected<std::uintmax_t, lunas::error> get_size_and_remove(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path,
+									lunas::file_types file_type, bool dry_run)
 	{
 		if (file_type == lunas::file_types::regular_file || file_type == lunas::file_types::resume_regular_file)
 		{
@@ -113,8 +115,8 @@ namespace lunas {
 		ipath.increment_stats_removed_size(file_size);
 	}
 
-	std::expected<std::monostate, lunas::error> remove_extra(
-	    struct lunas::parsed_data& data, const std::string& path, const size_t& src_index, const size_t& dest_index)
+	std::expected<std::monostate, lunas::error> remove_extra(struct lunas::parsed_data& data, const std::string& path,
+								 const size_t& src_index, const size_t& dest_index)
 	{
 		const auto&		 ipaths		   = data.get_ipaths();
 		struct directory_options directory_options = {
@@ -184,8 +186,9 @@ namespace lunas {
 			else if (not src_file && src_file.error().value() == lunas::error_type::no_such_file)
 			{
 				lunas::print_remove_extra(dest_file.value().path);
-				auto file_size = lunas::get_size_and_remove(ipaths.at(dest_index).sftp, dest_file.value().path,
-				    std::get<lunas::file_types>(dest_file->file_type), data.options.dry_run);
+				auto file_size =
+				    lunas::get_size_and_remove(ipaths.at(dest_index).sftp, dest_file.value().path,
+							       std::get<lunas::file_types>(dest_file->file_type), data.options.dry_run);
 				if (not file_size)
 				{
 					lunas::printerr("{}", file_size.error().message());
@@ -193,7 +196,7 @@ namespace lunas {
 				else
 				{
 					lunas::register_remove(file_size.value(), std::get<lunas::file_types>(dest_file->file_type),
-					    data.get_ipath(dest_index));
+							       data.get_ipath(dest_index));
 				}
 			}
 		}

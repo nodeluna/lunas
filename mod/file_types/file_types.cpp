@@ -9,7 +9,8 @@ import std.compat;
 
 export module lunas.file_types;
 
-export namespace lunas {
+export namespace lunas
+{
 	enum class file_types : uint8_t {
 		not_found = 0,
 		regular_file,

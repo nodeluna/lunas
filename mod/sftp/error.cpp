@@ -13,7 +13,8 @@ import std;
 export module lunas.sftp:error;
 export import lunas.error;
 
-export namespace lunas {
+export namespace lunas
+{
 	lunas::error ssh_error(const sftp_session& sftp);
 	lunas::error ssh_error(const sftp_session& sftp, const std::string& message);
 	lunas::error ssh_error(const ssh_session& ssh);
@@ -21,7 +22,8 @@ export namespace lunas {
 	lunas::error ssh_error(const ssh_session& ssh, const std::string& message);
 }
 
-namespace lunas {
+namespace lunas
+{
 	void sftp_error_filling(const sftp_session& sftp, std::string& msg, lunas::error_type& type)
 	{
 		ssh_session& _ssh_session = sftp->session;

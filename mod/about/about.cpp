@@ -14,8 +14,10 @@ export module lunas.about;
 #	define LOCAL_ONLY true
 #endif
 
-export namespace lunas {
-	namespace about {
+export namespace lunas
+{
+	namespace about
+	{
 		inline std::string author = "\n  -> nodeluna - nodeluna@proton.me"
 					    "\n  -> https://github.com/nodeluna\n";
 

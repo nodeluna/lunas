@@ -18,8 +18,10 @@ import lunas.config.options;
 import lunas.sftp;
 import lunas.path;
 
-export namespace lunas {
-	namespace ipath {
+export namespace lunas
+{
+	namespace ipath
+	{
 		struct sync_stats {
 				std::uintmax_t synced_size   = 0;
 				std::uintmax_t synced_files  = 0;

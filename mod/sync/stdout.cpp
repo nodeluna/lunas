@@ -13,7 +13,8 @@ export import :types;
 export import lunas.file_types;
 export import lunas.stdout;
 
-export namespace lunas {
+export namespace lunas
+{
 	void print_sync(const std::string& src, const std::string& dest, const struct lunas::syncmisc& misc)
 	{
 		if (misc.options.quiet)

@@ -25,8 +25,10 @@ struct ssh_key_data {
 		key_type_t	  key_type   = key_type_t::none;
 };
 
-namespace raii {
-	namespace sftp {
+namespace raii
+{
+	namespace sftp
+	{
 		class channel {
 				ssh_channel* _channel;
 
@@ -38,7 +40,8 @@ namespace raii {
 		};
 	}
 
-	namespace ssh {
+	namespace ssh
+	{
 		class key {
 				ssh_key key_t;
 				bool	free_key = false;
@@ -55,8 +58,10 @@ namespace raii {
 	}
 }
 
-namespace raii {
-	namespace sftp {
+namespace raii
+{
+	namespace sftp
+	{
 		channel::channel(ssh_channel* channel_) : _channel(channel_)
 		{
 		}
@@ -70,10 +75,10 @@ namespace raii {
 			ssh_channel_close(*_channel);
 			ssh_channel_free(*_channel);
 		}
-
 	}
 
-	namespace ssh {
+	namespace ssh
+	{
 		key::key()
 		{
 		}

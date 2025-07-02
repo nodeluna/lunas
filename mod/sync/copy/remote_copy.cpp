@@ -22,11 +22,14 @@ export import lunas.stdout;
 
 #ifdef REMOTE_ENABLED
 
-export namespace lunas {
-	namespace remote {
+export namespace lunas
+{
+	namespace remote
+	{
 		std::expected<lunas::syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const lunas::syncmisc& misc)
+								  const std::unique_ptr<lunas::sftp>& src_sftp,
+								  const std::unique_ptr<lunas::sftp>& dest_sftp,
+								  const lunas::syncmisc&	      misc)
 		{
 
 			lunas::print_sync(src, dest, misc);

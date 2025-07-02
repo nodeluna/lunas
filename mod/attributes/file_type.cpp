@@ -14,13 +14,15 @@ export module lunas.attributes:file_type;
 export import lunas.error;
 export import lunas.file_types;
 
-export namespace lunas {
+export namespace lunas
+{
 	std::expected<lunas::file_types, lunas::error> get_file_type(const std::string& path, lunas::follow_symlink follow);
 	lunas::file_types			       get_file_type(const std::filesystem::file_status& status);
 	std::expected<bool, lunas::error>	       is_broken_link(const std::string& path);
 }
 
-namespace lunas {
+namespace lunas
+{
 	lunas::file_types enum_file_types(std::filesystem::file_status entry)
 	{
 		if (entry.type() == std::filesystem::file_type::symlink)

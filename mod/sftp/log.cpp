@@ -11,7 +11,8 @@ import std;
 
 export module lunas.sftp:log;
 
-namespace llog {
+namespace llog
+{
 	void error(const std::string& data)
 	{
 		std::println("\x1b[1;31m-[X] {}\x1b[0m", data);
@@ -28,7 +29,8 @@ namespace llog {
 	}
 }
 
-namespace fmt {
+namespace fmt
+{
 	std::string err_path(const std::string_view& error, const std::string_view& path)
 	{
 		return std::format("{} '{}'", error, path);

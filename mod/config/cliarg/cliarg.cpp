@@ -25,8 +25,10 @@ import lunas.sftp;
 import lunas.ipath;
 import lunas.error;
 
-export namespace lunas {
-	namespace cliarg {
+export namespace lunas
+{
+	namespace cliarg
+	{
 		struct cliopts {
 				std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>> ipaths;
 				lunas::config::options									     options;
@@ -37,13 +39,16 @@ export namespace lunas {
 		using options	= lunas::config::options;
 		using paths_vec = std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>;
 
-		std::expected<struct cliopts, lunas::error> fillopts(const int& argc, const char* argv[],
-		    std::function<expect(const std::string&, options&, paths_vec&)> config_file_preset);
+		std::expected<struct cliopts, lunas::error>
+		fillopts(const int& argc, const char* argv[],
+			 std::function<expect(const std::string&, options&, paths_vec&)> config_file_preset);
 	}
 }
 
-namespace lunas {
-	namespace cliarg {
+namespace lunas
+{
+	namespace cliarg
+	{
 		bool is_num(const std::string& x)
 		{
 			return std::all_of(x.begin(), x.end(), [](char c) { return std::isdigit(c); });
@@ -55,22 +60,22 @@ namespace lunas {
 			{
 				return std::unexpected(
 				    lunas::error(std::format("argument for option '{}' wasn't provided, exiting", argv[i]),
-					lunas::error_type::config_missing_argument));
+						 lunas::error_type::config_missing_argument));
 			}
 
 			if (argv[i + 1][0] == '-')
 			{
 				return std::unexpected(
 				    lunas::error(std::format("invalid argument '{}' for option '{}', exiting", argv[i + 1], argv[i]),
-					lunas::error_type::config_invalid_argument));
+						 lunas::error_type::config_invalid_argument));
 			}
 
 			return std::monostate();
 		}
 
 #ifdef REMOTE_ENABLED
-		std::expected<struct lunas::ipath::remote_path, lunas::error> fill_remote_path(
-		    const int& argc, const char* argv[], int& index, const lunas::ipath::srcdest& srcdest)
+		std::expected<struct lunas::ipath::remote_path, lunas::error>
+		fill_remote_path(const int& argc, const char* argv[], int& index, const lunas::ipath::srcdest& srcdest)
 		{
 			struct lunas::ipath::remote_path rpath;
 			rpath.srcdest	      = srcdest;
@@ -103,7 +108,7 @@ namespace lunas {
 					if (port < 0)
 					{
 						std::string err = std::format("port number '{}' for '{}' can't be negative ",
-						    std::to_string(port), rpath.session_data.ip);
+									      std::to_string(port), rpath.session_data.ip);
 						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
 					}
 					rpath.session_data.port = port;
@@ -126,8 +131,9 @@ namespace lunas {
 		using options	= lunas::config::options;
 		using paths_vec = std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>;
 
-		std::expected<struct cliopts, lunas::error> fillopts(
-		    const int& argc, const char* argv[], std::function<expect(const std::string&, options&, paths_vec&)> config_file_preset)
+		std::expected<struct cliopts, lunas::error>
+		fillopts(const int& argc, const char* argv[],
+			 std::function<expect(const std::string&, options&, paths_vec&)> config_file_preset)
 		{
 
 			auto	       lpaths_options = lunas::config::get_lpaths_options();

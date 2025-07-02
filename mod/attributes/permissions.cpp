@@ -19,22 +19,26 @@ export import lunas.error;
 
 namespace fs = std::filesystem;
 
-export namespace lunas {
-	namespace permissions {
+export namespace lunas
+{
+	namespace permissions
+	{
 		std::expected<bool, lunas::error> is_file_readable(const std::string& path, lunas::follow_symlink follow);
 
 		std::expected<std::filesystem::perms, lunas::error> get(const std::string& path, lunas::follow_symlink follow);
 
-		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, std::filesystem::perms permissions, lunas::follow_symlink follow);
+		std::expected<std::monostate, lunas::error> set(const std::string& path, std::filesystem::perms permissions,
+								lunas::follow_symlink follow);
 
-		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, unsigned int permissions, lunas::follow_symlink follow);
+		std::expected<std::monostate, lunas::error> set(const std::string& path, unsigned int permissions,
+								lunas::follow_symlink follow);
 	}
 }
 
-namespace lunas {
-	namespace permissions {
+namespace lunas
+{
+	namespace permissions
+	{
 		std::expected<bool, lunas::error> is_file_readable(const std::string& path, lunas::follow_symlink follow)
 		{
 			auto perms = permissions::get(path, follow);
@@ -71,8 +75,8 @@ namespace lunas {
 			return perms;
 		}
 
-		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, std::filesystem::perms permissions, lunas::follow_symlink follow)
+		std::expected<std::monostate, lunas::error> set(const std::string& path, std::filesystem::perms permissions,
+								lunas::follow_symlink follow)
 		{
 			std::error_code		      ec;
 			std::filesystem::perm_options perm_options = std::filesystem::perm_options::replace;
@@ -91,8 +95,8 @@ namespace lunas {
 			return std::monostate();
 		}
 
-		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, unsigned int permissions, lunas::follow_symlink follow)
+		std::expected<std::monostate, lunas::error> set(const std::string& path, unsigned int permissions,
+								lunas::follow_symlink follow)
 		{
 			return set(path, ( std::filesystem::perms ) permissions, follow);
 		}

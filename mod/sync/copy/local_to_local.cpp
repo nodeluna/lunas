@@ -41,7 +41,8 @@ struct lbuffque {
 		}
 };
 
-export namespace lunas {
+export namespace lunas
+{
 	class jthread {
 		private:
 			std::thread thread;
@@ -64,32 +65,38 @@ export namespace lunas {
 			}
 	};
 
-	void fstream_aio_read_begin(
-	    std::unique_ptr<std::fstream>& src_file, std::queue<lbuffque>* queue, std::uintmax_t position, size_t queue_limit);
+	void fstream_aio_read_begin(std::unique_ptr<std::fstream>& src_file, std::queue<lbuffque>* queue, std::uintmax_t position,
+				    size_t queue_limit);
 	struct lbuffque fstream_aio_wait_read(std::queue<lbuffque>& queue);
 
-	namespace local_to_local {
-		std::expected<struct syncstat, lunas::error> copy(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc);
-		std::expected<struct syncstat, lunas::error> link(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc);
-		std::expected<struct syncstat, lunas::error> rfile(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc);
-		std::expected<struct syncstat, lunas::error> mkdir(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc);
-		std::expected<struct syncstat, lunas::error> symlink(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc);
+	namespace local_to_local
+	{
+		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
+								  const struct syncmisc& misc);
 
+		std::expected<struct syncstat, lunas::error> link(const std::string& src, const std::string& dest,
+								  const struct syncmisc& misc);
+
+		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
+								   const struct syncmisc& misc);
+
+		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
+								   const struct syncmisc& misc);
+
+		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
+								     const struct syncmisc& misc);
 	}
 }
 
-namespace lunas {
-	namespace local_to_local {
+namespace lunas
+{
+	namespace local_to_local
+	{
 		std::mutex		file_mutex;
 		std::condition_variable cv;
 
-		void fstream_aio_read_begin(
-		    std::unique_ptr<std::fstream>& src_file, std::queue<lbuffque>* queue, std::uintmax_t position, size_t queue_limit)
+		void fstream_aio_read_begin(std::unique_ptr<std::fstream>& src_file, std::queue<lbuffque>* queue, std::uintmax_t position,
+					    size_t queue_limit)
 		{
 			const std::uint64_t buffer_size = LOCAL_BUFFER_SIZE;
 			while (not src_file->eof())
@@ -140,8 +147,8 @@ namespace lunas {
 			return lbuffque;
 		}
 
-		std::expected<struct syncstat, lunas::error> copy(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
+								  const struct syncmisc& misc)
 		{
 			std::expected<struct syncstat, lunas::error> syncstat;
 
@@ -157,8 +164,8 @@ namespace lunas {
 					auto syncstat = local_to_local::rfile(src, dest_lspart, misc);
 					if (syncstat)
 					{
-						struct lunas::local::original_name _(
-						    dest_lspart, dest, syncstat.value().code, misc.options.dry_run);
+						struct lunas::local::original_name _(dest_lspart, dest, syncstat.value().code,
+										     misc.options.dry_run);
 					}
 					return syncstat;
 				};
@@ -182,8 +189,8 @@ namespace lunas {
 			return syncstat;
 		}
 
-		std::expected<struct syncstat, lunas::error> link(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		std::expected<struct syncstat, lunas::error> link(const std::string& src, const std::string& dest,
+								  const struct syncmisc& misc)
 		{
 			struct syncstat syncstat;
 			if (misc.options.dry_run)
@@ -217,8 +224,8 @@ namespace lunas {
 			}
 		}
 
-		std::expected<struct syncstat, lunas::error> rfile(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
+								   const struct syncmisc& misc)
 		{
 			struct syncstat syncstat;
 			std::error_code ec;
@@ -340,8 +347,8 @@ namespace lunas {
 			return syncstat;
 		}
 
-		std::expected<struct syncstat, lunas::error> mkdir(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
+								   const struct syncmisc& misc)
 		{
 			struct syncstat syncstat;
 			if (misc.options.dry_run)
@@ -374,8 +381,8 @@ namespace lunas {
 			return syncstat;
 		}
 
-		std::expected<struct syncstat, lunas::error> symlink(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
+								     const struct syncmisc& misc)
 		{
 			struct syncstat syncstat;
 			if (misc.options.dry_run)
@@ -408,5 +415,4 @@ namespace lunas {
 			return syncstat;
 		}
 	}
-
 }

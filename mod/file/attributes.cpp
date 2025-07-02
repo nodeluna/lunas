@@ -25,15 +25,16 @@ import lunas.attributes;
 import lunas.error;
 import lunas.stdout;
 
-export namespace lunas {
+export namespace lunas
+{
 	class attributes {
 		private:
 			std::variant<std::unique_ptr<lunas::sftp_attributes>, std::pair<struct stat, lunas::file_types>> file_attributes;
 			const std::filesystem::path									 file_path;
 
 		public:
-			attributes(
-			    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow);
+			attributes(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path,
+				   lunas::follow_symlink follow);
 			bool		  exists();
 			std::string	  name();
 			std::string	  path();
@@ -42,11 +43,12 @@ export namespace lunas {
 			std::uintmax_t	  file_size();
 	};
 
-	std::expected<std::unique_ptr<lunas::attributes>, lunas::error> get_attributes(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow);
+	std::expected<std::unique_ptr<lunas::attributes>, lunas::error>
+	get_attributes(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow);
 }
 
-namespace lunas {
+namespace lunas
+{
 	attributes::attributes(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow)
 	    : file_path(path)
 	{
@@ -161,8 +163,8 @@ namespace lunas {
 		}
 	}
 
-	std::expected<std::unique_ptr<lunas::attributes>, lunas::error> get_attributes(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow)
+	std::expected<std::unique_ptr<lunas::attributes>, lunas::error>
+	get_attributes(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow)
 	{
 		try
 		{

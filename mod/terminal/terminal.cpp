@@ -5,7 +5,8 @@ module;
 
 export module lunas.terminal;
 
-export namespace lunas {
+export namespace lunas
+{
 	struct termsize {
 			unsigned short ts_row;
 			unsigned short ts_col;

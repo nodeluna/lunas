@@ -13,13 +13,15 @@ import std.compat;
 export module lunas.stats;
 import lunas.ipath;
 
-export namespace lunas {
+export namespace lunas
+{
 	std::string decimal_precision(const double& number, const int& percision);
 	std::string size_units(const std::uintmax_t& bytes);
 	void	    print_stats(const struct lunas::parsed_data& data);
 }
 
-namespace lunas {
+namespace lunas
+{
 	std::string decimal_precision(const double& number, const int& percision)
 	{
 		const std::string temp = std::to_string(number);

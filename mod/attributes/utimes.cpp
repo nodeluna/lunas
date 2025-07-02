@@ -32,7 +32,8 @@ import lunas.error;
 #	endif
 #endif
 
-export namespace lunas {
+export namespace lunas
+{
 	enum class time_type {
 		atime  = 1,
 		mtime  = 2,
@@ -46,17 +47,20 @@ export namespace lunas {
 			time_t mtime_nsec = 0;
 	};
 
-	namespace utime {
-		std::expected<struct time_val, lunas::error> get(
-		    const std::string& path, const time_type utime, lunas::follow_symlink follow);
+	namespace utime
+	{
+		std::expected<struct time_val, lunas::error> get(const std::string& path, const time_type utime,
+								 lunas::follow_symlink follow);
 
-		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, const struct time_val& time_val, lunas::follow_symlink follow);
+		std::expected<std::monostate, lunas::error> set(const std::string& path, const struct time_val& time_val,
+								lunas::follow_symlink follow);
 	}
 }
 
-namespace lunas {
-	namespace utime {
+namespace lunas
+{
+	namespace utime
+	{
 		int switch_fill_local(struct time_val& time_val, const struct stat& stats, const time_type utime)
 		{
 			struct timespec timespec;
@@ -111,8 +115,8 @@ namespace lunas {
 			return 0;
 		}
 
-		std::expected<struct time_val, lunas::error> get(
-		    const std::string& path, const time_type utime, lunas::follow_symlink follow)
+		std::expected<struct time_val, lunas::error> get(const std::string& path, const time_type utime,
+								 lunas::follow_symlink follow)
 		{
 			struct stat	stats;
 			struct time_val time_val;
@@ -143,8 +147,8 @@ namespace lunas {
 			return time_val;
 		}
 
-		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, const struct time_val& time_val, lunas::follow_symlink follow)
+		std::expected<std::monostate, lunas::error> set(const std::string& path, const struct time_val& time_val,
+								lunas::follow_symlink follow)
 		{
 			struct timeval times[2];
 			int	       rv = 0;
@@ -172,7 +176,5 @@ namespace lunas {
 
 			return std::monostate();
 		}
-
 	}
-
 }

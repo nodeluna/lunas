@@ -11,8 +11,10 @@ import std.compat;
 export module lunas.path;
 export import lunas.error;
 
-export namespace lunas {
-	namespace path {
+export namespace lunas
+{
+	namespace path
+	{
 		void append_seperator(std::string& path) noexcept;
 
 		void pop_seperator(std::string& path) noexcept;
@@ -25,8 +27,10 @@ export namespace lunas {
 	}
 }
 
-namespace lunas {
-	namespace path {
+namespace lunas
+{
+	namespace path
+	{
 		void append_seperator(std::string& path) noexcept
 		{
 			if (path.empty() != true && path.back() != std::filesystem::path::preferred_separator)

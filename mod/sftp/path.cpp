@@ -11,7 +11,8 @@ export module lunas.sftp:path;
 
 auto& path_seperator = std::filesystem::path::preferred_separator;
 
-namespace path {
+namespace path
+{
 	void append_seperator(std::string& path) noexcept
 	{
 		if (path.empty() != true && path.back() != path_seperator)

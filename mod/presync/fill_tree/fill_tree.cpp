@@ -20,19 +20,23 @@ export import lunas.file_table;
 import lunas.exclude;
 import lunas.stdout;
 
-export namespace lunas {
-	namespace presync {
-		std::expected<std::monostate, lunas::error> readdir(
-		    std::set<lunas::file_table>& content, const std::string& path, const lunas::fill_tree_type& data);
+export namespace lunas
+{
+	namespace presync
+	{
+		std::expected<std::monostate, lunas::error> readdir(std::set<lunas::file_table>& content, const std::string& path,
+								    const lunas::fill_tree_type& data);
 
 		std::expected<std::monostate, lunas::error> input_directory_check(const lunas::fill_tree_type& data);
 	}
 }
 
-namespace lunas {
-	namespace content {
+namespace lunas
+{
+	namespace content
+	{
 		void insert(std::set<lunas::file_table>& content, const struct lunas::metadata& metadata, const std::string& path,
-		    const lunas::fill_tree_type& data)
+			    const lunas::fill_tree_type& data)
 		{
 			auto itr = content.find(lunas::file_table(path, metadata, data.path_index, data.ipaths_count));
 			if (itr != content.end())
@@ -44,12 +48,12 @@ namespace lunas {
 				content.insert(lunas::file_table(path, metadata, data.path_index, data.ipaths_count));
 			}
 		}
-
 	}
 
-	namespace presync {
-		std::expected<std::monostate, lunas::error> readdir(
-		    std::set<lunas::file_table>& content, const std::string& path, const lunas::fill_tree_type& data)
+	namespace presync
+	{
+		std::expected<std::monostate, lunas::error> readdir(std::set<lunas::file_table>& content, const std::string& path,
+								    const lunas::fill_tree_type& data)
 		{
 
 			struct directory_options directory_options = {
@@ -135,6 +139,5 @@ namespace lunas {
 
 			return std::monostate();
 		}
-
 	}
 }

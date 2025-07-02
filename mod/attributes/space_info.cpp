@@ -18,7 +18,8 @@ import lunas.path;
 
 namespace fs = std::filesystem;
 
-export namespace lunas {
+export namespace lunas
+{
 	std::expected<std::uintmax_t, lunas::error> available_space(const std::string& path)
 	{
 		std::error_code ec;

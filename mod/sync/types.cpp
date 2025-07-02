@@ -23,7 +23,8 @@ export import lunas.stats;
 export import lunas.terminal;
 export import lunas.error;
 
-export namespace lunas {
+export namespace lunas
+{
 	enum class sync_code {
 		none,
 		success,
@@ -84,7 +85,7 @@ export namespace lunas {
 			const std::optional<std::uintmax_t> file_size;
 
 			file_metadata(const std::string& path, const lunas::metadata& metadata, const size_t& index,
-			    std::optional<std::uintmax_t> size = std::nullopt)
+				      std::optional<std::uintmax_t> size = std::nullopt)
 			    : path(path), metadata(metadata), index(index), file_size(size)
 			{
 			}
@@ -95,7 +96,8 @@ export namespace lunas {
 	int ownership_value(auto& options, int uid, enum ownership_type type);
 }
 
-namespace lunas {
+namespace lunas
+{
 	progress_bar::progress_bar(bool progress, bool quiet)
 	{
 		this->quiet    = quiet;
@@ -210,5 +212,4 @@ namespace lunas {
 			return -1;
 		}
 	}
-
 }

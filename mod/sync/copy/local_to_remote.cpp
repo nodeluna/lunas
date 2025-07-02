@@ -30,24 +30,30 @@ import lunas.cppfs;
 
 #ifdef REMOTE_ENABLED
 
-export namespace lunas {
-	namespace local_to_remote {
-		std::expected<struct syncstat, lunas::error> copy(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
+export namespace lunas
+{
+	namespace local_to_remote
+	{
+		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
+								  const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
 
-		std::expected<struct syncstat, lunas::error> rfile(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
-		std::expected<struct syncstat, lunas::error> mkdir(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
-		std::expected<struct syncstat, lunas::error> symlink(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
+		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
+								   const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
+
+		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
+								   const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
+
+		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
+								     const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
 	}
 }
 
-namespace lunas {
-	namespace local_to_remote {
-		std::expected<struct syncstat, lunas::error> copy(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
+namespace lunas
+{
+	namespace local_to_remote
+	{
+		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
+								  const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
 		{
 			std::expected<struct syncstat, lunas::error> syncstat;
 
@@ -82,16 +88,16 @@ namespace lunas {
 			return syncstat;
 		}
 
-		std::expected<struct syncstat, lunas::error> rfile(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
+		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
+								   const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
 		{
 			struct syncstat syncstat;
 
 			std::unique_ptr<std::fstream> src_file = std::make_unique<std::fstream>(src, std::ios::in | std::ios::binary);
 			if (not src_file->is_open())
 			{
-				std::unexpected(lunas::error(
-				    "couldn't open src '" + src + "', " + std::strerror(errno), lunas::error_type::sync_is_open));
+				std::unexpected(lunas::error("couldn't open src '" + src + "', " + std::strerror(errno),
+							     lunas::error_type::sync_is_open));
 			}
 
 			std::uintmax_t dest_size = 0, src_size = 0;
@@ -249,8 +255,8 @@ namespace lunas {
 			return syncstat;
 		}
 
-		std::expected<struct syncstat, lunas::error> mkdir(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
+		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
+								   const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
 		{
 			struct syncstat syncstat;
 			if (misc.options.dry_run)
@@ -281,8 +287,8 @@ namespace lunas {
 			return syncstat;
 		}
 
-		std::expected<struct syncstat, lunas::error> symlink(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
+		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
+								     const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
 		{
 			struct syncstat syncstat;
 			if (misc.options.dry_run)
@@ -319,6 +325,5 @@ namespace lunas {
 			return syncstat;
 		}
 	}
-
 }
 #endif // REMOTE_ENABLED

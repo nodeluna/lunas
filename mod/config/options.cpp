@@ -13,8 +13,10 @@ export module lunas.config.options;
 export import lunas.file_types;
 import lunas.sftp;
 
-export namespace lunas {
-	namespace config {
+export namespace lunas
+{
+	namespace config
+	{
 		struct path_options {
 				bool			      quiet		= false;
 				bool			      verbose		= false;

@@ -29,12 +29,14 @@ import lunas.exclude;
 
 import lunas.stdout;
 
-export namespace lunas {
+export namespace lunas
+{
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data);
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data, lunas::content& content);
 }
 
-export namespace lunas {
+export namespace lunas
+{
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data)
 	{
 		const auto& ipaths = data.get_ipaths();
@@ -121,7 +123,7 @@ export namespace lunas {
 				progress_stats.total_to_be_synced = progress_stats.total_synced;
 
 				ok = check_dest_and_sync(file_metadata(src_file->path, src_metadata, src_index, src_file->file_size),
-				    file_metadata(dest_path, dest_metadata, dest_index), data, progress_stats);
+							 file_metadata(dest_path, dest_metadata, dest_index), data, progress_stats);
 				if (not ok)
 				{
 					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
@@ -221,16 +223,16 @@ export namespace lunas {
 						}
 						std::string to_be_removed = ipaths.at(dest_index).path + file->path;
 						lunas::print_remove_extra(to_be_removed);
-						auto file_size = lunas::get_size_and_remove(
-						    ipaths.at(dest_index).sftp, to_be_removed, metadata.file_type, data.options.dry_run);
+						auto file_size = lunas::get_size_and_remove(ipaths.at(dest_index).sftp, to_be_removed,
+											    metadata.file_type, data.options.dry_run);
 						if (not file_size)
 						{
 							lunas::printerr("{}", file_size.error().message());
 						}
 						else
 						{
-							lunas::register_remove(
-							    file_size.value(), metadata.file_type, data.get_ipath(dest_index));
+							lunas::register_remove(file_size.value(), metadata.file_type,
+									       data.get_ipath(dest_index));
 						}
 					}
 					dest_index++;

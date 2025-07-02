@@ -21,16 +21,21 @@ import lunas.sftp;
 import lunas.file_table;
 import lunas.file_types;
 
-export namespace lunas {
-	namespace presync {
-		std::expected<std::monostate, lunas::error> input_paths_are_different(
-		    const std::vector<struct lunas::ipath::input_path>& ipaths);
+export namespace lunas
+{
+	namespace presync
+	{
+		std::expected<std::monostate, lunas::error>
+		input_paths_are_different(const std::vector<struct lunas::ipath::input_path>& ipaths);
+
 		size_t to_be_synced_counter(const std::set<file_table>& conent);
 	}
 }
 
-namespace lunas {
-	namespace presync {
+namespace lunas
+{
+	namespace presync
+	{
 		std::string fmt_err(const std::string& path1, const std::string& path2)
 		{
 			std::string err = "";
@@ -40,8 +45,8 @@ namespace lunas {
 			return err;
 		}
 
-		std::expected<std::monostate, lunas::error> input_paths_are_different(
-		    const std::vector<struct lunas::ipath::input_path>& ipaths)
+		std::expected<std::monostate, lunas::error>
+		input_paths_are_different(const std::vector<struct lunas::ipath::input_path>& ipaths)
 		{
 
 			size_t out = 0, in = 0;

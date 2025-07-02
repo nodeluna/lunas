@@ -13,7 +13,8 @@ import std.compat;
 export module lunas.sftp:attributes;
 export import lunas.file_types;
 
-export namespace lunas {
+export namespace lunas
+{
 	class sftp_attributes {
 		private:
 			::sftp_attributes attr = NULL;
@@ -61,7 +62,8 @@ export namespace lunas {
 	};
 }
 
-namespace lunas {
+namespace lunas
+{
 	sftp_attributes::sftp_attributes(const sftp_session& sftp, const std::string& path, follow_symlink follow)
 	{
 		file_path = path;
@@ -265,5 +267,4 @@ namespace lunas {
 			sftp_attributes_free(attr);
 		}
 	}
-
 }

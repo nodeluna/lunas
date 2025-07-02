@@ -28,13 +28,16 @@ import lunas.ipath;
 import lunas.stdout;
 import lunas.error;
 
-export namespace lunas {
-	namespace config_file {
+export namespace lunas
+{
+	namespace config_file
+	{
 		std::string				    config_dir = std::getenv("HOME") + std::string("/.config/lunas/");
 		std::string				    file_name  = std::string("lunas.luco");
 		std::expected<std::monostate, lunas::error> make_demo_config(lunas::config::options& options);
-		std::expected<std::monostate, lunas::error> preset(const std::string& name, lunas::config::options& options,
-		    std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths);
+		std::expected<std::monostate, lunas::error>
+		preset(const std::string& name, lunas::config::options& options,
+		       std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths);
 	}
 }
 
@@ -60,8 +63,10 @@ export namespace lunas {
 
 namespace fs = std::filesystem;
 
-namespace lunas {
-	namespace config_file {
+namespace lunas
+{
+	namespace config_file
+	{
 		std::expected<std::monostate, lunas::error> make_demo_config(lunas::config::options& options)
 		{
 			std::string	config_file = config_dir + file_name;
@@ -119,9 +124,9 @@ namespace lunas {
 			return std::all_of(x.begin(), x.end(), [](char c) { return std::isdigit(c); });
 		}
 
-		std::expected<struct lunas::ipath::remote_path, lunas::error> fill_remote_path(
-		    const std::multimap<std::string, std::string>& nest, std::multimap<std::string, std::string>::iterator& it,
-		    const std::string& name)
+		std::expected<struct lunas::ipath::remote_path, lunas::error>
+		fill_remote_path(const std::multimap<std::string, std::string>& nest, std::multimap<std::string, std::string>::iterator& it,
+				 const std::string& name)
 		{
 			std::string			 nest_path = it->first;
 			size_t				 nest_size = nest_path.size();
@@ -170,9 +175,9 @@ namespace lunas {
 		}
 #endif // REMOTE_ENABLED
 
-		std::expected<std::monostate, lunas::error> config_fill(std::multimap<std::string, std::string>& nest,
-		    const std::string& name, lunas::config::options& options,
-		    std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths)
+		std::expected<std::monostate, lunas::error>
+		config_fill(std::multimap<std::string, std::string>& nest, const std::string& name, lunas::config::options& options,
+			    std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths)
 		{
 			auto lpaths_options = config::get_lpaths_options();
 			auto rpaths_options = config::get_rpaths_options();
@@ -230,15 +235,16 @@ namespace lunas {
 				else if (it->first.front() != '#')
 				{
 					return std::unexpected(lunas::error("nest '" + name + "': wrong option '" + it->first + "'",
-					    lunas::error_type::config_invalid_option));
+									    lunas::error_type::config_invalid_option));
 				}
 			}
 
 			return std::monostate();
 		}
 
-		std::expected<std::monostate, lunas::error> preset(const std::string& name, lunas::config::options& options,
-		    std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths)
+		std::expected<std::monostate, lunas::error>
+		preset(const std::string& name, lunas::config::options& options,
+		       std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths)
 		{
 			if (name == "DEMO_CONFIG")
 			{

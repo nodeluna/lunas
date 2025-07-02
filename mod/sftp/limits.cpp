@@ -11,7 +11,8 @@ import std;
 
 export module lunas.sftp:limits;
 
-export namespace lunas {
+export namespace lunas
+{
 	class sftp_limits {
 		private:
 			::sftp_limits_t limits = nullptr;
@@ -26,7 +27,8 @@ export namespace lunas {
 	};
 }
 
-namespace lunas {
+namespace lunas
+{
 	sftp_limits::sftp_limits(const sftp_session& sftp)
 	{
 		limits = ::sftp_limits(sftp);

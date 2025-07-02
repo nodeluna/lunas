@@ -16,8 +16,10 @@ import lunas.ipath;
 import lunas.config.options;
 import lunas.error;
 
-export namespace lunas {
-	namespace config {
+export namespace lunas
+{
+	namespace config
+	{
 		using onoff_func = std::function<std::expected<std::monostate, lunas::error>(std::string, lunas::config::options&)>;
 
 		std::unordered_map<std::string, onoff_func> get_onoff_options()
