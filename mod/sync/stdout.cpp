@@ -14,7 +14,8 @@ export import lunas.file_types;
 export import lunas.stdout;
 
 export namespace lunas {
-	void print_sync(const std::string& src, const std::string& dest, const struct lunas::syncmisc& misc) {
+	void print_sync(const std::string& src, const std::string& dest, const struct lunas::syncmisc& misc)
+	{
 		if (misc.options.quiet)
 			return;
 		unsigned long padding_length = std::ceil(std::log10(misc.progress_stats.total_to_be_synced));
@@ -32,12 +33,15 @@ export namespace lunas {
 		std::string count = "(" + padding + std::to_string(misc.progress_stats.total_synced) + std::string("/") +
 				    std::to_string(misc.progress_stats.total_to_be_synced) + ") ";
 		std::string space(count.size() - 3, ' ');
-		if (misc.file_type == lunas::file_types::directory) {
+		if (misc.file_type == lunas::file_types::directory)
+		{
 			if (misc.options.verbose)
 				lunas::println(misc.options.quiet, "{} [Dir]   '{}''\n{}-> [At]   '{}'", count, src, space, dest);
 			else
 				lunas::println(misc.options.quiet, "{} [Dir]   '{}'", count, dest);
-		} else {
+		}
+		else
+		{
 			if (misc.options.verbose)
 				lunas::println(misc.options.quiet, "{} [File]  '{}''\n{}-> [To]   '{}'", count, src, space, dest);
 			else
@@ -45,7 +49,8 @@ export namespace lunas {
 		}
 	}
 
-	void print_remove_extra(const std::string& path) {
+	void print_remove_extra(const std::string& path)
+	{
 		std::println("! removing extra '{}', not found in any source", path);
 	}
 }

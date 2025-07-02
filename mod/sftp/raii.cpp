@@ -57,10 +57,12 @@ namespace raii {
 
 namespace raii {
 	namespace sftp {
-		channel::channel(ssh_channel* channel_) : _channel(channel_) {
+		channel::channel(ssh_channel* channel_) : _channel(channel_)
+		{
 		}
 
-		channel::~channel() {
+		channel::~channel()
+		{
 			if (*_channel == NULL)
 				return;
 			ssh_channel_close(*_channel);
@@ -70,10 +72,12 @@ namespace raii {
 	}
 
 	namespace ssh {
-		key::key() {
+		key::key()
+		{
 		}
 
-		int key::import_key(const struct ssh_key_data& data) {
+		int key::import_key(const struct ssh_key_data& data)
+		{
 			int rc = -1;
 			if (retry <= 0)
 				return SSH_AUTH_DENIED;
@@ -91,7 +95,8 @@ namespace raii {
 			return rc;
 		}
 
-		const ssh_key& key::get() {
+		const ssh_key& key::get()
+		{
 			return key_t;
 		}
 
@@ -99,11 +104,13 @@ namespace raii {
 		// 	retry = retries;
 		// }
 
-		const int& key::get_retry_countdown() {
+		const int& key::get_retry_countdown()
+		{
 			return retry;
 		}
 
-		key::~key() {
+		key::~key()
+		{
 			if (free_key)
 				ssh_key_free(key_t);
 		}

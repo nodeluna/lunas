@@ -23,7 +23,8 @@ export import lunas.stdout;
 
 export namespace lunas {
 	namespace multi_source {
-		std::expected<size_t, lunas::error> get_src(const lunas::file_table& file_table, const struct lunas::parsed_data& data) {
+		std::expected<size_t, lunas::error> get_src(const lunas::file_table& file_table, const struct lunas::parsed_data& data)
+		{
 			time_t src_mtime	   = 0;
 			size_t src_index	   = 0;
 			size_t potential_src_index = 0;
@@ -31,18 +32,22 @@ export namespace lunas {
 			const auto& ipaths = data.get_ipaths();
 
 			bool first = true;
-			for (const auto& potential_src_metadata : file_table.metadatas) {
+			for (const auto& potential_src_metadata : file_table.metadatas)
+			{
 				if (not ipaths.at(potential_src_index).is_src() ||
 				    potential_src_metadata.file_type == lunas::file_types::not_found)
 					goto end;
-				if (first) {
+				if (first)
+				{
 					first = false;
 					goto assign;
-				} else if (not data.options.rollback && src_mtime > potential_src_metadata.mtime)
+				}
+				else if (not data.options.rollback && src_mtime > potential_src_metadata.mtime)
 					goto end;
 				else if (data.options.rollback && src_mtime < potential_src_metadata.mtime)
 					goto end;
-				else if (src_mtime == potential_src_metadata.mtime) {
+				else if (src_mtime == potential_src_metadata.mtime)
+				{
 					if (ipaths.at(src_index).is_remote() && not ipaths.at(potential_src_index).is_remote())
 						goto assign;
 					else
@@ -69,7 +74,8 @@ export namespace lunas {
 
 		std::expected<std::monostate, enum lunas::error_type> sync_dest(const lunas::metadata& src_metadata,
 		    const lunas::metadata& dest_metadata, const size_t src_index, const size_t dest_index,
-		    const struct lunas::parsed_data& data) {
+		    const struct lunas::parsed_data& data)
+		{
 			if (src_index == dest_index)
 				return std::unexpected(lunas::error_type::dest_check_skip_sync);
 			else if (not data.get_ipaths().at(dest_index).is_dest())
@@ -92,7 +98,8 @@ export namespace lunas {
 
 		std::expected<std::monostate, lunas::error> check_dest_and_sync(const lunas::metadata& src_metadata,
 		    const lunas::metadata& dest_metadata, const size_t src_index, const size_t dest_index, const std::string& src,
-		    const std::string& dest, struct lunas::parsed_data& data, struct progress_stats& progress_stats) {
+		    const std::string& dest, struct lunas::parsed_data& data, struct progress_stats& progress_stats)
+		{
 
 			const auto& ipaths = data.get_ipaths();
 
@@ -109,7 +116,8 @@ export namespace lunas {
 				 dest_metadata.file_type == lunas::file_types::resume_regular_file)
 				sync = true;
 
-			if (sync) {
+			if (sync)
+			{
 				struct syncmisc misc = {
 				    .src_mtime = src_metadata.mtime,
 				    .file_type = dest_metadata.file_type == lunas::file_types::resume_regular_file ? dest_metadata.file_type
@@ -134,18 +142,21 @@ export namespace lunas {
 		}
 
 		std::expected<std::monostate, lunas::error> updating(const lunas::file_table& file_table, const size_t src_index,
-		    struct lunas::parsed_data& data, struct progress_stats& progress_stats) {
+		    struct lunas::parsed_data& data, struct progress_stats& progress_stats)
+		{
 
 			const auto& src_metadata = file_table.metadatas.at(src_index);
 			const auto& ipaths	 = data.get_ipaths();
 			size_t	    dest_index	 = 0;
-			for (const auto& dest_metadata : file_table.metadatas) {
+			for (const auto& dest_metadata : file_table.metadatas)
+			{
 				const std::string src  = ipaths.at(src_index).path + file_table.path;
 				const std::string dest = ipaths.at(dest_index).path + file_table.path;
 
 				auto ok = check_dest_and_sync(
 				    src_metadata, dest_metadata, src_index, dest_index, src, dest, data, progress_stats);
-				if (not ok) {
+				if (not ok)
+				{
 					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
 						lunas::printerr("conflict in types between '{}' and '{}'", src, dest);
 					else if (ok.error().value() != lunas::error_type::dest_check_skip_sync)

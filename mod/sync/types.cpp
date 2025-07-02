@@ -49,7 +49,8 @@ export namespace lunas {
 			int							      bytes_xfered = 0;
 			std::expected<std::unique_ptr<lunas::sftp_aio>, lunas::error> aio;
 
-			explicit buffque(std::uint64_t size) : buffer(size) {
+			explicit buffque(std::uint64_t size) : buffer(size)
+			{
 			}
 	};
 
@@ -81,7 +82,8 @@ export namespace lunas {
 }
 
 namespace lunas {
-	progress_bar::progress_bar(bool progress, bool quiet) {
+	progress_bar::progress_bar(bool progress, bool quiet)
+	{
 		this->quiet    = quiet;
 		this->progress = progress;
 		if (progress == false || quiet)
@@ -89,7 +91,8 @@ namespace lunas {
 		std::cout << '\n';
 	}
 
-	void progress_bar::bar(const double& full_size, const double& occupied) {
+	void progress_bar::bar(const double& full_size, const double& occupied)
+	{
 		std::string	stat		= "\r(" + lunas::size_units(occupied) + "/" + lunas::size_units(full_size) + ") [";
 		struct termsize term		= lunas::terminal_size();
 		float		term_width	= term.ts_col;
@@ -106,7 +109,8 @@ namespace lunas {
 		lock = true;
 	}
 
-	void progress_bar::ingoing(const double& full_size, const double& occupied) {
+	void progress_bar::ingoing(const double& full_size, const double& occupied)
+	{
 		if (progress == false || quiet)
 			return;
 		std::cout << "\x1b[1B\r";
@@ -114,24 +118,28 @@ namespace lunas {
 		std::cout << "\x1b[1A\r";
 	}
 
-	progress_bar::~progress_bar() {
+	progress_bar::~progress_bar()
+	{
 		if (progress == false || quiet)
 			return;
 
-		if (lock) {
+		if (lock)
+		{
 			std::cout << "\x1b[2K";
 			std::cout << "\x1b[1B\r";
 			std::cout << "\x1b[2K";
 			std::cout << "\x1b[2A";
 			std::cout << "\n\n\n\n\n";
 			std::cout << "\x1b[6A";
-		} else
+		}
+		else
 			std::cout << "\x1b[1A";
 
 		lock = false;
 	}
 
-	bool no_ownership_value(auto& options) {
+	bool no_ownership_value(auto& options)
+	{
 		if (not options.attributes_uid_value && options.attributes_uid)
 			return true;
 		else if (not options.attributes_gid_value && options.attributes_gid)
@@ -139,22 +147,27 @@ namespace lunas {
 		return false;
 	}
 
-	int ownership_value(auto& options, int uid, enum ownership_type type) {
-		if (type == ownership_type::uid) {
+	int ownership_value(auto& options, int uid, enum ownership_type type)
+	{
+		if (type == ownership_type::uid)
+		{
 			if (not options.attributes_uid)
 				return -1;
 			else if (options.attributes_uid_value)
 				return *options.attributes_uid_value;
 			else
 				return uid;
-		} else if (type == ownership_type::gid) {
+		}
+		else if (type == ownership_type::gid)
+		{
 			if (not options.attributes_gid)
 				return -1;
 			else if (options.attributes_gid_value)
 				return *options.attributes_gid_value;
 			else
 				return uid;
-		} else
+		}
+		else
 			return -1;
 	}
 

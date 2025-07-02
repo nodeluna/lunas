@@ -22,25 +22,29 @@ export namespace lunas {
 }
 
 namespace lunas {
-	void sftp_error_filling(const sftp_session& sftp, std::string& msg, lunas::error_type& type) {
+	void sftp_error_filling(const sftp_session& sftp, std::string& msg, lunas::error_type& type)
+	{
 		ssh_session& _ssh_session = sftp->session;
 
 		int num = sftp_get_error(sftp);
 		if (num >= 0)
 			type = static_cast<lunas::error_type>(num);
-		else {
+		else
+		{
 			type = lunas::error_type::ssh_unknown;
 			msg  = "failed to retrieve sftp server error: ";
 		}
 		msg += ssh_get_error(_ssh_session);
 	}
 
-	lunas::error ssh_error(const sftp_session& sftp) {
+	lunas::error ssh_error(const sftp_session& sftp)
+	{
 		std::string	  err_msg    = "";
 		lunas::error_type error_type = lunas::error_type::none;
 		sftp_error_filling(sftp, err_msg, error_type);
 
-		auto error_constructor = [&](std::string& msg, lunas::error_type& type) {
+		auto error_constructor = [&](std::string& msg, lunas::error_type& type)
+		{
 			msg  = err_msg;
 			type = error_type;
 		};
@@ -48,12 +52,14 @@ namespace lunas {
 		return lunas::error(error_constructor);
 	}
 
-	lunas::error ssh_error(const sftp_session& sftp, const std::string& message) {
+	lunas::error ssh_error(const sftp_session& sftp, const std::string& message)
+	{
 		std::string	  err_msg    = message + ", ";
 		lunas::error_type error_type = lunas::error_type::none;
 		sftp_error_filling(sftp, err_msg, error_type);
 
-		auto error_constructor = [&](std::string& msg, lunas::error_type& type) {
+		auto error_constructor = [&](std::string& msg, lunas::error_type& type)
+		{
 			msg  = err_msg;
 			type = error_type;
 		};
@@ -61,11 +67,13 @@ namespace lunas {
 		return lunas::error(error_constructor);
 	}
 
-	lunas::error ssh_error(const ssh_session& ssh) {
+	lunas::error ssh_error(const ssh_session& ssh)
+	{
 		std::string	  err_msg    = ssh_get_error(ssh);
 		lunas::error_type error_type = static_cast<lunas::error_type>(ssh_get_error_code(ssh));
 
-		auto error_constructor = [&](std::string& msg, lunas::error_type& type) {
+		auto error_constructor = [&](std::string& msg, lunas::error_type& type)
+		{
 			msg  = err_msg;
 			type = error_type;
 		};
@@ -73,11 +81,13 @@ namespace lunas {
 		return lunas::error(error_constructor);
 	}
 
-	lunas::error ssh_error(const ssh_session& ssh, const std::string& message) {
+	lunas::error ssh_error(const ssh_session& ssh, const std::string& message)
+	{
 		std::string	  err_msg    = message + ", " + ssh_get_error(ssh);
 		lunas::error_type error_type = static_cast<lunas::error_type>(ssh_get_error_code(ssh));
 
-		auto error_constructor = [&](std::string& msg, lunas::error_type& type) {
+		auto error_constructor = [&](std::string& msg, lunas::error_type& type)
+		{
 			msg  = err_msg;
 			type = error_type;
 		};
@@ -85,8 +95,10 @@ namespace lunas {
 		return lunas::error(error_constructor);
 	}
 
-	lunas::error ssh_error(const std::string& err_msg) {
-		auto error_constructor = [&](std::string& msg, lunas::error_type& type) {
+	lunas::error ssh_error(const std::string& err_msg)
+	{
+		auto error_constructor = [&](std::string& msg, lunas::error_type& type)
+		{
 			msg  = err_msg;
 			type = lunas::error_type::ssh_other;
 		};

@@ -34,14 +34,16 @@ export namespace lunas {
 }
 
 export namespace lunas {
-	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data) {
+	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data)
+	{
 		const auto& ipaths = data.get_ipaths();
 
 		if (ipaths.empty())
 			return std::unexpected(lunas::error("didn't find any input directories"));
 
 		size_t src_index = 0;
-		for (const auto& path : ipaths) {
+		for (const auto& path : ipaths)
+		{
 			if (path.is_src())
 				break;
 			src_index++;
@@ -64,12 +66,15 @@ export namespace lunas {
 		struct progress_stats			    progress_stats;
 		std::expected<std::monostate, lunas::error> ok;
 
-		while (auto src_file = directory.value()->read()) {
-			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++) {
+		while (auto src_file = directory.value()->read())
+		{
+			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++)
+			{
 				if (src_index == dest_index || not ipaths.at(dest_index).is_dest())
 					continue;
 
-				if (auto ok = src_file.value().holds_attributes(); not ok) {
+				if (auto ok = src_file.value().holds_attributes(); not ok)
+				{
 					lunas::printerr("{}", ok.error().message());
 					continue;
 				}
@@ -90,10 +95,13 @@ export namespace lunas {
 				struct metadata dest_metadata;
 
 				auto dest_file = lunas::get_attributes(ipaths.at(dest_index).sftp, dest_path, data.options.follow_symlink);
-				if (not dest_file && dest_file.error().value() != lunas::error_type::no_such_file) {
+				if (not dest_file && dest_file.error().value() != lunas::error_type::no_such_file)
+				{
 					lunas::warn("{}", dest_file.error().message());
 					continue;
-				} else if (dest_file) {
+				}
+				else if (dest_file)
+				{
 					dest_metadata.mtime	= dest_file.value()->mtime();
 					dest_metadata.file_type = dest_file.value()->file_type();
 				}
@@ -101,7 +109,8 @@ export namespace lunas {
 
 				ok = multi_source::check_dest_and_sync(
 				    src_metadata, dest_metadata, src_index, dest_index, src_file->path, dest_path, data, progress_stats);
-				if (not ok) {
+				if (not ok)
+				{
 					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
 						lunas::printerr("conflict in types between '{}' and '{}'", src_file->path, dest_path);
 					else if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
@@ -113,11 +122,13 @@ export namespace lunas {
 		if (not directory.value()->eof())
 			lunas::println(false, "didn't reach eof '{}'", ipaths.at(src_index).path);
 
-		if (data.options.remove_extra) {
+		if (data.options.remove_extra)
+		{
 			lunas::println(false, "");
 			lunas::warn_ok("remove extra is running. checking for extra files to be removed...");
 
-			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++) {
+			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++)
+			{
 				if (not ipaths.at(dest_index).is_dest_only())
 					continue;
 
@@ -130,19 +141,22 @@ export namespace lunas {
 		return std::monostate();
 	}
 
-	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data, lunas::content& content) {
+	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data, lunas::content& content)
+	{
 
 		struct progress_stats progress_stats;
 		progress_stats.total_to_be_synced = content.to_be_synced;
 		std::expected<std::monostate, lunas::error> synced;
 		lunas::println(data.options.quiet, "");
 
-		for (auto file = content.files_table.begin(); file != content.files_table.end();) {
+		for (auto file = content.files_table.begin(); file != content.files_table.end();)
+		{
 			auto src_index = multi_source::get_src(*file, data);
-			if (not src_index && data.options.remove_extra &&
-			    src_index.error().value() == lunas::error_type::source_not_found) {
+			if (not src_index && data.options.remove_extra && src_index.error().value() == lunas::error_type::source_not_found)
+			{
 				goto retained_for_remove_extra;
-			} else if (not src_index)
+			}
+			else if (not src_index)
 				goto not_needed_in_the_files_table_any_longer;
 
 			synced = multi_source::updating(*file, src_index.value(), data, progress_stats);
@@ -162,12 +176,16 @@ export namespace lunas {
 
 		const auto& ipaths = data.get_ipaths();
 
-		for (auto file = content.files_table.rbegin(); file != content.files_table.rend() && data.options.remove_extra; ++file) {
+		for (auto file = content.files_table.rbegin(); file != content.files_table.rend() && data.options.remove_extra; ++file)
+		{
 			auto src_index = multi_source::get_src(*file, data);
-			if (not src_index && src_index.error().value() == lunas::error_type::source_not_found) {
+			if (not src_index && src_index.error().value() == lunas::error_type::source_not_found)
+			{
 				size_t dest_index = 0;
-				for (auto& metadata : file->metadatas) {
-					if (metadata.file_type != lunas::file_types::not_found) {
+				for (auto& metadata : file->metadatas)
+				{
+					if (metadata.file_type != lunas::file_types::not_found)
+					{
 						if (lunas::exclude(file->path, data.options.exclude, data.options.exclude_pattern))
 							continue;
 						std::string to_be_removed = ipaths.at(dest_index).path + file->path;

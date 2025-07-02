@@ -24,7 +24,8 @@ export namespace lunas {
 			sftp_attributes(const ::sftp_attributes& attribute);
 			sftp_attributes(const ::sftp_attributes& attribute, const std::string& path);
 
-			sftp_attributes() {
+			sftp_attributes()
+			{
 			}
 
 			lunas::file_types file_type();
@@ -61,7 +62,8 @@ export namespace lunas {
 }
 
 namespace lunas {
-	sftp_attributes::sftp_attributes(const sftp_session& sftp, const std::string& path, follow_symlink follow) {
+	sftp_attributes::sftp_attributes(const sftp_session& sftp, const std::string& path, follow_symlink follow)
+	{
 		file_path = path;
 
 		if (follow == follow_symlink::yes)
@@ -70,34 +72,42 @@ namespace lunas {
 			attr = sftp_lstat(sftp, path.c_str());
 	}
 
-	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute) : attr(attribute) {
+	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute) : attr(attribute)
+	{
 	}
 
-	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute, const std::string& path) : attr(attribute) {
+	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute, const std::string& path) : attr(attribute)
+	{
 		file_path = path;
 	}
 
-	std::string sftp_attributes::path() {
+	std::string sftp_attributes::path()
+	{
 		return file_path;
 	}
 
-	std::string sftp_attributes::name() {
+	std::string sftp_attributes::name()
+	{
 		return attr->name ? attr->name : "";
 	}
 
-	std::string sftp_attributes::longname() {
+	std::string sftp_attributes::longname()
+	{
 		return attr->longname ? attr->name : "";
 	}
 
-	uint32_t sftp_attributes::flags() {
+	uint32_t sftp_attributes::flags()
+	{
 		return attr->flags;
 	}
 
-	uint8_t sftp_attributes::type() {
+	uint8_t sftp_attributes::type()
+	{
 		return attr->type;
 	}
 
-	lunas::file_types sftp_attributes::file_type() {
+	lunas::file_types sftp_attributes::file_type()
+	{
 		if (attr == nullptr)
 			return lunas::file_types::not_found;
 		if (attr->type == SSH_FILEXFER_TYPE_SYMLINK)
@@ -110,7 +120,8 @@ namespace lunas {
 			return lunas::file_types::other;
 	}
 
-	std::string sftp_attributes::file_type_name() {
+	std::string sftp_attributes::file_type_name()
+	{
 		auto type = this->file_type();
 
 		if (type == lunas::file_types::symlink)
@@ -123,89 +134,110 @@ namespace lunas {
 			return "other";
 	}
 
-	std::uintmax_t sftp_attributes::file_size() {
+	std::uintmax_t sftp_attributes::file_size()
+	{
 		return attr->size;
 	}
 
-	uint32_t sftp_attributes::uid() {
+	uint32_t sftp_attributes::uid()
+	{
 		return attr->uid;
 	}
 
-	uint32_t sftp_attributes::gid() {
+	uint32_t sftp_attributes::gid()
+	{
 		return attr->gid;
 	}
 
-	std::string sftp_attributes::owner() {
+	std::string sftp_attributes::owner()
+	{
 		return attr->owner;
 	}
 
-	std::string sftp_attributes::group() {
+	std::string sftp_attributes::group()
+	{
 		return attr->group;
 	}
 
-	uint32_t sftp_attributes::permissions() {
+	uint32_t sftp_attributes::permissions()
+	{
 		return attr->permissions;
 	}
 
-	uint64_t sftp_attributes::atime64() {
+	uint64_t sftp_attributes::atime64()
+	{
 		return attr->atime64;
 	}
 
-	uint32_t sftp_attributes::atime() {
+	uint32_t sftp_attributes::atime()
+	{
 		return attr->atime;
 	}
 
-	uint32_t sftp_attributes::atime_nseconds() {
+	uint32_t sftp_attributes::atime_nseconds()
+	{
 		return attr->atime_nseconds;
 	}
 
-	uint64_t sftp_attributes::createtime() {
+	uint64_t sftp_attributes::createtime()
+	{
 		return attr->createtime;
 	}
 
-	uint32_t sftp_attributes::createtime_nseconds() {
+	uint32_t sftp_attributes::createtime_nseconds()
+	{
 		return attr->createtime_nseconds;
 	}
 
-	uint64_t sftp_attributes::mtime64() {
+	uint64_t sftp_attributes::mtime64()
+	{
 		return attr->mtime64;
 	}
 
-	uint32_t sftp_attributes::mtime() {
+	uint32_t sftp_attributes::mtime()
+	{
 		return attr->mtime;
 	}
 
-	uint32_t sftp_attributes::mtime_nseconds() {
+	uint32_t sftp_attributes::mtime_nseconds()
+	{
 		return attr->mtime_nseconds;
 	}
 
-	std::string sftp_attributes::acl() {
+	std::string sftp_attributes::acl()
+	{
 		return attr->acl ? ssh_string_get_char(attr->acl) : "";
 	}
 
-	uint32_t sftp_attributes::extended_count() {
+	uint32_t sftp_attributes::extended_count()
+	{
 		return attr->extended_count;
 	}
 
-	std::string sftp_attributes::extended_type() {
+	std::string sftp_attributes::extended_type()
+	{
 		return attr->acl ? ssh_string_get_char(attr->extended_type) : "";
 	}
 
-	std::string sftp_attributes::extended_data() {
+	std::string sftp_attributes::extended_data()
+	{
 		return attr->acl ? ssh_string_get_char(attr->extended_data) : "";
 	}
 
-	bool sftp_attributes::exists() {
+	bool sftp_attributes::exists()
+	{
 		return attr != NULL;
 	}
 
-	sftp_attributes sftp_attributes::release() {
+	sftp_attributes sftp_attributes::release()
+	{
 		sftp_attributes temp = attr;
 		attr		     = nullptr;
 		return temp;
 	}
 
-	sftp_attributes::~sftp_attributes() {
+	sftp_attributes::~sftp_attributes()
+	{
 		if (attr != nullptr && attr != NULL)
 			sftp_attributes_free(attr);
 	}

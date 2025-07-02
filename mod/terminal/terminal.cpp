@@ -13,7 +13,8 @@ export namespace lunas {
 			unsigned short ts_ypixel;
 	};
 
-	struct termsize terminal_size(void) {
+	struct termsize terminal_size(void)
+	{
 		struct winsize term_size;
 		ioctl(STDOUT_FILENO, TIOCGWINSZ, &term_size);
 

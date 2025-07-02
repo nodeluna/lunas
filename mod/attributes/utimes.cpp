@@ -57,20 +57,24 @@ export namespace lunas {
 
 namespace lunas {
 	namespace utime {
-		int switch_fill_local(struct time_val& time_val, const struct stat& stats, const time_type utime) {
+		int switch_fill_local(struct time_val& time_val, const struct stat& stats, const time_type utime)
+		{
 			struct timespec timespec;
 			int		rv;
-			switch (utime) {
+			switch (utime)
+			{
 				case time_type::atime:
 					timespec	    = stats.st_atim;
 					time_val.atime	    = timespec.tv_sec;
 					time_val.atime_nsec = timespec.tv_nsec;
 
 					rv = clock_gettime(CLOCK_REALTIME, &timespec);
-					if (rv == 0) {
+					if (rv == 0)
+					{
 						time_val.mtime	    = timespec.tv_sec;
 						time_val.mtime_nsec = timespec.tv_nsec;
-					} else
+					}
+					else
 						return -1;
 					break;
 				case time_type::mtime:
@@ -79,10 +83,12 @@ namespace lunas {
 					time_val.mtime_nsec = timespec.tv_nsec;
 
 					rv = clock_gettime(CLOCK_REALTIME, &timespec);
-					if (rv == 0) {
+					if (rv == 0)
+					{
 						time_val.atime	    = timespec.tv_sec;
 						time_val.atime_nsec = timespec.tv_nsec;
-					} else
+					}
+					else
 						return -1;
 					break;
 				case time_type::utimes:
@@ -102,7 +108,8 @@ namespace lunas {
 		}
 
 		std::expected<struct time_val, lunas::error> get(
-		    const std::string& path, const time_type utime, lunas::follow_symlink follow) {
+		    const std::string& path, const time_type utime, lunas::follow_symlink follow)
+		{
 			struct stat	stats;
 			struct time_val time_val;
 			int		rv = 0;
@@ -112,13 +119,15 @@ namespace lunas {
 			else
 				rv = lstat(path.c_str(), &stats);
 
-			if (rv != 0) {
+			if (rv != 0)
+			{
 				std::string err = "couldn't get utimes of '" + path + "', " + std::strerror(errno);
 				return std::unexpected(lunas::error(err, lunas::error_type::attributes_get_utimes));
 			}
 
 			rv = switch_fill_local(time_val, stats, utime);
-			if (rv != 0) {
+			if (rv != 0)
+			{
 				std::string err = "couldn't get utimes of '" + path + "', " + std::strerror(errno);
 				return std::unexpected(lunas::error(err, lunas::error_type::attributes_get_utimes));
 			}
@@ -127,7 +136,8 @@ namespace lunas {
 		}
 
 		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, const struct time_val& time_val, lunas::follow_symlink follow) {
+		    const std::string& path, const struct time_val& time_val, lunas::follow_symlink follow)
+		{
 			struct timeval times[2];
 			int	       rv = 0;
 			times[0].tv_sec	  = time_val.atime;
@@ -144,7 +154,8 @@ namespace lunas {
 				rv = utimes(path.c_str(), times);
 #endif // LUTIMES_EXISTS
 
-			if (rv != 0) {
+			if (rv != 0)
+			{
 				std::string err = "couldn't set utimes of '" + path + "', " + std::strerror(errno);
 				return std::unexpected(lunas::error(err, lunas::error_type::attributes_set_utimes));
 			}

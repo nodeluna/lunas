@@ -21,7 +21,8 @@ export namespace lunas {
 }
 
 namespace lunas {
-	lunas::file_types enum_file_types(std::filesystem::file_status entry) {
+	lunas::file_types enum_file_types(std::filesystem::file_status entry)
+	{
 		if (entry.type() == std::filesystem::file_type::symlink)
 			return lunas::file_types::symlink;
 		else if (entry.type() == std::filesystem::file_type::directory)
@@ -36,7 +37,8 @@ namespace lunas {
 			return lunas::file_types::other;
 	}
 
-	std::expected<lunas::file_types, lunas::error> get_file_type(const std::string& path, lunas::follow_symlink follow) {
+	std::expected<lunas::file_types, lunas::error> get_file_type(const std::string& path, lunas::follow_symlink follow)
+	{
 		std::error_code		     ec;
 		std::filesystem::file_status status;
 		if (follow == lunas::follow_symlink::yes)
@@ -44,7 +46,8 @@ namespace lunas {
 		else
 			status = std::filesystem::symlink_status(path, ec);
 
-		if (ec.value() != 0) {
+		if (ec.value() != 0)
+		{
 			std::string	  err  = "couldn't get type of '" + path + "', " + ec.message();
 			lunas::error_type type = ec == std::errc::no_such_file_or_directory ? lunas::error_type::attributes_no_such_file
 											    : lunas::error_type::attributes_file_type;
@@ -54,11 +57,13 @@ namespace lunas {
 		return enum_file_types(status);
 	}
 
-	lunas::file_types get_file_type(const std::filesystem::file_status& status) {
+	lunas::file_types get_file_type(const std::filesystem::file_status& status)
+	{
 		return enum_file_types(status);
 	}
 
-	std::expected<bool, lunas::error> is_broken_link(const std::string& path) {
+	std::expected<bool, lunas::error> is_broken_link(const std::string& path)
+	{
 		std::error_code ec;
 		bool		exists = false;
 		std::string	target;

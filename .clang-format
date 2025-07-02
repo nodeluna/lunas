@@ -30,7 +30,16 @@ AllowShortLoopsOnASingleLine: false
 AllowShortEnumsOnASingleLine: false
 
 SeparateDefinitionBlocks: Always
-BreakBeforeBraces: Attach
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: true
+  AfterExternBlock: true
+  BeforeElse: true
+  BeforeCatch: true
+  BeforeWhile: false
+  BeforeLambdaBody: true
+  SplitEmptyFunction: true 
 AlwaysBreakTemplateDeclarations: true
 
 AccessModifierOffset: 0
@@ -43,3 +52,7 @@ IndentExternBlock: true
 IndentGotoLabels: true
 IndentPPDirectives: AfterHash
 LambdaBodyIndentation: Signature
+
+AllowShortCompoundRequirementOnASingleLine: false
+BreakBeforeConceptDeclarations: Always
+RequiresExpressionIndentation: OuterScope

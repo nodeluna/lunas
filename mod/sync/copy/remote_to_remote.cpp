@@ -47,12 +47,15 @@ namespace lunas {
 	namespace remote_to_remote {
 		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
 		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc) {
+		    const struct syncmisc& misc)
+		{
 
 			std::expected<struct syncstat, lunas::error> syncstat;
 
-			if (misc.file_type == lunas::file_types::regular_file || misc.file_type == lunas::file_types::resume_regular_file) {
-				auto func = [&](const std::string& dest_lspart) -> std::expected<struct syncstat, lunas::error> {
+			if (misc.file_type == lunas::file_types::regular_file || misc.file_type == lunas::file_types::resume_regular_file)
+			{
+				auto func = [&](const std::string& dest_lspart) -> std::expected<struct syncstat, lunas::error>
+				{
 					std::expected<struct syncstat, lunas::error> syncstat =
 					    remote_to_remote::rfile(src, dest_lspart, src_sftp, dest_sftp, misc);
 					if (syncstat)
@@ -61,7 +64,8 @@ namespace lunas {
 				};
 
 				syncstat = regular_file_sync(src, dest, misc.src_mtime, func);
-			} else if (misc.file_type == lunas::file_types::directory)
+			}
+			else if (misc.file_type == lunas::file_types::directory)
 				syncstat = remote_to_remote::mkdir(src, dest, src_sftp, dest_sftp, misc);
 			else if (misc.file_type == lunas::file_types::symlink)
 				syncstat = remote_to_remote::symlink(src, dest, src_sftp, dest_sftp, misc);
@@ -74,7 +78,8 @@ namespace lunas {
 
 		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
 		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc) {
+		    const struct syncmisc& misc)
+		{
 			struct syncstat syncstat;
 
 			std::expected<std::unique_ptr<lunas::sftp_file>, lunas::error> src_file = src_sftp->openfile(src, O_RDONLY, 0);
@@ -94,17 +99,22 @@ namespace lunas {
 
 			syncstat.copied_size = src_size;
 
-			if (misc.options.dry_run) {
+			if (misc.options.dry_run)
+			{
 				syncstat.code = lunas::sync_code::success;
 				return syncstat;
 			}
 
 			int access_type;
-			if (misc.options.resume) {
+			if (misc.options.resume)
+			{
 				auto attrs = dest_sftp->attributes(dest, lunas::follow_symlink::yes);
-				if (not attrs && attrs.error().value() != lunas::error_type::sftp_no_such_file) {
+				if (not attrs && attrs.error().value() != lunas::error_type::sftp_no_such_file)
+				{
 					return std::unexpected(attrs.error());
-				} else if (attrs) {
+				}
+				else if (attrs)
+				{
 					dest_size = attrs.value()->file_size();
 					syncstat.copied_size -= dest_size;
 					auto ok = src_file.value()->seek64(dest_size);
@@ -113,7 +123,8 @@ namespace lunas {
 				}
 
 				access_type = O_WRONLY | O_CREAT | O_APPEND;
-			} else
+			}
+			else
 				access_type = O_WRONLY | O_CREAT | O_TRUNC;
 
 			std::expected<std::unique_ptr<lunas::sftp_file>, lunas::error> dest_file =
@@ -146,15 +157,19 @@ namespace lunas {
 
 			class progress_bar progress_bar(misc.options.progress_bar, misc.options.quiet);
 
-			while (dest_size < src_size) {
-				while (read_requests_sent < max_requests && total_read_bytes_requested < src_size) {
+			while (dest_size < src_size)
+			{
+				while (read_requests_sent < max_requests && total_read_bytes_requested < src_size)
+				{
 					struct buffque bq(
 					    std::min(src_limits.value()->max_read_length(), dest_limits.value()->max_write_length()));
 
 					bq.aio = src_file.value()->aio_begin_read(bq.buffer.size());
-					if (not bq.aio) {
+					if (not bq.aio)
+					{
 						return std::unexpected(bq.aio.error());
-					} else if (bq.aio.value()->get_bytes_requested() == 0)
+					}
+					else if (bq.aio.value()->get_bytes_requested() == 0)
 						break;
 
 					read_requests_sent++;
@@ -172,7 +187,8 @@ namespace lunas {
 				    rqueue.front().aio.value(), rqueue.front().buffer, rqueue.front().aio.value()->get_bytes_requested());
 				if (not read_done && read_done.error().value() == lunas::error_type::ssh_again)
 					goto read_again;
-				else if (not read_done) {
+				else if (not read_done)
+				{
 					std::string err = "error reading '" + src + "', " + src_sftp->get_str_error();
 					return std::unexpected(lunas::error(err, lunas::error_type::sync_error_reading));
 				}
@@ -181,12 +197,16 @@ namespace lunas {
 
 			write:
 				if (write_requests_sent >= max_requests ||
-				    (total_write_bytes_requested >= src_size && write_requests_sent > 0)) {
+				    (total_write_bytes_requested >= src_size && write_requests_sent > 0))
+				{
 					bytes_written = dest_file.value()->aio_wait_write(wqueue.front().aio.value());
-					if (not bytes_written) {
+					if (not bytes_written)
+					{
 						std::string err = "error writing '" + dest + "', " + dest_sftp->get_str_error();
 						return std::unexpected(lunas::error(err, lunas::error_type::sync_error_writing));
-					} else if (bytes_written.value() != wqueue.front().bytes_xfered) {
+					}
+					else if (bytes_written.value() != wqueue.front().bytes_xfered)
+					{
 						std::string err = "error writing '" + dest +
 								  "', sftp server: mismatch in the number of requested and written bytes";
 						return std::unexpected(lunas::error(err, lunas::error_type::sync_error_writing));
@@ -215,12 +235,14 @@ namespace lunas {
 					read_requests_sent--;
 			}
 
-			if (dest_size != src_size) {
+			if (dest_size != src_size)
+			{
 				std::string err = "error occured while syncing '" + dest + "', mismatch src/dest sizes";
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_size_mismatch));
 			}
 
-			if (misc.options.fsync) {
+			if (misc.options.fsync)
+			{
 				auto ok = dest_file.value()->fsync();
 				if (not ok)
 					lunas::warn("couldn't fsync '{}', ", dest, ok.error().message());
@@ -232,9 +254,11 @@ namespace lunas {
 
 		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
 		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc) {
+		    const struct syncmisc& misc)
+		{
 			struct syncstat syncstat;
-			if (misc.options.dry_run) {
+			if (misc.options.dry_run)
+			{
 				syncstat.code = lunas::sync_code::success;
 				return syncstat;
 			}
@@ -261,9 +285,11 @@ namespace lunas {
 
 		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
 		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp,
-		    const struct syncmisc& misc) {
+		    const struct syncmisc& misc)
+		{
 			struct syncstat syncstat;
-			if (misc.options.dry_run) {
+			if (misc.options.dry_run)
+			{
 				syncstat.code = lunas::sync_code::success;
 				return syncstat;
 			}

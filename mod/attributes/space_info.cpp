@@ -19,14 +19,17 @@ import lunas.path;
 namespace fs = std::filesystem;
 
 export namespace lunas {
-	std::expected<std::uintmax_t, lunas::error> available_space(const std::string& path) {
+	std::expected<std::uintmax_t, lunas::error> available_space(const std::string& path)
+	{
 		std::error_code ec;
-		auto		err_func = [&ec](const std::string& path) -> lunas::error {
-			   std::string err = "couldn't check partition space of '" + path + "', " + ec.message();
-			   return lunas::error(err, lunas::error_type::attributes_space_info);
+		auto		err_func = [&ec](const std::string& path) -> lunas::error
+		{
+			std::string err = "couldn't check partition space of '" + path + "', " + ec.message();
+			return lunas::error(err, lunas::error_type::attributes_space_info);
 		};
 
-		if (fs::exists(path, ec) == false) {
+		if (fs::exists(path, ec) == false)
+		{
 			if (ec.value() != 0)
 				return std::unexpected(err_func(path));
 

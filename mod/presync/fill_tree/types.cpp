@@ -21,8 +21,9 @@ export namespace lunas {
 	};
 
 	namespace presync {
-		fill_tree_type prepare_fill_tree_data(const struct lunas::ipath::input_path* ipath, size_t index, size_t ipaths_count,
-		    const lunas::config::options* options) {
+		fill_tree_type prepare_fill_tree_data(
+		    const struct lunas::ipath::input_path* ipath, size_t index, size_t ipaths_count, const lunas::config::options* options)
+		{
 
 			struct fill_tree_type data;
 
@@ -34,7 +35,8 @@ export namespace lunas {
 			return data;
 		}
 
-		bool is_lspart(const std::string& path) {
+		bool is_lspart(const std::string& path)
+		{
 			if (path.size() > 8 && path.substr(path.size() - 8, path.size()) == ".ls.part")
 				return true;
 			return false;

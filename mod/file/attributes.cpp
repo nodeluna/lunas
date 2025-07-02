@@ -47,21 +47,26 @@ export namespace lunas {
 
 namespace lunas {
 	attributes::attributes(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow)
-	    : file_path(path) {
-		if (sftp != nullptr) {
+	    : file_path(path)
+	{
+		if (sftp != nullptr)
+		{
 			auto attr = sftp->attributes(path, follow);
 			if (not attr)
 				throw attr.error();
 
 			file_attributes = std::move(attr.value());
-		} else {
+		}
+		else
+		{
 			struct stat stats;
 			int	    rc = 0;
 			if (follow == lunas::follow_symlink::yes)
 				rc = stat(path.c_str(), &stats);
 			else
 				rc = lstat(path.c_str(), &stats);
-			if (rc != 0) {
+			if (rc != 0)
+			{
 				lunas::error_type error_type =
 				    errno == ENOENT ? lunas::error_type::no_such_file : lunas::error_type::attributes_get;
 				std::string err = "couldn't get attributes of '" + path.string() + "', " + std::strerror(errno);
@@ -81,49 +86,69 @@ namespace lunas {
 		}
 	}
 
-	std::string attributes::name() {
-		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes)) {
+	std::string attributes::name()
+	{
+		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes))
+		{
 			auto& attr = std::get<std::unique_ptr<lunas::sftp_attributes>>(file_attributes);
 			return attr->name();
-		} else {
+		}
+		else
+		{
 			return file_path.filename();
 		}
 	}
 
-	std::string attributes::path() {
-		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes)) {
+	std::string attributes::path()
+	{
+		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes))
+		{
 			auto& attr = std::get<std::unique_ptr<lunas::sftp_attributes>>(file_attributes);
 			return attr->path();
-		} else {
+		}
+		else
+		{
 			return file_path;
 		}
 	}
 
-	time_t attributes::mtime() {
-		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes)) {
+	time_t attributes::mtime()
+	{
+		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes))
+		{
 			auto& attr = std::get<std::unique_ptr<lunas::sftp_attributes>>(file_attributes);
 			return attr->mtime();
-		} else {
+		}
+		else
+		{
 			auto& attr = std::get<std::pair<struct stat, lunas::file_types>>(file_attributes);
 			return attr.first.st_mtim.tv_sec;
 		}
 	}
 
-	lunas::file_types attributes::file_type() {
-		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes)) {
+	lunas::file_types attributes::file_type()
+	{
+		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes))
+		{
 			auto& attr = std::get<std::unique_ptr<lunas::sftp_attributes>>(file_attributes);
 			return lunas::if_lspart_return_resume_type(attr->path(), attr->file_type());
-		} else {
+		}
+		else
+		{
 			auto& attr = std::get<std::pair<struct stat, lunas::file_types>>(file_attributes);
 			return lunas::if_lspart_return_resume_type(file_path, attr.second);
 		}
 	}
 
 	std::expected<std::unique_ptr<lunas::attributes>, lunas::error> get_attributes(
-	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow) {
-		try {
+	    const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow)
+	{
+		try
+		{
 			return std::make_unique<lunas::attributes>(sftp, path, follow);
-		} catch (const lunas::error& e) {
+		}
+		catch (const lunas::error& e)
+		{
 			return std::unexpected(e);
 		}
 	}

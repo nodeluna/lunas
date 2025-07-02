@@ -32,7 +32,8 @@ export namespace lunas {
 namespace lunas {
 	namespace content {
 		void insert(std::set<lunas::file_table>& content, const struct lunas::metadata& metadata, const std::string& path,
-		    const lunas::fill_tree_type& data) {
+		    const lunas::fill_tree_type& data)
+		{
 			auto itr = content.find(lunas::file_table(path, metadata, data.path_index, data.ipaths_count));
 			if (itr != content.end())
 				itr->metadatas.at(data.path_index) = metadata;
@@ -44,7 +45,8 @@ namespace lunas {
 
 	namespace presync {
 		std::expected<std::monostate, lunas::error> readdir(
-		    std::set<lunas::file_table>& content, const std::string& path, const lunas::fill_tree_type& data) {
+		    std::set<lunas::file_table>& content, const std::string& path, const lunas::fill_tree_type& data)
+		{
 
 			struct directory_options directory_options = {
 			    .follow_symlink    = data.options->follow_symlink,
@@ -57,7 +59,8 @@ namespace lunas {
 
 			std::expected<std::monostate, lunas::error> ok;
 
-			while (auto src_file = directory.value()->read()) {
+			while (auto src_file = directory.value()->read())
+			{
 				if (auto ok = src_file.value().holds_attributes(); not ok)
 					return std::unexpected(ok.error());
 
@@ -80,27 +83,36 @@ namespace lunas {
 			return std::monostate();
 		}
 
-		std::expected<std::monostate, lunas::error> input_directory_check(const lunas::fill_tree_type& data) {
+		std::expected<std::monostate, lunas::error> input_directory_check(const lunas::fill_tree_type& data)
+		{
 			if (not data.ipath->path.empty() && data.ipath->path.back() != std::filesystem::path::preferred_separator)
 				return std::unexpected(lunas::error(
 				    "trailing slash missing from input directory '" + data.ipath->path + "'", lunas::error_type::ipath));
 
 			auto type = lunas::get_attributes(data.ipath->sftp, data.ipath->path, data.options->follow_symlink);
-			if (not type && type.error().value() == lunas::error_type::no_such_file) {
-				if (not data.options->mkdir) {
+			if (not type && type.error().value() == lunas::error_type::no_such_file)
+			{
+				if (not data.options->mkdir)
+				{
 					std::string err =
 					    "input directory '" + data.ipath->path + "', doesn't exist. use -mkdir option to create it";
 					return std::unexpected(lunas::error(err, lunas::error_type::input_directory_check));
-				} else {
+				}
+				else
+				{
 					auto ok = lunas::file_operations::mkdir(data.ipath->sftp, data.ipath->path, data.options->dry_run);
 					if (not ok)
 						return std::unexpected(ok.error());
 
 					lunas::warn_ok("created input directory '{}', it was not found", data.ipath->path);
 				}
-			} else if (not type) {
+			}
+			else if (not type)
+			{
 				return std::unexpected(type.error());
-			} else if (type.value()->file_type() != lunas::file_types::directory) {
+			}
+			else if (type.value()->file_type() != lunas::file_types::directory)
+			{
 				std::string err = "input path '" + data.ipath->path + "', isn't a directory";
 				return std::unexpected(lunas::error(err, lunas::error_type::input_directory_check));
 			}

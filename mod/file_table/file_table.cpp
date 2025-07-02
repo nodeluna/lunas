@@ -23,21 +23,25 @@ export namespace lunas {
 
 			file_table(const std::string& name_, const struct metadata& metadata, const size_t input_path_index,
 			    const size_t files_count)
-			    : path(name_) {
+			    : path(name_)
+			{
 
 				metadatas.resize(files_count);
 				metadatas.at(input_path_index) = metadata;
 			}
 
-			bool operator==(const file_table& other) const {
+			bool operator==(const file_table& other) const
+			{
 				return path == other.path;
 			}
 
-			bool operator<(const file_table& other) const {
+			bool operator<(const file_table& other) const
+			{
 				return path < other.path;
 			}
 
-			bool operator>(const file_table& other) const {
+			bool operator>(const file_table& other) const
+			{
 				return path > other.path;
 			}
 	};

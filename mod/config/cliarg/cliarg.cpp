@@ -44,11 +44,13 @@ export namespace lunas {
 
 namespace lunas {
 	namespace cliarg {
-		bool is_num(const std::string& x) {
+		bool is_num(const std::string& x)
+		{
 			return std::all_of(x.begin(), x.end(), [](char c) { return std::isdigit(c); });
 		}
 
-		std::expected<std::monostate, lunas::error> next_arg_exists(const int& argc, const char* argv[], int i) {
+		std::expected<std::monostate, lunas::error> next_arg_exists(const int& argc, const char* argv[], int i)
+		{
 			if ((argc - 1) == i)
 				return std::unexpected(
 				    lunas::error(std::format("argument for option '{}' wasn't provided, exiting", argv[i]),
@@ -64,37 +66,48 @@ namespace lunas {
 
 #ifdef REMOTE_ENABLED
 		std::expected<struct lunas::ipath::remote_path, lunas::error> fill_remote_path(
-		    const int& argc, const char* argv[], int& index, const lunas::ipath::srcdest& srcdest) {
+		    const int& argc, const char* argv[], int& index, const lunas::ipath::srcdest& srcdest)
+		{
 			struct lunas::ipath::remote_path rpath;
 			rpath.srcdest	      = srcdest;
 			rpath.session_data.ip = argv[index + 1];
 
 			index++;
-			while (index++ != (argc - 1)) {
+			while (index++ != (argc - 1))
+			{
 				std::string option = argv[index];
 				if (option.find('=') != option.npos)
 					option.resize(option.find('='));
-				if (option[0] == '-') {
+				if (option[0] == '-')
+				{
 					index--;
 					break;
 				}
 				std::string argument = argv[index];
 				argument	     = argument.substr(argument.find('=') + 1, argument.size());
 
-				if ((option == "N" || option == "port") && is_num(argument) == false) {
+				if ((option == "N" || option == "port") && is_num(argument) == false)
+				{
 					std::string err = std::format("argument '{}' for option '{}' isn't a number", argument, option);
 					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
-				} else if (option == "N" || option == "port") {
+				}
+				else if (option == "N" || option == "port")
+				{
 					int port = std::stoi(argument);
-					if (port < 0) {
+					if (port < 0)
+					{
 						std::string err = std::format("port number '{}' for '{}' can't be negative ",
 						    std::to_string(port), rpath.session_data.ip);
 						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
 					}
 					rpath.session_data.port = port;
-				} else if (option == "pw" || option == "password") {
+				}
+				else if (option == "pw" || option == "password")
+				{
 					rpath.session_data.pw = argument;
-				} else {
+				}
+				else
+				{
 					std::string err = std::format("option '{}' isn't recognized", option);
 					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_option));
 				}
@@ -107,8 +120,9 @@ namespace lunas {
 		using options	= lunas::config::options;
 		using paths_vec = std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>;
 
-		std::expected<struct cliopts, lunas::error> fillopts(const int& argc, const char* argv[],
-		    std::function<expect(const std::string&, options&, paths_vec&)> config_file_preset) {
+		std::expected<struct cliopts, lunas::error> fillopts(
+		    const int& argc, const char* argv[], std::function<expect(const std::string&, options&, paths_vec&)> config_file_preset)
+		{
 
 			auto	       lpaths_options = lunas::config::get_lpaths_options();
 			auto	       rpaths_options = lunas::config::get_rpaths_options();
@@ -121,10 +135,12 @@ namespace lunas {
 			if (not ok)
 				return std::unexpected(ok.error());
 
-			for (int index = 1; index < argc; index++) {
+			for (int index = 1; index < argc; index++)
+			{
 				std::string option = argv[index];
 
-				if (option == "-c" || option == "--config") {
+				if (option == "-c" || option == "--config")
+				{
 					{
 						auto ok = next_arg_exists(argc, argv, index);
 						if (not ok)
@@ -137,7 +153,9 @@ namespace lunas {
 							return std::unexpected(ok.error());
 					}
 					index++;
-				} else if (auto itr0 = lpaths_options.find(option); itr0 != lpaths_options.end()) {
+				}
+				else if (auto itr0 = lpaths_options.find(option); itr0 != lpaths_options.end())
+				{
 					auto ok = next_arg_exists(argc, argv, index);
 					if (not ok)
 						return std::unexpected(ok.error());
@@ -145,7 +163,9 @@ namespace lunas {
 					cliopts.ipaths.emplace_back(itr0->second(argument));
 					index++;
 #ifdef REMOTE_ENABLED
-				} else if (auto itr1 = rpaths_options.find(option); itr1 != rpaths_options.end()) {
+				}
+				else if (auto itr1 = rpaths_options.find(option); itr1 != rpaths_options.end())
+				{
 					auto ok = next_arg_exists(argc, argv, index);
 					if (not ok)
 						return std::unexpected(ok.error());
@@ -155,34 +175,43 @@ namespace lunas {
 						return std::unexpected(remote_path.error());
 					cliopts.ipaths.emplace_back(std::move(remote_path.value()));
 #endif // REMOTE_ENABLED
-				} else if (auto itr2 = onoff_options.find(option); itr2 != onoff_options.end()) {
+				}
+				else if (auto itr2 = onoff_options.find(option); itr2 != onoff_options.end())
+				{
 					auto	    ok = next_arg_exists(argc, argv, index);
 					std::string argument;
 					if (not ok)
 						argument = "on";
-					else {
+					else
+					{
 						argument = argv[index + 1];
 						index++;
 					}
 					auto rv = itr2->second(argument, cliopts.options);
-					if (not rv) {
+					if (not rv)
+					{
 						std::string err =
 						    std::format("wrong argument '{}' for on/off option '{}'", argument, option);
 						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument));
 					}
-				} else if (auto itr3 = misc_options.find(option); itr3 != misc_options.end()) {
+				}
+				else if (auto itr3 = misc_options.find(option); itr3 != misc_options.end())
+				{
 					auto ok = next_arg_exists(argc, argv, index);
 					if (not ok)
 						return std::unexpected(ok.error());
 					std::string argument = argv[index + 1];
 					auto	    ok2	     = itr3->second(argument, cliopts.options);
-					if (not ok2) {
+					if (not ok2)
+					{
 						return std::unexpected(ok2.error());
 					}
 					index++;
-				} else if (auto itr4 = info.find(option); itr4 != info.end())
+				}
+				else if (auto itr4 = info.find(option); itr4 != info.end())
 					itr4->second();
-				else {
+				else
+				{
 					std::string err = std::format("option '{}' wasn't recognized, read the man page", option);
 					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_option));
 				}

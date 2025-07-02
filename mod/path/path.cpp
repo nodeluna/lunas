@@ -27,17 +27,20 @@ export namespace lunas {
 
 namespace lunas {
 	namespace path {
-		void append_seperator(std::string& path) noexcept {
+		void append_seperator(std::string& path) noexcept
+		{
 			if (path.empty() != true && path.back() != std::filesystem::path::preferred_separator)
 				path = path + std::filesystem::path::preferred_separator;
 		}
 
-		void pop_seperator(std::string& path) noexcept {
+		void pop_seperator(std::string& path) noexcept
+		{
 			if (path.empty() != true && path.back() == std::filesystem::path::preferred_separator)
 				path.pop_back();
 		}
 
-		std::string get_file_or_dir_name(const std::string& path) {
+		std::string get_file_or_dir_name(const std::string& path)
+		{
 			if (path.empty())
 				return {};
 			else if (path.rfind(std::filesystem::path::preferred_separator) == path.npos)
@@ -46,7 +49,8 @@ namespace lunas {
 			return path.substr(path.rfind(std::filesystem::path::preferred_separator) + 1, path.length());
 		}
 
-		std::string get_lower_dir_level(std::string path) {
+		std::string get_lower_dir_level(std::string path)
+		{
 			if (path.rfind(std::filesystem::path::preferred_separator) == path.npos)
 				return path;
 			path::pop_seperator(path);
@@ -54,20 +58,24 @@ namespace lunas {
 			return path;
 		}
 
-		std::expected<std::string, lunas::error> resolve_relative_path(std::string path, std::string cwd) {
+		std::expected<std::string, lunas::error> resolve_relative_path(std::string path, std::string cwd)
+		{
 			if (not path.empty() && path.size() > 3 && path.front() == std::filesystem::path::preferred_separator)
 				return path;
 
 			path::pop_seperator(cwd);
 			std::string prefix("", 3);
-			for (auto itr = path.begin(); itr != path.end(); ++itr) {
+			for (auto itr = path.begin(); itr != path.end(); ++itr)
+			{
 				if (prefix.size() >= 3)
 					prefix.clear();
 
 				prefix += *itr;
 
-				if (prefix == "../") {
-					if (cwd.rfind(std::filesystem::path::preferred_separator) == cwd.npos) {
+				if (prefix == "../")
+				{
+					if (cwd.rfind(std::filesystem::path::preferred_separator) == cwd.npos)
+					{
 						return std::unexpected(
 						    lunas::error("couldn't resolve relative path '" + path + "' too many '../'"));
 					}
@@ -84,8 +92,10 @@ namespace lunas {
 			return cwd + std::filesystem::path::preferred_separator + path;
 		}
 
-		std::expected<std::string, lunas::error> absolute(std::string path) {
-			if (not path.empty() && path.size() > 3 && path.substr(0, 2) == "~/") {
+		std::expected<std::string, lunas::error> absolute(std::string path)
+		{
+			if (not path.empty() && path.size() > 3 && path.substr(0, 2) == "~/")
+			{
 				std::string home = std::getenv("HOME");
 				path::append_seperator(home);
 				path = home + path.substr(2, path.size());

@@ -36,7 +36,8 @@ struct lbuffque {
 		std::vector<char> buffer;
 		long int	  bytes_read = 0;
 
-		explicit lbuffque(std::uint64_t size) : buffer(size) {
+		explicit lbuffque(std::uint64_t size) : buffer(size)
+		{
 		}
 };
 
@@ -50,10 +51,12 @@ export namespace lunas {
 			jthread& operator=(const jthread&) = delete;
 
 			template<typename function, typename... args_t>
-			jthread(function&& func, args_t&&... args) : thread(std::forward<function>(func), std::forward<args_t>(args)...) {
+			jthread(function&& func, args_t&&... args) : thread(std::forward<function>(func), std::forward<args_t>(args)...)
+			{
 			}
 
-			~jthread() {
+			~jthread()
+			{
 				if (thread.joinable())
 					thread.join();
 			}
@@ -84,9 +87,11 @@ namespace lunas {
 		std::condition_variable cv;
 
 		void fstream_aio_read_begin(
-		    std::unique_ptr<std::fstream>& src_file, std::queue<lbuffque>* queue, std::uintmax_t position, size_t queue_limit) {
+		    std::unique_ptr<std::fstream>& src_file, std::queue<lbuffque>* queue, std::uintmax_t position, size_t queue_limit)
+		{
 			const std::uint64_t buffer_size = LOCAL_BUFFER_SIZE;
-			while (not src_file->eof()) {
+			while (not src_file->eof())
+			{
 				std::unique_lock<std::mutex> lock_file(file_mutex);
 				if (queue->size() >= queue_limit)
 					cv.wait(lock_file, [&queue, &queue_limit]() { return queue->size() < queue_limit; });
@@ -97,13 +102,15 @@ namespace lunas {
 				}
 
 				src_file->seekg(position);
-				if (src_file->fail() || src_file->bad()) {
+				if (src_file->fail() || src_file->bad())
+				{
 					queue->back().bytes_read = -1;
 					goto done;
 				}
 
 				src_file->read(queue->back().buffer.data(), queue->back().buffer.size());
-				if (src_file->bad()) {
+				if (src_file->bad())
+				{
 					queue->back().bytes_read = -1;
 					goto done;
 				}
@@ -116,7 +123,8 @@ namespace lunas {
 			}
 		}
 
-		struct lbuffque fstream_aio_wait_read(std::queue<lbuffque>& queue) {
+		struct lbuffque fstream_aio_wait_read(std::queue<lbuffque>& queue)
+		{
 			std::unique_lock<std::mutex> lock(file_mutex);
 			cv.wait(lock, [&queue]() { return !queue.empty(); });
 
@@ -129,14 +137,19 @@ namespace lunas {
 		}
 
 		std::expected<struct syncstat, lunas::error> copy(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		{
 			std::expected<struct syncstat, lunas::error> syncstat;
 
-			if (misc.file_type == lunas::file_types::regular_file && misc.options.hardlink_regular_files) {
+			if (misc.file_type == lunas::file_types::regular_file && misc.options.hardlink_regular_files)
+			{
 				syncstat = local_to_local::link(src, dest, misc);
-			} else if (misc.file_type == lunas::file_types::regular_file ||
-				   misc.file_type == lunas::file_types::resume_regular_file) {
-				auto func = [&](const std::string& dest_lspart) -> std::expected<struct syncstat, lunas::error> {
+			}
+			else if (misc.file_type == lunas::file_types::regular_file ||
+				 misc.file_type == lunas::file_types::resume_regular_file)
+			{
+				auto func = [&](const std::string& dest_lspart) -> std::expected<struct syncstat, lunas::error>
+				{
 					auto syncstat = local_to_local::rfile(src, dest_lspart, misc);
 					if (syncstat)
 						struct lunas::local::original_name _(
@@ -145,7 +158,8 @@ namespace lunas {
 				};
 
 				syncstat = regular_file_sync(src, dest, misc.src_mtime, func);
-			} else if (misc.file_type == lunas::file_types::directory)
+			}
+			else if (misc.file_type == lunas::file_types::directory)
 				syncstat = local_to_local::mkdir(src, dest, misc);
 			else if (misc.file_type == lunas::file_types::symlink)
 				syncstat = local_to_local::symlink(src, dest, misc);
@@ -157,27 +171,34 @@ namespace lunas {
 		}
 
 		std::expected<struct syncstat, lunas::error> link(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		{
 			struct syncstat syncstat;
-			if (misc.options.dry_run) {
+			if (misc.options.dry_run)
+			{
 				syncstat.code = lunas::sync_code::success;
 				return syncstat;
 			}
 
 			std::error_code ec;
-			if (std::filesystem::exists(dest, ec)) {
+			if (std::filesystem::exists(dest, ec))
+			{
 				std::filesystem::remove(dest, ec);
-				if (ec.value() != 0) {
+				if (ec.value() != 0)
+				{
 					std::string err = "couldn't overwrite '" + dest + "', " + ec.message();
 					return std::unexpected(lunas::error(err, lunas::error_type::sync_hardlink));
 				}
 			}
 
 			std::filesystem::create_hard_link(src, dest, ec);
-			if (ec.value() != 0) {
+			if (ec.value() != 0)
+			{
 				std::string err = "couldn't hardlink '" + dest + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_hardlink));
-			} else {
+			}
+			else
+			{
 				syncstat.code	     = lunas::sync_code::success;
 				syncstat.copied_size = 0;
 				return syncstat;
@@ -185,44 +206,53 @@ namespace lunas {
 		}
 
 		std::expected<struct syncstat, lunas::error> rfile(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		{
 			struct syncstat syncstat;
 			std::error_code ec;
 			std::uintmax_t	src_size = std::filesystem::file_size(src, ec), dest_size = 0;
-			if (ec.value() != 0) {
+			if (ec.value() != 0)
+			{
 				std::string err = "couldn't get src size '" + src + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_get_file_size));
 			}
 
 			syncstat.copied_size = src_size;
-			if (misc.options.dry_run) {
+			if (misc.options.dry_run)
+			{
 				syncstat.code = lunas::sync_code::success;
 				return syncstat;
 			}
 
 			std::unique_ptr<std::fstream> src_file = std::make_unique<std::fstream>(src, std::ios::in | std::ios::binary);
-			if (src_file->is_open() == false) {
+			if (src_file->is_open() == false)
+			{
 				std::string err = "couldn't open src '" + src + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_is_open));
 			}
 
 			std::ios::openmode openmode;
 
-			if (misc.options.resume) {
+			if (misc.options.resume)
+			{
 				auto file_size = lunas::cppfs::file_size(dest);
 				if (not file_size && file_size.error().value() != lunas::error_type::no_such_file)
 					return std::unexpected(file_size.error());
-				if (file_size) {
+				if (file_size)
+				{
 					dest_size = file_size.value();
 					syncstat.copied_size -= dest_size;
 				}
 				openmode = std::ios::out | std::ios::binary | std::ios::app;
-			} else {
+			}
+			else
+			{
 				openmode = std::ios::out | std::ios::binary;
 			}
 
 			std::unique_ptr<std::fstream> dest_file = std::make_unique<std::fstream>(dest, openmode);
-			if (dest_file->is_open() == false) {
+			if (dest_file->is_open() == false)
+			{
 				std::string err = "couldn't open dest '" + dest + "', " + std::strerror(errno);
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_is_open));
 			}
@@ -245,20 +275,24 @@ namespace lunas {
 			lunas::jthread thread = lunas::jthread(fstream_aio_read_begin, std::ref(src_file), &queue, position, queue_limit);
 			class progress_bar progress_bar(misc.options.progress_bar, misc.options.quiet);
 
-			while (dest_size < src_size) {
+			while (dest_size < src_size)
+			{
 				struct lbuffque lbuffque = fstream_aio_wait_read(queue);
 
-				if (lbuffque.bytes_read == -1) {
+				if (lbuffque.bytes_read == -1)
+				{
 					std::string err = "error reading '" + src + "', " + std::strerror(errno);
 					return std::unexpected(lunas::error(err, lunas::error_type::sync_error_reading));
-				} else if (lbuffque.bytes_read == 0)
+				}
+				else if (lbuffque.bytes_read == 0)
 					break;
 
 				std::fpos pos = dest_file->tellp();
 				dest_file->write(lbuffque.buffer.data(), lbuffque.bytes_read);
 				bytes_written = dest_file->tellp() - pos;
 
-				if (bytes_written != lbuffque.bytes_read || dest_file->bad() || dest_file->fail()) {
+				if (bytes_written != lbuffque.bytes_read || dest_file->bad() || dest_file->fail())
+				{
 					std::string err = "error writing '" + dest + "', " + std::strerror(errno);
 					return std::unexpected(lunas::error(err, lunas::error_type::sync_error_writing));
 				}
@@ -267,12 +301,14 @@ namespace lunas {
 				progress_bar.ingoing(src_size, dest_size);
 			}
 
-			if (dest_size != src_size) {
+			if (dest_size != src_size)
+			{
 				std::string err = "error occured while syncing '" + dest + "', mismatch src/dest sizes";
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_size_mismatch));
 			}
 
-			if (misc.options.fsync) {
+			if (misc.options.fsync)
+			{
 				int rc = dest_file->sync();
 				if (rc != 0)
 					lunas::warn("couldn't fsync '{}', ", dest, std::strerror(errno));
@@ -283,9 +319,11 @@ namespace lunas {
 		}
 
 		std::expected<struct syncstat, lunas::error> mkdir(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		{
 			struct syncstat syncstat;
-			if (misc.options.dry_run) {
+			if (misc.options.dry_run)
+			{
 				syncstat.code = lunas::sync_code::success;
 				return syncstat;
 			}
@@ -309,15 +347,18 @@ namespace lunas {
 		}
 
 		std::expected<struct syncstat, lunas::error> symlink(
-		    const std::string& src, const std::string& dest, const struct syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const struct syncmisc& misc)
+		{
 			struct syncstat syncstat;
-			if (misc.options.dry_run) {
+			if (misc.options.dry_run)
+			{
 				syncstat.code = lunas::sync_code::success;
 				return syncstat;
 			}
 			std::error_code ec;
 			std::string	target = std::filesystem::read_symlink(src, ec);
-			if (ec.value() != 0) {
+			if (ec.value() != 0)
+			{
 				std::string err = "couldn't read symlink '" + src + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::sync_read_symlink));
 			}

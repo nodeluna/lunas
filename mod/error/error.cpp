@@ -124,31 +124,39 @@ export namespace lunas {
 }
 
 namespace lunas {
-	error::error(const std::string_view& message, const enum error_type type) : msg(message), type(type) {
+	error::error(const std::string_view& message, const enum error_type type) : msg(message), type(type)
+	{
 	}
 
-	error::error(const std::string& message) : msg(message) {
+	error::error(const std::string& message) : msg(message)
+	{
 	}
 
-	error::error(const enum error_type type) : type(type) {
+	error::error(const enum error_type type) : type(type)
+	{
 	}
 
-	error::error(std::function<void(std::string&, enum error_type&)> custom_constructor) {
+	error::error(std::function<void(std::string&, enum error_type&)> custom_constructor)
+	{
 		custom_constructor(this->msg, this->type);
 	}
 
-	error::error() {
+	error::error()
+	{
 	}
 
-	const std::string error::message() const noexcept {
+	const std::string error::message() const noexcept
+	{
 		return msg;
 	}
 
-	const char* error::what() const {
+	const char* error::what() const
+	{
 		return msg.c_str();
 	}
 
-	enum error_type error::value() const noexcept {
+	enum error_type error::value() const noexcept
+	{
 		return type;
 	}
 }

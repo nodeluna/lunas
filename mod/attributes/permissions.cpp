@@ -35,9 +35,11 @@ export namespace lunas {
 
 namespace lunas {
 	namespace permissions {
-		std::expected<bool, lunas::error> is_file_readable(const std::string& path, lunas::follow_symlink follow) {
+		std::expected<bool, lunas::error> is_file_readable(const std::string& path, lunas::follow_symlink follow)
+		{
 			auto perms = permissions::get(path, follow);
-			if (not perms) {
+			if (not perms)
+			{
 				return std::unexpected(
 				    lunas::error(perms.error().message(), lunas::error_type::attributes_permissions_check));
 			}
@@ -47,14 +49,16 @@ namespace lunas {
 			return false;
 		}
 
-		std::expected<std::filesystem::perms, lunas::error> get(const std::string& path, lunas::follow_symlink follow) {
+		std::expected<std::filesystem::perms, lunas::error> get(const std::string& path, lunas::follow_symlink follow)
+		{
 			std::error_code	       ec;
 			std::filesystem::perms perms;
 			if (follow == lunas::follow_symlink::yes)
 				perms = std::filesystem::status(path, ec).permissions();
 			else
 				perms = std::filesystem::symlink_status(path, ec).permissions();
-			if (ec.value() != 0) {
+			if (ec.value() != 0)
+			{
 				std::string err = "couldn't get permission '" + path + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::attributes_get_permissions));
 			}
@@ -62,7 +66,8 @@ namespace lunas {
 		}
 
 		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, std::filesystem::perms permissions, lunas::follow_symlink follow) {
+		    const std::string& path, std::filesystem::perms permissions, lunas::follow_symlink follow)
+		{
 			std::error_code		      ec;
 			std::filesystem::perm_options perm_options = std::filesystem::perm_options::replace;
 
@@ -70,7 +75,8 @@ namespace lunas {
 				perm_options |= std::filesystem::perm_options::nofollow;
 
 			std::filesystem::permissions(path, permissions, perm_options, ec);
-			if (ec.value() != 0) {
+			if (ec.value() != 0)
+			{
 				std::string err = "couldn't set permission '" + path + "', " + ec.message();
 				return std::unexpected(lunas::error(err, lunas::error_type::attributes_set_permissions));
 			}
@@ -78,7 +84,8 @@ namespace lunas {
 		}
 
 		std::expected<std::monostate, lunas::error> set(
-		    const std::string& path, unsigned int permissions, lunas::follow_symlink follow) {
+		    const std::string& path, unsigned int permissions, lunas::follow_symlink follow)
+		{
 			return set(path, ( std::filesystem::perms ) permissions, follow);
 		}
 	}

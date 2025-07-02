@@ -33,7 +33,8 @@ export namespace lunas {
 namespace lunas {
 	namespace ownership {
 		std::expected<std::monostate, lunas::error> local_to_local(
-		    const std::string& src, const std::string& dest, const syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const syncmisc& misc)
+		{
 			if (not misc.options.attributes_uid && not misc.options.attributes_gid)
 				return std::monostate();
 
@@ -57,7 +58,8 @@ namespace lunas {
 	}
 
 	namespace utimes {
-		std::expected<std::monostate, lunas::error> local(const std::string& src, const std::string& dest, const syncmisc& misc) {
+		std::expected<std::monostate, lunas::error> local(const std::string& src, const std::string& dest, const syncmisc& misc)
+		{
 			if (not misc.options.attributes_atime && not misc.options.attributes_mtime)
 				return std::monostate();
 
@@ -84,7 +86,8 @@ namespace lunas {
 
 	namespace permissions {
 		std::expected<std::monostate, lunas::error> local_to_local(
-		    const std::string& src, const std::string& dest, const syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const syncmisc& misc)
+		{
 			auto perms = lunas::permissions::get(src, misc.options.follow_symlink);
 			if (not perms)
 				return std::unexpected(perms.error());

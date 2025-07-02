@@ -25,7 +25,8 @@ export namespace lunas {
 
 namespace lunas {
 	namespace config {
-		std::expected<struct lunas::parsed_data, lunas::error> parse_cliarg(const int argc, const char* argv[]) {
+		std::expected<struct lunas::parsed_data, lunas::error> parse_cliarg(const int argc, const char* argv[])
+		{
 			std::expected<struct cliarg::cliopts, lunas::error> parsed_data =
 			    lunas::cliarg::fillopts(argc, argv, lunas::config_file::preset);
 			if (not parsed_data)
@@ -35,15 +36,18 @@ namespace lunas {
 
 			struct lunas::parsed_data data;
 
-			for (auto& ipath : cliopts.ipaths) {
-				if (std::holds_alternative<struct lunas::ipath::local_path>(ipath)) {
+			for (auto& ipath : cliopts.ipaths)
+			{
+				if (std::holds_alternative<struct lunas::ipath::local_path>(ipath))
+				{
 					auto& local_path = std::get<struct lunas::ipath::local_path>(ipath);
 					lunas::path::append_seperator(local_path.path);
 					struct lunas::ipath::input_path ipath(local_path.path);
 					ipath.srcdest = local_path.srcdest;
 					data.ipaths_emplace_back(std::move(ipath));
-
-				} else if (std::holds_alternative<struct lunas::ipath::remote_path>(ipath)) {
+				}
+				else if (std::holds_alternative<struct lunas::ipath::remote_path>(ipath))
+				{
 					auto&				remote_path = std::get<struct lunas::ipath::remote_path>(ipath);
 					struct lunas::ipath::input_path ipath;
 					ipath.srcdest				   = remote_path.srcdest;
@@ -52,13 +56,17 @@ namespace lunas {
 					remote_path.session_data.options.timeout   = cliopts.options.timeout_sec;
 					if (cliopts.options.compression)
 						remote_path.session_data.options.compression_level = cliopts.options.compression_level;
-					try {
+					try
+					{
 						auto ok = ipath.init_sftp(remote_path.session_data);
-						if (not ok) {
+						if (not ok)
+						{
 							auto& err = ok.error().message();
 							return std::unexpected(lunas::error(err, lunas::error_type::init_sftp_error));
 						}
-					} catch (std::exception& e) {
+					}
+					catch (std::exception& e)
+					{
 						return std::unexpected(lunas::error(e.what(), lunas::error_type::init_sftp_error));
 					}
 					data.ipaths_emplace_back(std::move(ipath));

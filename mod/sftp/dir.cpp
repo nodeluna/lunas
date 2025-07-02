@@ -32,16 +32,19 @@ export namespace lunas {
 }
 
 namespace lunas {
-	sftp_dir::sftp_dir(const sftp_session& sftp, const std::string& path) : m_dir(sftp_opendir(sftp, path.c_str())) {
+	sftp_dir::sftp_dir(const sftp_session& sftp, const std::string& path) : m_dir(sftp_opendir(sftp, path.c_str()))
+	{
 		if (m_dir == NULL)
 			throw std::runtime_error(fmt::err_path("couldn't open sftp directory", path));
 	}
 
-	std::expected<std::unique_ptr<lunas::sftp_attributes>, lunas::error> sftp_dir::read(const sftp_session& sftp) {
+	std::expected<std::unique_ptr<lunas::sftp_attributes>, lunas::error> sftp_dir::read(const sftp_session& sftp)
+	{
 		::sftp_attributes attr = sftp_readdir(sftp, m_dir);
 		if (attr == NULL && not sftp_dir_eof(m_dir))
 			return std::unexpected(ssh_error(sftp, "sftp readdir error"));
-		else if (sftp_dir_eof(m_dir)) {
+		else if (sftp_dir_eof(m_dir))
+		{
 			m_eof = true;
 			return std::unexpected(lunas::error("", lunas::error_type::sftp_eof));
 		}
@@ -54,13 +57,15 @@ namespace lunas {
 		return std::make_unique<lunas::sftp_attributes>(attr, dir_path);
 	}
 
-	std::expected<bool, lunas::error> sftp_dir::eof(const sftp_session& sftp, const std::string& path) {
+	std::expected<bool, lunas::error> sftp_dir::eof(const sftp_session& sftp, const std::string& path)
+	{
 		if (m_eof)
 			return true;
 		return std::unexpected(ssh_error(sftp, fmt::err_path("couldn't reach eof of sftp directory", path)));
 	}
 
-	sftp_dir::~sftp_dir() {
+	sftp_dir::~sftp_dir()
+	{
 		if (m_dir != NULL)
 			sftp_closedir(m_dir);
 	}

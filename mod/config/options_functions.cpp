@@ -20,7 +20,8 @@ export namespace lunas {
 	namespace config {
 		using onoff_func = std::function<std::expected<std::monostate, lunas::error>(std::string, lunas::config::options&)>;
 
-		std::unordered_map<std::string, onoff_func> get_onoff_options() {
+		std::unordered_map<std::string, onoff_func> get_onoff_options()
+		{
 			// clang-format off
 			std::unordered_map<std::string, onoff_func> onoff_options = {
 				{"-R",			config::filler::resume		},
@@ -110,7 +111,8 @@ export namespace lunas {
 			return lpaths_options;
 		}
 
-		std::unordered_map<std::string, std::function<lunas::ipath::srcdest(void)>> get_rpaths_options() {
+		std::unordered_map<std::string, std::function<lunas::ipath::srcdest(void)>> get_rpaths_options()
+		{
 			// clang-format off
 			std::unordered_map<std::string, std::function<lunas::ipath::srcdest(void)>> rpaths_options = {
 				{"--remote-path",	config::filler::rpath_srcdest	},
@@ -137,7 +139,8 @@ export namespace lunas {
 
 		using misc_func = std::function<std::expected<std::monostate, lunas::error>(std::string, lunas::config::options&)>;
 
-		std::unordered_map<std::string, misc_func> get_misc_options() {
+		std::unordered_map<std::string, misc_func> get_misc_options()
+		{
 			// clang-format off
 			std::unordered_map<std::string, misc_func> misc_options = {
 				{"--compression-level",	config::filler::compression_level	},
@@ -174,7 +177,8 @@ export namespace lunas {
 			return misc_options;
 		}
 
-		std::unordered_map<std::string, std::function<void(void)>> get_info_options() {
+		std::unordered_map<std::string, std::function<void(void)>> get_info_options()
+		{
 			// clang-format off
 			std::unordered_map<std::string, std::function<void(void)>> info = {
 				{"-h",			lunas::config::info::help		},

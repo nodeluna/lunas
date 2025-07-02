@@ -42,7 +42,8 @@ export namespace lunas {
 namespace lunas {
 	namespace ownership {
 		std::expected<std::monostate, lunas::error> local_to_remote(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const syncmisc& misc)
+		{
 			if (not misc.options.attributes_uid && not misc.options.attributes_gid)
 				return std::monostate();
 
@@ -65,7 +66,8 @@ namespace lunas {
 		}
 
 		std::expected<std::monostate, lunas::error> remote_to_local(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const syncmisc& misc)
+		{
 			if (not misc.options.attributes_uid && not misc.options.attributes_gid)
 				return std::monostate();
 
@@ -88,7 +90,8 @@ namespace lunas {
 		}
 
 		std::expected<std::monostate, lunas::error> remote_to_remote(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp, const syncmisc& misc) {
+		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp, const syncmisc& misc)
+		{
 			if (not misc.options.attributes_uid && not misc.options.attributes_gid)
 				return std::monostate();
 
@@ -104,7 +107,8 @@ namespace lunas {
 			};
 
 			auto ok = dest_sftp->set_ownership(dest, owner, misc.options.follow_symlink);
-			if (not ok) {
+			if (not ok)
+			{
 				return std::unexpected(ok.error());
 			}
 
@@ -114,7 +118,8 @@ namespace lunas {
 
 	namespace permissions {
 		std::expected<std::monostate, lunas::error> remote_to_local(
-		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const syncmisc& misc) {
+		    const std::string& src, const std::string& dest, const std::unique_ptr<lunas::sftp>& sftp, const syncmisc& misc)
+		{
 			auto perms = sftp->get_permissions(src, misc.options.follow_symlink);
 			if (not perms)
 				return std::unexpected(perms.error());
@@ -129,7 +134,8 @@ namespace lunas {
 
 	namespace utimes {
 		std::expected<std::monostate, lunas::error> remote(const std::string& src, const std::string& dest,
-		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp, const syncmisc& misc) {
+		    const std::unique_ptr<lunas::sftp>& src_sftp, const std::unique_ptr<lunas::sftp>& dest_sftp, const syncmisc& misc)
+		{
 			if (not misc.options.attributes_atime && not misc.options.attributes_mtime)
 				return std::monostate();
 
@@ -144,21 +150,27 @@ namespace lunas {
 
 			std::expected<struct lunas::time_val, lunas::error> time_val;
 
-			if (src_sftp != nullptr) {
+			if (src_sftp != nullptr)
+			{
 				time_val = src_sftp->get_utimes<lunas::time_val>(src, utime, misc.options.follow_symlink);
 				if (not time_val)
 					return std::unexpected(time_val.error());
-			} else {
+			}
+			else
+			{
 				time_val = lunas::utime::get(src, utime, misc.options.follow_symlink);
 				if (not time_val)
 					return std::unexpected(time_val.error());
 			}
 
-			if (dest_sftp != nullptr) {
+			if (dest_sftp != nullptr)
+			{
 				auto ok = dest_sftp->set_utimes<lunas::time_val>(dest, time_val.value(), misc.options.follow_symlink);
 				if (not ok)
 					return std::unexpected(ok.error());
-			} else {
+			}
+			else
+			{
 				auto ok = lunas::utime::set(dest, time_val.value(), misc.options.follow_symlink);
 				if (not ok)
 					return std::unexpected(ok.error());
