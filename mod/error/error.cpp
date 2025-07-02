@@ -118,6 +118,8 @@ export namespace lunas
 			error(const std::string& message);
 			error(const enum error_type type);
 			error(std::function<void(std::string&, enum error_type&)> custom_constructor);
+			template<typename... args_t>
+			error(error_type err, std::format_string<args_t...> fmt, args_t&&... args);
 			error();
 
 			[[nodiscard]] const std::string message() const noexcept;
@@ -143,6 +145,12 @@ namespace lunas
 	error::error(std::function<void(std::string&, enum error_type&)> custom_constructor)
 	{
 		custom_constructor(this->msg, this->type);
+	}
+
+	template<typename... args_t>
+	error::error(error_type err, std::format_string<args_t...> fmt, args_t&&... args)
+	    : msg(std::format(fmt, std::forward<args_t>(args)...)), type(err)
+	{
 	}
 
 	error::error()

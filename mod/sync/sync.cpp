@@ -126,11 +126,7 @@ export namespace lunas
 							 file_metadata(dest_path, dest_metadata, dest_index), data, progress_stats);
 				if (not ok)
 				{
-					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
-					{
-						lunas::printerr("conflict in types between '{}' and '{}'", src_file->path, dest_path);
-					}
-					else if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
+					if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
 					{
 						lunas::printerr("{}", ok.error().message());
 					}

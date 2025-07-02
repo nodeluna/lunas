@@ -90,38 +90,40 @@ export namespace lunas
 		return src_index;
 	}
 
-	std::expected<std::monostate, enum lunas::error_type> check_dest(const struct file_metadata& src, const struct file_metadata& dest,
-									 struct lunas::parsed_data& data)
+	std::expected<std::monostate, lunas::error> check_dest(const struct file_metadata& src, const struct file_metadata& dest,
+							       struct lunas::parsed_data& data)
 	{
 		if (src.index == dest.index)
 		{
-			return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
 		}
 		else if (not data.get_ipaths().at(dest.index).is_dest())
 		{
-			return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
 		}
 		else if (dest.metadata.file_type == lunas::file_types::directory)
 		{
-			return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
 		}
 		else if (dest.metadata.mtime == src.metadata.mtime)
 		{
-			return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
 		}
-		else if (dest.metadata.file_type == lunas::file_types::brokenlink)
+		else if (dest.metadata.file_type == lunas::file_types::brokenlink ||
+			 src.metadata.file_type == lunas::file_types::brokenlink)
 		{
-			return std::unexpected(lunas::error_type::dest_check_brokenlink);
+			return std::unexpected(error(lunas::error_type::dest_check_brokenlink, "ignoring broken link {}", src.path));
 		}
 		else if (src.metadata.file_type == lunas::file_types::resume_regular_file)
 		{
-			return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
 		}
 		else if (dest.metadata.file_type != lunas::file_types::not_found &&
 			 dest.metadata.file_type != lunas::file_types::resume_regular_file &&
 			 dest.metadata.file_type != src.metadata.file_type)
 		{
-			return std::unexpected(lunas::error_type::dest_check_type_conflict);
+			return std::unexpected(error(lunas::error_type::dest_check_type_conflict, "conflict in types between '{}' and '{}'",
+						     src.path, dest.path));
 		}
 		else if (data.options.minimum_space)
 		{
@@ -136,16 +138,16 @@ export namespace lunas
 			auto partition = lunas::get_partition(data.get_ipath(dest.index).sftp, data.get_ipath(dest.index).path);
 			if (not partition)
 			{
-				lunas::printerr("{}", partition.error().message());
-				return std::unexpected(partition.error().value());
+				return std::unexpected(partition.error());
 			}
 
 			if ((partition.value()->available() - *src.file_size) < *data.options.minimum_space)
 			{
-				lunas::printerr("partition '{}' is getting full: {}. file size: {}. minimum-space: {}",
-						data.get_ipath(dest.index).path, size_units(partition.value()->available()),
-						size_units(*src.file_size), size_units(*data.options.minimum_space));
-				return std::unexpected(lunas::error_type::partition_info);
+				std::string err = std::format("partition '{}' is getting full: {}. file size: {}. minimum-space: {}",
+							      data.get_ipath(dest.index).path, size_units(partition.value()->available()),
+							      size_units(*src.file_size), size_units(*data.options.minimum_space));
+
+				return std::unexpected(error(lunas::error_type::partition_info, "{}", err));
 			}
 		}
 
