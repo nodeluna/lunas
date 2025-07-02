@@ -16,6 +16,7 @@ import std.compat;
 
 export module lunas.sync:types;
 export import lunas.file_types;
+export import lunas.file_table;
 export import lunas.sftp;
 export import lunas.config.options;
 export import lunas.stats;
@@ -74,6 +75,17 @@ export namespace lunas {
 	enum class ownership_type {
 		uid,
 		gid,
+	};
+
+	struct file_metadata {
+			const std::string&     path;
+			const lunas::metadata& metadata;
+			const size_t&	       index;
+
+			file_metadata(const std::string& path, const lunas::metadata& metadata, const size_t& index)
+			    : path(path), metadata(metadata), index(index)
+			{
+			}
 	};
 
 	bool no_ownership_value(auto& options);

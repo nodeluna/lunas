@@ -122,6 +122,10 @@ export namespace lunas {
 
 			std::expected<std::monostate, lunas::error> minimum_space(const std::string& data, lunas::config::options& options)
 			{
+				if (data == "off")
+				{
+					return std::monostate();
+				}
 				constexpr std::uintmax_t KiB  = 1024;
 				constexpr std::uintmax_t MiB  = 1024 * KiB;
 				constexpr std::uintmax_t GiB  = 1024 * MiB;

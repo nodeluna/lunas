@@ -28,6 +28,7 @@ export import :path;
 export import :dir;
 export import :file;
 export import :limits;
+export import :parition;
 
 #define REMOTE_BUFFER_SIZE 65536 * 2
 namespace fs = std::filesystem;
@@ -67,9 +68,10 @@ export namespace lunas {
 			std::expected<std::monostate, lunas::error> mkdir(const std::string& path, const std::filesystem::perms& perms);
 			std::expected<std::monostate, lunas::error> symlink(const std::string& target, const std::string& path);
 			std::expected<std::monostate, lunas::error> rename(const std::string& original, const std::string& newname);
-			std::expected<std::unique_ptr<lunas::sftp_dir>, lunas::error>  opendir(const std::string& path);
-			std::expected<std::unique_ptr<lunas::sftp_file>, lunas::error> openfile(
-			    const std::string& path, int access_type, mode_t mode);
+			std::expected<std::unique_ptr<lunas::sftp_partition>, lunas::error> sftp_partition(const std::string& path);
+			std::expected<std::unique_ptr<lunas::sftp_dir>, lunas::error>	    opendir(const std::string& path);
+			std::expected<std::unique_ptr<lunas::sftp_file>, lunas::error>	    openfile(
+				 const std::string& path, int access_type, mode_t mode);
 			std::expected<std::unique_ptr<lunas::sftp_file>, lunas::error> openfile(
 			    const std::string& path, int access_type, std::filesystem::perms mode);
 			std::expected<std::unique_ptr<lunas::sftp_limits>, lunas::error> limits();
@@ -181,6 +183,18 @@ namespace lunas {
 		}
 
 		return std::monostate();
+	}
+
+	std::expected<std::unique_ptr<lunas::sftp_partition>, lunas::error> sftp::sftp_partition(const std::string& path)
+	{
+		try
+		{
+			return std::make_unique<lunas::sftp_partition>(this->get_sftp_session(), path);
+		}
+		catch (const std::exception& e)
+		{
+			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get partition info", path)));
+		}
 	}
 
 	std::expected<std::unique_ptr<lunas::sftp_dir>, lunas::error> sftp::opendir(const std::string& path)

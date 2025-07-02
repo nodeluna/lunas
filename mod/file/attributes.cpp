@@ -4,7 +4,7 @@ module;
 #include <sys/stat.h>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
+import std.compat;
 #else
 #	include <string>
 #	include <expected>
@@ -14,6 +14,7 @@ import std;
 #	include <stdexcept>
 #	include <cstring>
 #	include <utility>
+#	include <cstdint>
 #endif
 
 export module lunas.file:attributes;
@@ -22,7 +23,6 @@ import lunas.sftp;
 import lunas.file_types;
 import lunas.attributes;
 import lunas.error;
-
 import lunas.stdout;
 
 export namespace lunas {
@@ -39,6 +39,7 @@ export namespace lunas {
 			std::string	  path();
 			time_t		  mtime();
 			lunas::file_types file_type();
+			std::uintmax_t	  file_size();
 	};
 
 	std::expected<std::unique_ptr<lunas::attributes>, lunas::error> get_attributes(
@@ -145,6 +146,18 @@ namespace lunas {
 		{
 			auto& attr = std::get<std::pair<struct stat, lunas::file_types>>(file_attributes);
 			return lunas::if_lspart_return_resume_type(file_path, attr.second);
+		}
+	}
+
+	std::uintmax_t attributes::file_size()
+	{
+		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes))
+		{
+			return std::get<std::unique_ptr<lunas::sftp_attributes>>(file_attributes)->file_size();
+		}
+		else
+		{
+			return std::get<std::pair<struct stat, lunas::file_types>>(file_attributes).first.st_size;
 		}
 	}
 

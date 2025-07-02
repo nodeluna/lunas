@@ -69,6 +69,7 @@ export namespace lunas {
 			std::string				      path;
 			std::variant<lunas::file_types, lunas::error> file_type = lunas::error("empty directory_entry.file_type value");
 			std::variant<time_t, lunas::error>	      mtime	= lunas::error("empty directory_entry.mtime value");
+			std::uintmax_t				      file_size = 0;
 			std::expected<std::monostate, lunas::error>   holds_attributes();
 			std::expected<std::monostate, lunas::error>   holds_file_type();
 	};
@@ -136,6 +137,7 @@ namespace lunas {
 		abstract_entry.filename	 = attr->name();
 		abstract_entry.path	 = attr->path();
 		abstract_entry.file_type = attr->file_type();
+		abstract_entry.file_size = attr->file_size();
 
 		auto&	   file_type		= std::get<lunas::file_types>(abstract_entry.file_type);
 		const auto unfollowed_file_type = file_type;
@@ -188,8 +190,9 @@ namespace lunas {
 
 	directory_entry directory::convert_to_directory_entry(std::filesystem::directory_entry& attr)
 	{
-		abstract_entry.filename = attr.path().filename();
-		abstract_entry.path	= attr.path().string();
+		abstract_entry.filename	 = attr.path().filename();
+		abstract_entry.path	 = attr.path().string();
+		abstract_entry.file_size = attr.file_size();
 
 		if (directory_options.follow_symlink == lunas::follow_symlink::yes)
 		{

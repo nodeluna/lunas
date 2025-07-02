@@ -103,6 +103,8 @@ export namespace lunas {
 		sync_read_symlink	  = 101,
 		sync_get_file_size	  = 102,
 		sync_hardlink		  = 103,
+
+		partition_info = 104
 	};
 
 	class error {

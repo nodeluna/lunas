@@ -186,6 +186,11 @@ export namespace lunas {
 				return ipaths.at(index);
 			}
 
+			const struct lunas::ipath::input_path& get_ipath(size_t index) const
+			{
+				return ipaths.at(index);
+			}
+
 			void ipaths_emplace_back(struct lunas::ipath::input_path&& ipath)
 			{
 				ipaths.emplace_back(std::move(ipath));

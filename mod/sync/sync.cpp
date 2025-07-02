@@ -15,7 +15,8 @@ import std.compat;
 export module lunas.sync;
 import :types;
 import :copy;
-import :multi_source;
+import :checks;
+import :updating;
 import :remove;
 
 export import lunas.error;
@@ -93,11 +94,11 @@ export namespace lunas {
 				{
 					std::string relative = src_file.value().path;
 					relative	     = relative.substr(ipaths.at(src_index).path.size(), relative.size());
-					dest_path	     = ipaths.at(dest_index).path + relative;
 					if (lunas::exclude(relative, data.options.exclude, data.options.exclude_pattern))
 					{
 						continue;
 					}
+					dest_path = ipaths.at(dest_index).path + relative;
 				}
 
 				struct metadata src_metadata = {
@@ -119,8 +120,8 @@ export namespace lunas {
 				}
 				progress_stats.total_to_be_synced = progress_stats.total_synced;
 
-				ok = multi_source::check_dest_and_sync(
-				    src_metadata, dest_metadata, src_index, dest_index, src_file->path, dest_path, data, progress_stats);
+				ok = check_dest_and_sync(file_metadata(src_file->path, src_metadata, src_index),
+				    file_metadata(dest_path, dest_metadata, dest_index), data, progress_stats);
 				if (not ok)
 				{
 					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
@@ -173,7 +174,7 @@ export namespace lunas {
 
 		for (auto file = content.files_table.begin(); file != content.files_table.end();)
 		{
-			auto src_index = multi_source::get_src(*file, data);
+			auto src_index = get_src(*file, data);
 			if (not src_index && data.options.remove_extra && src_index.error().value() == lunas::error_type::source_not_found)
 			{
 				goto retained_for_remove_extra;
@@ -183,7 +184,7 @@ export namespace lunas {
 				goto not_needed_in_the_files_table_any_longer;
 			}
 
-			synced = multi_source::updating(*file, src_index.value(), data, progress_stats);
+			synced = updating(*file, src_index.value(), data, progress_stats);
 			if (not synced)
 			{
 				lunas::printerr("{}", synced.error().message());
@@ -206,7 +207,7 @@ export namespace lunas {
 
 		for (auto file = content.files_table.rbegin(); file != content.files_table.rend() && data.options.remove_extra; ++file)
 		{
-			auto src_index = multi_source::get_src(*file, data);
+			auto src_index = get_src(*file, data);
 			if (not src_index && src_index.error().value() == lunas::error_type::source_not_found)
 			{
 				size_t dest_index = 0;
