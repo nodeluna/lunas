@@ -137,7 +137,6 @@ namespace lunas {
 		abstract_entry.filename	 = attr->name();
 		abstract_entry.path	 = attr->path();
 		abstract_entry.file_type = attr->file_type();
-		abstract_entry.file_size = attr->file_size();
 
 		auto&	   file_type		= std::get<lunas::file_types>(abstract_entry.file_type);
 		const auto unfollowed_file_type = file_type;
@@ -185,14 +184,17 @@ namespace lunas {
 		}
 
 		file_type = lunas::if_lspart_return_resume_type(abstract_entry.path, file_type);
+		if (file_type == lunas::file_types::regular_file)
+		{
+			abstract_entry.file_size = attr->file_size();
+		}
 		return abstract_entry;
 	}
 
 	directory_entry directory::convert_to_directory_entry(std::filesystem::directory_entry& attr)
 	{
-		abstract_entry.filename	 = attr.path().filename();
-		abstract_entry.path	 = attr.path().string();
-		abstract_entry.file_size = attr.file_size();
+		abstract_entry.filename = attr.path().filename();
+		abstract_entry.path	= attr.path().string();
 
 		if (directory_options.follow_symlink == lunas::follow_symlink::yes)
 		{
@@ -243,6 +245,10 @@ namespace lunas {
 		}
 
 		file_type = lunas::if_lspart_return_resume_type(abstract_entry.path, file_type);
+		if (file_type == lunas::file_types::regular_file)
+		{
+			abstract_entry.file_size = attr.file_size();
+		}
 		return abstract_entry;
 	}
 
