@@ -24,17 +24,29 @@ namespace lunas {
 	lunas::file_types enum_file_types(std::filesystem::file_status entry)
 	{
 		if (entry.type() == std::filesystem::file_type::symlink)
+		{
 			return lunas::file_types::symlink;
+		}
 		else if (entry.type() == std::filesystem::file_type::directory)
+		{
 			return lunas::file_types::directory;
+		}
 		else if (entry.type() == std::filesystem::file_type::regular)
+		{
 			return lunas::file_types::regular_file;
+		}
 		else if (entry.type() == std::filesystem::file_type::socket)
+		{
 			return lunas::file_types::socket;
+		}
 		else if (entry.type() == std::filesystem::file_type::not_found)
+		{
 			return lunas::file_types::not_found;
+		}
 		else
+		{
 			return lunas::file_types::other;
+		}
 	}
 
 	std::expected<lunas::file_types, lunas::error> get_file_type(const std::string& path, lunas::follow_symlink follow)
@@ -42,9 +54,13 @@ namespace lunas {
 		std::error_code		     ec;
 		std::filesystem::file_status status;
 		if (follow == lunas::follow_symlink::yes)
+		{
 			status = std::filesystem::status(path, ec);
+		}
 		else
+		{
 			status = std::filesystem::symlink_status(path, ec);
+		}
 
 		if (ec.value() != 0)
 		{
@@ -70,18 +86,26 @@ namespace lunas {
 
 		bool is_symlink = std::filesystem::is_symlink(path, ec);
 		if (ec.value() != 0)
+		{
 			goto err;
+		}
 
 		if (not is_symlink)
+		{
 			return false;
+		}
 
 		target = std::filesystem::read_symlink(path, ec);
 		if (ec.value() != 0)
+		{
 			goto err;
+		}
 
 		exists = std::filesystem::exists(target, ec);
 		if (ec.value() != 0)
+		{
 			goto err;
+		}
 
 		return not exists;
 	err:

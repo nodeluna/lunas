@@ -87,7 +87,9 @@ namespace lunas {
 		this->quiet    = quiet;
 		this->progress = progress;
 		if (progress == false || quiet)
+		{
 			return;
+		}
 		std::cout << '\n';
 	}
 
@@ -112,7 +114,9 @@ namespace lunas {
 	void progress_bar::ingoing(const double& full_size, const double& occupied)
 	{
 		if (progress == false || quiet)
+		{
 			return;
+		}
 		std::cout << "\x1b[1B\r";
 		this->bar(full_size, occupied);
 		std::cout << "\x1b[1A\r";
@@ -121,7 +125,9 @@ namespace lunas {
 	progress_bar::~progress_bar()
 	{
 		if (progress == false || quiet)
+		{
 			return;
+		}
 
 		if (lock)
 		{
@@ -133,7 +139,9 @@ namespace lunas {
 			std::cout << "\x1b[6A";
 		}
 		else
+		{
 			std::cout << "\x1b[1A";
+		}
 
 		lock = false;
 	}
@@ -141,9 +149,13 @@ namespace lunas {
 	bool no_ownership_value(auto& options)
 	{
 		if (not options.attributes_uid_value && options.attributes_uid)
+		{
 			return true;
+		}
 		else if (not options.attributes_gid_value && options.attributes_gid)
+		{
 			return true;
+		}
 		return false;
 	}
 
@@ -152,23 +164,37 @@ namespace lunas {
 		if (type == ownership_type::uid)
 		{
 			if (not options.attributes_uid)
+			{
 				return -1;
+			}
 			else if (options.attributes_uid_value)
+			{
 				return *options.attributes_uid_value;
+			}
 			else
+			{
 				return uid;
+			}
 		}
 		else if (type == ownership_type::gid)
 		{
 			if (not options.attributes_gid)
+			{
 				return -1;
+			}
 			else if (options.attributes_gid_value)
+			{
 				return *options.attributes_gid_value;
+			}
 			else
+			{
 				return uid;
+			}
 		}
 		else
+		{
 			return -1;
+		}
 	}
 
 }

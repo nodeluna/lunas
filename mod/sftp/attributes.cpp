@@ -67,9 +67,13 @@ namespace lunas {
 		file_path = path;
 
 		if (follow == follow_symlink::yes)
+		{
 			attr = sftp_stat(sftp, path.c_str());
+		}
 		else
+		{
 			attr = sftp_lstat(sftp, path.c_str());
+		}
 	}
 
 	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute) : attr(attribute)
@@ -109,15 +113,25 @@ namespace lunas {
 	lunas::file_types sftp_attributes::file_type()
 	{
 		if (attr == nullptr)
+		{
 			return lunas::file_types::not_found;
+		}
 		if (attr->type == SSH_FILEXFER_TYPE_SYMLINK)
+		{
 			return lunas::file_types::symlink;
+		}
 		else if (attr->type == SSH_FILEXFER_TYPE_DIRECTORY)
+		{
 			return lunas::file_types::directory;
+		}
 		else if (attr->type == SSH_FILEXFER_TYPE_REGULAR)
+		{
 			return lunas::file_types::regular_file;
+		}
 		else
+		{
 			return lunas::file_types::other;
+		}
 	}
 
 	std::string sftp_attributes::file_type_name()
@@ -125,13 +139,21 @@ namespace lunas {
 		auto type = this->file_type();
 
 		if (type == lunas::file_types::symlink)
+		{
 			return "symlink";
+		}
 		else if (type == lunas::file_types::directory)
+		{
 			return "directory";
+		}
 		else if (type == lunas::file_types::regular_file)
+		{
 			return "regular_file";
+		}
 		else
+		{
 			return "other";
+		}
 	}
 
 	std::uintmax_t sftp_attributes::file_size()
@@ -239,7 +261,9 @@ namespace lunas {
 	sftp_attributes::~sftp_attributes()
 	{
 		if (attr != nullptr && attr != NULL)
+		{
 			sftp_attributes_free(attr);
+		}
 	}
 
 }

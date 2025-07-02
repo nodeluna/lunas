@@ -49,7 +49,9 @@ export namespace lunas {
 					std::filesystem::directory_options local_directory_options;
 
 					if (options.follow_symlink == lunas::follow_symlink::yes)
+					{
 						local_directory_options = std::filesystem::directory_options::follow_directory_symlink;
+					}
 					return lunas::local_directory(path, local_directory_options);
 				}
 				catch (const lunas::error& e)
@@ -120,7 +122,9 @@ namespace lunas {
 	std::expected<std::filesystem::directory_entry, lunas::error> local_directory::read()
 	{
 		if (this->eof())
+		{
 			return std::unexpected(lunas::error("", lunas::error_type::readdir_eof));
+		}
 
 		std::filesystem::directory_entry entry = *itr;
 		++itr;
@@ -145,23 +149,33 @@ namespace lunas {
 			{
 				auto attr = sftp->attributes(abstract_entry.path, lunas::follow_symlink::yes);
 				if (not attr)
+				{
 					abstract_entry.file_type = attr.error();
+				}
 				else
+				{
 					abstract_entry.file_type = attr.value()->file_type();
+				}
 			}
 		}
 
 		if (not std::holds_alternative<lunas::file_types>(abstract_entry.file_type))
+		{
 			return abstract_entry;
+		}
 
 		if (file_type != lunas::file_types::brokenlink && unfollowed_file_type == lunas::file_types::symlink &&
 		    directory_options.follow_symlink == lunas::follow_symlink::yes)
 		{
 			auto ok = sftp->get_utimes(abstract_entry.path, lunas::sftp::time_type::mtime, directory_options.follow_symlink);
 			if (not ok)
+			{
 				abstract_entry.mtime = ok.error();
+			}
 			else
+			{
 				abstract_entry.mtime = ok.value().mtime;
+			}
 		}
 		else
 		{
@@ -178,9 +192,13 @@ namespace lunas {
 		abstract_entry.path	= attr.path().string();
 
 		if (directory_options.follow_symlink == lunas::follow_symlink::yes)
+		{
 			abstract_entry.file_type = get_file_type(attr.status());
+		}
 		else
+		{
 			abstract_entry.file_type = get_file_type(attr.symlink_status());
+		}
 
 		auto& file_type = std::get<lunas::file_types>(abstract_entry.file_type);
 
@@ -188,24 +206,38 @@ namespace lunas {
 		{
 			std::expected<bool, lunas::error> broken = lunas::is_broken_link(abstract_entry.path);
 			if (not broken)
+			{
 				abstract_entry.file_type = broken.error();
+			}
 			if (broken.value())
+			{
 				abstract_entry.file_type = lunas::file_types::brokenlink;
+			}
 		}
 
 		if (not std::holds_alternative<lunas::file_types>(abstract_entry.file_type))
+		{
 			return abstract_entry;
+		}
 
 		std::expected<lunas::time_val, lunas::error> ok;
 		if (file_type != lunas::file_types::brokenlink)
+		{
 			ok = lunas::utime::get(abstract_entry.path, lunas::time_type::mtime, directory_options.follow_symlink);
+		}
 		else
+		{
 			ok = lunas::utime::get(abstract_entry.path, lunas::time_type::mtime, lunas::follow_symlink::no);
+		}
 
 		if (not ok)
+		{
 			abstract_entry.mtime = ok.error();
+		}
 		else
+		{
 			abstract_entry.mtime = ok.value().mtime;
+		}
 
 		file_type = lunas::if_lspart_return_resume_type(abstract_entry.path, file_type);
 		return abstract_entry;
@@ -222,7 +254,9 @@ namespace lunas {
 			auto& sftp_dirs = std::get<remote_dirs_stack>(dir);
 			sftp_dirs.push(sftp->opendir(path.string()));
 			if (not sftp_dirs.top())
+			{
 				throw lunas::error(sftp_dirs.top().error());
+			}
 		}
 		else
 		{
@@ -231,7 +265,9 @@ namespace lunas {
 			auto& local_dirs = std::get<local_dirs_stack>(dir);
 			auto  local_dir	 = lunas::local_directory::init(path, options);
 			if (not local_dir)
+			{
 				throw local_dir.error();
+			}
 			local_dirs.push(local_dir.value());
 		}
 	}
@@ -239,9 +275,13 @@ namespace lunas {
 	std::expected<std::monostate, lunas::error> directory_entry::holds_attributes()
 	{
 		if (not std::holds_alternative<lunas::file_types>(this->file_type))
+		{
 			return std::unexpected(std::get<lunas::error>(this->file_type));
+		}
 		else if (not std::holds_alternative<time_t>(this->mtime))
+		{
 			return std::unexpected(std::get<lunas::error>(this->mtime));
+		}
 
 		return std::monostate();
 	}
@@ -249,7 +289,9 @@ namespace lunas {
 	std::expected<std::monostate, lunas::error> directory_entry::holds_file_type()
 	{
 		if (not std::holds_alternative<lunas::file_types>(this->file_type))
+		{
 			return std::unexpected(std::get<lunas::error>(this->file_type));
+		}
 
 		return std::monostate();
 	}
@@ -257,15 +299,21 @@ namespace lunas {
 	bool directory::eof()
 	{
 		if (std::holds_alternative<remote_dirs_stack>(dir))
+		{
 			return std::get<remote_dirs_stack>(dir).empty();
+		}
 		else
+		{
 			return std::get<local_dirs_stack>(dir).empty();
+		}
 	}
 
 	[[nodiscard]] std::expected<directory_entry, lunas::error> directory::read()
 	{
 		if (this->eof())
+		{
 			return std::unexpected(lunas::error("", lunas::error_type::readdir_eof));
+		}
 
 		if (std::holds_alternative<remote_dirs_stack>(dir))
 		{
@@ -289,17 +337,25 @@ namespace lunas {
 				if (not remote_entry)
 				{
 					if (remote_entry.error().value() == lunas::error_type::sftp_eof)
+					{
 						sftp_dirs.pop();
+					}
 					else
+					{
 						return std::unexpected(remote_entry.error());
+					}
 					continue;
 				}
 				std::string filename = remote_entry.value()->name();
 				if (filename != "." && filename != "..")
+				{
 					break;
+				}
 			}
 			if (sftp_dirs.empty())
+			{
 				return std::unexpected(lunas::error("", lunas::error_type::readdir_eof));
+			}
 
 			return convert_to_directory_entry(remote_entry.value());
 		}
@@ -326,9 +382,13 @@ namespace lunas {
 				if (not entry)
 				{
 					if (entry.error().value() == lunas::error_type::readdir_eof)
+					{
 						local_dirs.pop();
+					}
 					else
+					{
 						return std::unexpected(entry.error());
+					}
 				}
 				else
 				{
@@ -336,7 +396,9 @@ namespace lunas {
 				}
 			}
 			if (local_dirs.empty())
+			{
 				return std::unexpected(lunas::error("", lunas::error_type::readdir_eof));
+			}
 
 			return convert_to_directory_entry(entry.value());
 		}

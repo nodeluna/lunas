@@ -53,7 +53,9 @@ namespace lunas {
 		{
 			auto attr = sftp->attributes(path, follow);
 			if (not attr)
+			{
 				throw attr.error();
+			}
 
 			file_attributes = std::move(attr.value());
 		}
@@ -62,9 +64,13 @@ namespace lunas {
 			struct stat stats;
 			int	    rc = 0;
 			if (follow == lunas::follow_symlink::yes)
+			{
 				rc = stat(path.c_str(), &stats);
+			}
 			else
+			{
 				rc = lstat(path.c_str(), &stats);
+			}
 			if (rc != 0)
 			{
 				lunas::error_type error_type =
@@ -74,7 +80,9 @@ namespace lunas {
 			}
 			auto type = lunas::get_file_type(path, follow);
 			if (not type)
+			{
 				throw type.error();
+			}
 
 			std::pair<struct stat, lunas::file_types> pair;
 			{

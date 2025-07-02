@@ -126,7 +126,9 @@ namespace lunas {
 	std::expected<std::monostate, lunas::error> sftp::unlink(const std::string& path)
 	{
 		if (not session_data.options.dry_run && sftp_unlink(m_sftp, path.c_str()) != SSH_OK)
+		{
 			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't remove file", path)));
+		}
 
 		return std::monostate();
 	}
@@ -134,7 +136,9 @@ namespace lunas {
 	std::expected<std::monostate, lunas::error> sftp::rmdir(const std::string& path)
 	{
 		if (not session_data.options.dry_run && sftp_rmdir(m_sftp, path.c_str()) != SSH_OK)
+		{
 			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't remove directory", path)));
+		}
 
 		return std::monostate();
 	}
@@ -142,7 +146,9 @@ namespace lunas {
 	std::expected<std::monostate, lunas::error> sftp::mkdir(const std::string& path, const unsigned int& perms = 0755)
 	{
 		if (not session_data.options.dry_run && sftp_mkdir(m_sftp, path.c_str(), perms) != SSH_OK)
+		{
 			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't make directory", path)));
+		}
 
 		return std::monostate();
 	}
@@ -150,7 +156,9 @@ namespace lunas {
 	std::expected<std::monostate, lunas::error> sftp::mkdir(const std::string& path, const std::filesystem::perms& perms)
 	{
 		if (not session_data.options.dry_run && sftp_mkdir(m_sftp, path.c_str(), ( unsigned int ) perms) != SSH_OK)
+		{
 			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't make directory", path)));
+		}
 
 		return std::monostate();
 	}
@@ -158,7 +166,9 @@ namespace lunas {
 	std::expected<std::monostate, lunas::error> sftp::symlink(const std::string& target, const std::string& path)
 	{
 		if (not session_data.options.dry_run && sftp_symlink(m_sftp, target.c_str(), path.c_str()) != SSH_OK)
+		{
 			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't make symlink", path)));
+		}
 
 		return std::monostate();
 	}
@@ -166,7 +176,9 @@ namespace lunas {
 	std::expected<std::monostate, lunas::error> sftp::rename(const std::string& original, const std::string& newname)
 	{
 		if (not session_data.options.dry_run && sftp_rename(m_sftp, original.c_str(), newname.c_str()) != SSH_OK)
+		{
 			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't rename file", original)));
+		}
 
 		return std::monostate();
 	}
@@ -224,9 +236,13 @@ namespace lunas {
 	{
 		auto attr = std::make_unique<lunas::sftp_attributes>(m_sftp, path, follow);
 		if (attr->exists())
+		{
 			return attr;
+		}
 		else
+		{
 			return std::unexpected(ssh_error(this->get_sftp_session()));
+		}
 	}
 
 	std::expected<std::string, lunas::error> sftp::cmd(const std::string& command)
@@ -263,15 +279,21 @@ namespace lunas {
 				    ssh_error(this->get_sftp_session(), fmt::err_path("error while getting output of ", command)));
 			}
 			if (nbytes == 0)
+			{
 				break;
+			}
 			output.append(buffer, nbytes);
 		}
 
 		if (output.empty() != true && output.back() == '\n')
+		{
 			output.pop_back();
+		}
 
 		if (is_stderr == 1)
+		{
 			return std::unexpected(ssh_error(output));
+		}
 
 		return output;
 	}
@@ -285,11 +307,15 @@ namespace lunas {
 	{
 		auto target = this->readlink(link);
 		if (not target)
+		{
 			return std::unexpected(target.error());
+		}
 
 		auto attrs = this->attributes(target.value(), follow_symlink::no);
 		if (attrs)
+		{
 			return false;
+		}
 
 		return true;
 	}
@@ -298,11 +324,15 @@ namespace lunas {
 	{
 		auto path = this->cmd("echo $HOME");
 		if (not path)
+		{
 			return std::unexpected(
 			    ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get home directory for", session_data.ip)));
+		}
 		else if (path->empty())
+		{
 			return std::unexpected(
 			    ssh_error("couldn't get home directory for '" + session_data.ip + "' environment variable is empty"));
+		}
 
 		path::append_seperator(path.value());
 		return path.value();
@@ -348,7 +378,9 @@ namespace lunas {
 
 		auto attr = this->attributes(path, follow);
 		if (not attr)
+		{
 			return std::unexpected(attr.error());
+		}
 		auto& attributes = attr.value();
 
 		struct_time_val time_val;
@@ -368,8 +400,10 @@ namespace lunas {
 					time_val.mtime_nsec = timespec.tv_nsec;
 				}
 				else
+				{
 					return std::unexpected(
 					    lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get utimes", path)));
+				}
 				break;
 			case struct_time_type::mtime:
 				time_val.mtime	    = attributes->mtime();
@@ -382,8 +416,10 @@ namespace lunas {
 					time_val.atime_nsec = timespec.tv_nsec;
 				}
 				else
+				{
 					return std::unexpected(
 					    lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get utimes", path)));
+				}
 				break;
 			case struct_time_type::utimes:
 				time_val.atime	    = attributes->atime();
@@ -413,12 +449,18 @@ namespace lunas {
 		int rc = SSH_OK;
 
 		if (follow == lunas::follow_symlink::yes)
+		{
 			rc = sftp_setstat(m_sftp, path.c_str(), &attributes);
+		}
 		else
+		{
 			rc = sftp_lsetstat(m_sftp, path.c_str(), &attributes);
+		}
 
 		if (rc != SSH_OK)
+		{
 			return std::unexpected(lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't set utimes", path)));
+		}
 
 		return std::monostate();
 	}
@@ -429,7 +471,9 @@ namespace lunas {
 
 		auto attr = this->attributes(path, follow);
 		if (not attr)
+		{
 			return std::unexpected(attr.error());
+		}
 		auto& attributes = attr.value();
 
 		own.uid = attributes->uid();
@@ -441,7 +485,9 @@ namespace lunas {
 	{
 		auto attr = this->attributes(path, follow);
 		if (not attr)
+		{
 			return std::unexpected(attr.error());
+		}
 
 		unsigned int perms = attr.value()->permissions();
 		return perms;
@@ -451,7 +497,9 @@ namespace lunas {
 	{
 		auto attr = this->attributes(path, lunas::follow_symlink::yes);
 		if (not attr)
+		{
 			return std::unexpected(attr.error());
+		}
 
 		return attr.value()->file_size();
 	}
@@ -468,21 +516,33 @@ namespace lunas {
 		{
 			auto attr = this->attributes(path, follow);
 			if (not attr)
+			{
 				return std::unexpected(attr.error());
+			}
 			if (own.uid == -1)
+			{
 				attributes.uid = attr.value()->uid();
+			}
 			if (own.gid == -1)
+			{
 				attributes.gid = attr.value()->gid();
+			}
 		}
 
 		int rc;
 		if (follow == lunas::follow_symlink::yes)
+		{
 			rc = sftp_setstat(m_sftp, path.c_str(), &attributes);
+		}
 		else
+		{
 			rc = sftp_lsetstat(m_sftp, path.c_str(), &attributes);
+		}
 
 		if (rc != SSH_OK)
+		{
 			return std::unexpected(lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't set ownership", path)));
+		}
 
 		return std::monostate();
 	}
@@ -502,16 +562,20 @@ namespace lunas {
 		{
 			path = this->homedir();
 			if (not path)
+			{
 				return std::unexpected(
 				    lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get homedir", session_data.ip)));
+			}
 			sftp_path = path.value() + sftp_path.substr(2, sftp_path.size());
 		}
 		else if (sftp_path.size() > 1 && sftp_path.front() != path_seperator && sftp_path.front() != '.')
 		{
 			path = this->homedir();
 			if (not path)
+			{
 				return std::unexpected(
 				    lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get homedir", session_data.ip)));
+			}
 			sftp_path = path.value() + sftp_path;
 		}
 
@@ -529,14 +593,18 @@ namespace lunas {
 		{
 			auto current_path = this->cwd();
 			if (not current_path)
+			{
 				return std::unexpected(
 				    lunas::ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get cwd", session_data.ip)));
+			}
 			path::pop_seperator(current_path.value());
 			std::string prefix("", 3);
 			for (auto itr = sftp_path.begin(); itr != sftp_path.end(); ++itr)
 			{
 				if (prefix.size() >= 3)
+				{
 					prefix.clear();
+				}
 
 				prefix += *itr;
 
@@ -561,7 +629,9 @@ namespace lunas {
 
 		auto attributes = this->attributes(sftp_path, follow_symlink::yes);
 		if (attributes && attributes.value()->file_type() == lunas::file_types::directory)
+		{
 			path::append_seperator(sftp_path);
+		}
 
 		return sftp_path;
 	}

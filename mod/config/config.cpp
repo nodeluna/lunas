@@ -30,7 +30,9 @@ namespace lunas {
 			std::expected<struct cliarg::cliopts, lunas::error> parsed_data =
 			    lunas::cliarg::fillopts(argc, argv, lunas::config_file::preset);
 			if (not parsed_data)
+			{
 				return std::unexpected(parsed_data.error());
+			}
 
 			struct cliarg::cliopts& cliopts = parsed_data.value();
 
@@ -55,7 +57,9 @@ namespace lunas {
 					remote_path.session_data.options.dry_run   = cliopts.options.dry_run;
 					remote_path.session_data.options.timeout   = cliopts.options.timeout_sec;
 					if (cliopts.options.compression)
+					{
 						remote_path.session_data.options.compression_level = cliopts.options.compression_level;
+					}
 					try
 					{
 						auto ok = ipath.init_sftp(remote_path.session_data);

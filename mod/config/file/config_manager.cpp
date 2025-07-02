@@ -105,7 +105,9 @@ namespace lunas {
 
 			file.close();
 			if (file.is_open() == true)
+			{
 				lunas::warn("couldn't close config file '{}', {}", config_file, ec.message());
+			}
 
 			std::print(":: wrote a demo config file to '{}'", config_file);
 			return std::monostate();
@@ -138,7 +140,9 @@ namespace lunas {
 				else if (option == "N" || option == "port")
 				{
 					if (is_num(it->second))
+					{
 						remote_path.session_data.port = std::stoi(it->second);
+					}
 					else
 					{
 						std::string err = "nest '" + name + "': port '" + it->second + "' isn't a valid number";
@@ -146,12 +150,16 @@ namespace lunas {
 					}
 				}
 				else if (option == "pw" || option == "password")
+				{
 					remote_path.session_data.pw = it->second;
+				}
 				++it;
 			}
 
 			if (it != nest.begin())
+			{
 				--it;
+			}
 			if (remote_path.session_data.ip.empty())
 			{
 				std::string err = "remote path for nest'" + name + "' isn't provided";
@@ -190,7 +198,9 @@ namespace lunas {
 				{
 					auto ok = itr2->second(it->second, options);
 					if (not ok)
+					{
 						return std::unexpected(ok.error());
+					}
 				}
 #ifdef REMOTE_ENABLED
 				else if (auto itr3 = rpaths_options.find(it->first); itr3 != rpaths_options.end())
@@ -204,16 +214,24 @@ namespace lunas {
 				{
 					auto remote_path = fill_remote_path(nest, it, name);
 					if (remote_path)
+					{
 						ipaths.emplace_back(std::move(remote_path.value()));
+					}
 					else
+					{
 						return std::unexpected(remote_path.error());
+					}
 				}
 #endif // REMOTE_ENABLED
 				else if (auto itr4 = info.find(it->first); itr4 != info.end())
+				{
 					itr4->second();
+				}
 				else if (it->first.front() != '#')
+				{
 					return std::unexpected(lunas::error("nest '" + name + "': wrong option '" + it->first + "'",
 					    lunas::error_type::config_invalid_option));
+				}
 			}
 
 			return std::monostate();
@@ -223,7 +241,9 @@ namespace lunas {
 		    std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths)
 		{
 			if (name == "DEMO_CONFIG")
+			{
 				return make_demo_config(options);
+			}
 
 			try
 			{

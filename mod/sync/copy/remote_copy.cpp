@@ -34,14 +34,22 @@ export namespace lunas {
 			std::expected<struct syncstat, lunas::error> syncstat;
 
 			if (src_sftp != nullptr && dest_sftp == nullptr)
+			{
 				syncstat = lunas::remote_to_local::copy(src, dest, src_sftp, misc);
+			}
 			else if (src_sftp == nullptr && dest_sftp != nullptr)
+			{
 				syncstat = lunas::local_to_remote::copy(src, dest, dest_sftp, misc);
+			}
 			else
+			{
 				syncstat = lunas::remote_to_remote::copy(src, dest, src_sftp, dest_sftp, misc);
+			}
 
 			if (not syncstat)
+			{
 				return std::unexpected(syncstat.error());
+			}
 
 			if (misc.options.dry_run == false && syncstat.value().code == lunas::sync_code::success)
 			{

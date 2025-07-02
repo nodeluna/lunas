@@ -115,7 +115,9 @@ export namespace lunas {
 						lunas::path::append_seperator(path);
 					}
 					else
+					{
 						return std::unexpected(ok.error());
+					}
 
 					return std::monostate();
 				}

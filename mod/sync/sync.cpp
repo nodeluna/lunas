@@ -39,17 +39,23 @@ export namespace lunas {
 		const auto& ipaths = data.get_ipaths();
 
 		if (ipaths.empty())
+		{
 			return std::unexpected(lunas::error("didn't find any input directories"));
+		}
 
 		size_t src_index = 0;
 		for (const auto& path : ipaths)
 		{
 			if (path.is_src())
+			{
 				break;
+			}
 			src_index++;
 		}
 		if (not ipaths.at(src_index).is_src())
+		{
 			return std::unexpected(lunas::error("didn't find any source in the input directories"));
+		}
 
 		struct directory_options directory_options = {
 		    .follow_symlink    = data.options.follow_symlink,
@@ -58,7 +64,9 @@ export namespace lunas {
 
 		auto directory = lunas::opendir(ipaths.at(src_index).sftp, ipaths.at(src_index).path, directory_options);
 		if (not directory)
+		{
 			return std::unexpected(directory.error());
+		}
 
 		lunas::println(data.options.quiet, "--> opened source directory '{}'", ipaths.at(src_index).path);
 		lunas::println(data.options.quiet, "");
@@ -71,7 +79,9 @@ export namespace lunas {
 			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++)
 			{
 				if (src_index == dest_index || not ipaths.at(dest_index).is_dest())
+				{
 					continue;
+				}
 
 				if (auto ok = src_file.value().holds_attributes(); not ok)
 				{
@@ -85,7 +95,9 @@ export namespace lunas {
 					relative	     = relative.substr(ipaths.at(src_index).path.size(), relative.size());
 					dest_path	     = ipaths.at(dest_index).path + relative;
 					if (lunas::exclude(relative, data.options.exclude, data.options.exclude_pattern))
+					{
 						continue;
+					}
 				}
 
 				struct metadata src_metadata = {
@@ -112,15 +124,21 @@ export namespace lunas {
 				if (not ok)
 				{
 					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
+					{
 						lunas::printerr("conflict in types between '{}' and '{}'", src_file->path, dest_path);
+					}
 					else if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
+					{
 						lunas::printerr("{}", ok.error().message());
+					}
 				}
 			}
 		}
 
 		if (not directory.value()->eof())
+		{
 			lunas::println(false, "didn't reach eof '{}'", ipaths.at(src_index).path);
+		}
 
 		if (data.options.remove_extra)
 		{
@@ -130,11 +148,15 @@ export namespace lunas {
 			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++)
 			{
 				if (not ipaths.at(dest_index).is_dest_only())
+				{
 					continue;
+				}
 
 				auto ok = remove_extra(data, ipaths.at(dest_index).path, src_index, dest_index);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 		}
 
@@ -157,11 +179,15 @@ export namespace lunas {
 				goto retained_for_remove_extra;
 			}
 			else if (not src_index)
+			{
 				goto not_needed_in_the_files_table_any_longer;
+			}
 
 			synced = multi_source::updating(*file, src_index.value(), data, progress_stats);
 			if (not synced)
+			{
 				lunas::printerr("{}", synced.error().message());
+			}
 
 		not_needed_in_the_files_table_any_longer:
 			file = content.files_table.erase(file);
@@ -172,7 +198,9 @@ export namespace lunas {
 		}
 
 		if (not data.options.remove_extra)
+		{
 			return std::monostate();
+		}
 
 		const auto& ipaths = data.get_ipaths();
 
@@ -187,16 +215,22 @@ export namespace lunas {
 					if (metadata.file_type != lunas::file_types::not_found)
 					{
 						if (lunas::exclude(file->path, data.options.exclude, data.options.exclude_pattern))
+						{
 							continue;
+						}
 						std::string to_be_removed = ipaths.at(dest_index).path + file->path;
 						lunas::print_remove_extra(to_be_removed);
 						auto file_size = lunas::get_size_and_remove(
 						    ipaths.at(dest_index).sftp, to_be_removed, metadata.file_type, data.options.dry_run);
 						if (not file_size)
+						{
 							lunas::printerr("{}", file_size.error().message());
+						}
 						else
+						{
 							lunas::register_remove(
 							    file_size.value(), metadata.file_type, data.get_ipath(dest_index));
+						}
 					}
 					dest_index++;
 				}

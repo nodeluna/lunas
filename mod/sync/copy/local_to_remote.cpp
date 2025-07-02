@@ -57,19 +57,27 @@ namespace lunas {
 				{
 					auto syncstat = local_to_remote::rfile(src, dest_lspart, sftp, misc);
 					if (syncstat)
+					{
 						struct lunas::remote::original_name _(sftp, dest_lspart, dest, syncstat.value().code);
+					}
 					return syncstat;
 				};
 
 				syncstat = regular_file_sync(src, dest, misc.src_mtime, func);
 			}
 			else if (misc.file_type == lunas::file_types::directory)
+			{
 				syncstat = local_to_remote::mkdir(src, dest, sftp, misc);
+			}
 			else if (misc.file_type == lunas::file_types::symlink)
+			{
 				syncstat = local_to_remote::symlink(src, dest, sftp, misc);
+			}
 			else
+			{
 				std::unexpected(
 				    lunas::error("can't sync special file '" + src + "'", lunas::error_type::sync_special_file_ignored));
+			}
 
 			return syncstat;
 		}
@@ -90,7 +98,9 @@ namespace lunas {
 			{
 				auto file_size = lunas::cppfs::file_size(src);
 				if (not file_size)
+				{
 					std::unexpected(file_size.error());
+				}
 				src_size = file_size.value();
 			}
 
@@ -118,26 +128,36 @@ namespace lunas {
 				access_type = O_WRONLY | O_CREAT | O_APPEND;
 			}
 			else
+			{
 				access_type = O_WRONLY | O_CREAT | O_TRUNC;
+			}
 
 			auto perms = lunas::permissions::get(src, lunas::follow_symlink::yes);
 			if (not perms)
+			{
 				return std::unexpected(perms.error());
+			}
 
 			std::expected<std::unique_ptr<lunas::sftp_file>, lunas::error> dest_file =
 			    sftp->openfile(dest, access_type, perms.value());
 			if (not dest_file)
+			{
 				return std::unexpected(dest_file.error());
+			}
 
 			{
 				auto ok = lunas::ownership::local_to_remote(src, dest, sftp, misc);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 
 			auto limits = sftp->limits();
 			if (not limits)
+			{
 				return std::unexpected(limits.error());
+			}
 			const std::uint64_t buffer_size = limits.value()->max_write_length();
 
 			std::queue<buffque> queue;
@@ -153,7 +173,9 @@ namespace lunas {
 				{
 					struct buffque bq(buffer_size);
 					if (src_file->eof())
+					{
 						goto done_reading;
+					}
 
 					src_file->seekg(position);
 					if (src_file->bad() || src_file->fail())
@@ -194,11 +216,15 @@ namespace lunas {
 				}
 
 				if (total_bytes_requested >= src_size)
+				{
 					continue;
+				}
 
 				queue.back().aio = dest_file.value()->aio_begin_write(queue.back().buffer, queue.back().bytes_xfered);
 				if (not queue.back().aio)
+				{
 					return std::unexpected(queue.back().aio.error());
+				}
 
 				total_bytes_requested += queue.back().aio.value()->get_bytes_requested();
 				requests_sent++;
@@ -214,7 +240,9 @@ namespace lunas {
 			{
 				auto ok = dest_file.value()->fsync();
 				if (not ok)
+				{
 					lunas::warn("couldn't fsync '{}', ", dest, ok.error().message());
+				}
 			}
 
 			syncstat.code = lunas::sync_code::success;
@@ -239,11 +267,15 @@ namespace lunas {
 
 			auto ok = sftp->mkdir(dest, perms.value());
 			if (not ok)
+			{
 				return std::unexpected(ok.error());
+			}
 
 			auto ok2 = lunas::ownership::local_to_remote(src, dest, sftp, misc);
 			if (not ok2)
+			{
 				return std::unexpected(ok2.error());
+			}
 
 			syncstat.code = lunas::sync_code::success;
 			return syncstat;
@@ -270,13 +302,17 @@ namespace lunas {
 			{
 				auto ok = sftp->symlink(target, dest);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 
 			{
 				auto ok = lunas::ownership::local_to_remote(src, dest, sftp, misc);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 
 			syncstat.code = lunas::sync_code::success;

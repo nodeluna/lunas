@@ -60,7 +60,9 @@ export namespace lunas {
 		}
 		err += std::format(fmt, std::forward<args_t>(args)...);
 		if (not empty)
+		{
 			err += " \x1b[0m";
+		}
 		err += "\n";
 	}
 

@@ -64,7 +64,9 @@ namespace raii {
 		channel::~channel()
 		{
 			if (*_channel == NULL)
+			{
 				return;
+			}
 			ssh_channel_close(*_channel);
 			ssh_channel_free(*_channel);
 		}
@@ -80,15 +82,23 @@ namespace raii {
 		{
 			int rc = -1;
 			if (retry <= 0)
+			{
 				return SSH_AUTH_DENIED;
+			}
 
 			if (data.key_type & key_type_t::public_key)
+			{
 				rc = ssh_pki_import_pubkey_file(data.path.c_str(), &key_t);
+			}
 			else if (data.key_type & key_type_t::private_key)
+			{
 				rc = ssh_pki_import_privkey_file(data.path.c_str(), data.passphrase, data.auth_fn, data.userdata, &key_t);
+			}
 
 			if (rc == SSH_OK)
+			{
 				free_key = true;
+			}
 
 			retry--;
 
@@ -112,7 +122,9 @@ namespace raii {
 		key::~key()
 		{
 			if (free_key)
+			{
 				ssh_key_free(key_t);
+			}
 		}
 	}
 }

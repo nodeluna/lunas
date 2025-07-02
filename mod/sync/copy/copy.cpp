@@ -27,7 +27,9 @@ export namespace lunas {
 #endif
 #ifdef REMOTE_ENABLED
 		if (src_sftp != nullptr || dest_sftp != nullptr)
+		{
 			return remote::copy(src, dest, src_sftp, dest_sftp, misc);
+		}
 		else
 #endif
 			return local::copy(src, dest, misc);

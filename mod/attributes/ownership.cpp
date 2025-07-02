@@ -39,9 +39,13 @@ namespace lunas {
 			struct stat stats;
 			int	    rc = 0;
 			if (follow == lunas::follow_symlink::yes)
+			{
 				rc = stat(path.c_str(), &stats);
+			}
 			else
+			{
 				rc = lstat(path.c_str(), &stats);
+			}
 			if (rc != 0)
 			{
 				std::string err = "couldn't get ownership of '" + path + "', " + std::strerror(errno);
@@ -59,9 +63,13 @@ namespace lunas {
 			int rc = 0;
 
 			if (follow == lunas::follow_symlink::yes)
+			{
 				rc = chown(path.c_str(), own.uid, own.gid);
+			}
 			else
+			{
 				rc = lchown(path.c_str(), own.uid, own.gid);
+			}
 
 			if (rc != 0)
 			{

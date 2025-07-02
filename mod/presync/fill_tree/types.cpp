@@ -38,7 +38,9 @@ export namespace lunas {
 		bool is_lspart(const std::string& path)
 		{
 			if (path.size() > 8 && path.substr(path.size() - 8, path.size()) == ".ls.part")
+			{
 				return true;
+			}
 			return false;
 		}
 	}

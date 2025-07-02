@@ -36,9 +36,13 @@ namespace lunas {
 		{
 			auto itr = content.find(lunas::file_table(path, metadata, data.path_index, data.ipaths_count));
 			if (itr != content.end())
+			{
 				itr->metadatas.at(data.path_index) = metadata;
+			}
 			else
+			{
 				content.insert(lunas::file_table(path, metadata, data.path_index, data.ipaths_count));
+			}
 		}
 
 	}
@@ -55,19 +59,25 @@ namespace lunas {
 
 			auto directory = lunas::opendir(data.ipath->sftp, path, directory_options);
 			if (not directory)
+			{
 				return std::unexpected(directory.error());
+			}
 
 			std::expected<std::monostate, lunas::error> ok;
 
 			while (auto src_file = directory.value()->read())
 			{
 				if (auto ok = src_file.value().holds_attributes(); not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 
 				std::string relative_path = src_file.value().path;
 				relative_path		  = relative_path.substr(path.size(), relative_path.size());
 				if (lunas::exclude(relative_path, data.options->exclude, data.options->exclude_pattern))
+				{
 					continue;
+				}
 
 				struct metadata metadata = {
 				    .mtime     = std::get<time_t>(src_file->mtime),
@@ -78,7 +88,9 @@ namespace lunas {
 			}
 
 			if (not directory.value()->eof())
+			{
 				return std::unexpected(lunas::error("didn't reach eof", lunas::error_type::readdir_eof));
+			}
 
 			return std::monostate();
 		}
@@ -86,8 +98,10 @@ namespace lunas {
 		std::expected<std::monostate, lunas::error> input_directory_check(const lunas::fill_tree_type& data)
 		{
 			if (not data.ipath->path.empty() && data.ipath->path.back() != std::filesystem::path::preferred_separator)
+			{
 				return std::unexpected(lunas::error(
 				    "trailing slash missing from input directory '" + data.ipath->path + "'", lunas::error_type::ipath));
+			}
 
 			auto type = lunas::get_attributes(data.ipath->sftp, data.ipath->path, data.options->follow_symlink);
 			if (not type && type.error().value() == lunas::error_type::no_such_file)
@@ -102,7 +116,9 @@ namespace lunas {
 				{
 					auto ok = lunas::file_operations::mkdir(data.ipath->sftp, data.ipath->path, data.options->dry_run);
 					if (not ok)
+					{
 						return std::unexpected(ok.error());
+					}
 
 					lunas::warn_ok("created input directory '{}', it was not found", data.ipath->path);
 				}

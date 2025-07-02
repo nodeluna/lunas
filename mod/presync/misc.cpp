@@ -51,10 +51,14 @@ namespace lunas {
 				for (const auto& path2 : ipaths)
 				{
 					if (out == in)
+					{
 						goto end;
+					}
 					else if ((path1.is_remote() && not path2.is_remote()) ||
 						 (not path1.is_remote() && path2.is_remote()))
+					{
 						goto end;
+					}
 
 					if (not path1.is_remote() && not path2.is_remote() && path1.path == path2.path)
 					{

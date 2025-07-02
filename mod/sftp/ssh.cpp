@@ -34,7 +34,9 @@ export namespace lunas {
 			~session_data()
 			{
 				if (not pw.empty())
+				{
 					pw.clear();
+				}
 			}
 
 			std::string ip;
@@ -113,6 +115,7 @@ namespace lunas {
 
 		rc = this->auth_list(m_ssh, data.ip, data.pw);
 		if (rc == SSH_AUTH_SUCCESS)
+		{
 			try
 			{
 				this->verify_publickey(m_ssh, data.ip);
@@ -123,6 +126,7 @@ namespace lunas {
 				ssh_free(m_ssh);
 				throw;
 			}
+		}
 		else
 		{
 			std::string err = fmt::err_color("couldn't authenticate to '" + data.ip + "'");
@@ -138,7 +142,9 @@ namespace lunas {
 	{
 		int rc = SSH_OK;
 		if (rc = ssh_options_set(ssh, option, argument); rc != SSH_OK)
+		{
 			llog::warn("couldn't set " + warning_type + " for '" + session_data.ip + "'");
+		}
 
 		return rc;
 	}
@@ -175,7 +181,9 @@ namespace lunas {
 		{
 			retry--;
 			if (password.empty() || rc == SSH_AUTH_DENIED)
+			{
 				password = getpass("   --> Password: ");
+			}
 			rc = ssh_userauth_password(ssh, NULL, password.c_str());
 			if (rc == SSH_AUTH_DENIED)
 			{
@@ -183,7 +191,9 @@ namespace lunas {
 				continue;
 			}
 			else
+			{
 				break;
+			}
 		}
 		return rc;
 	}
@@ -197,7 +207,9 @@ namespace lunas {
 			for (const auto& entry : fs::directory_iterator(std::string(getenv("HOME")) + "/.ssh/"))
 			{
 				if (entry.path().extension() != ".pub")
+				{
 					continue;
+				}
 				raii::ssh::key pubkey;
 
 				struct ssh_key_data pubkey_data;
@@ -214,7 +226,9 @@ namespace lunas {
 					goto try_import_publickey_again;
 				}
 				else if (rc != SSH_OK)
+				{
 					continue;
+				}
 
 				int retries = 3;
 			try_try_publickey_again:
@@ -226,7 +240,9 @@ namespace lunas {
 					goto try_try_publickey_again;
 				}
 				else if (rc != SSH_AUTH_SUCCESS)
+				{
 					continue;
+				}
 
 				struct ssh_key_data privkey_data;
 				{
@@ -240,9 +256,13 @@ namespace lunas {
 			retry_passphrase:
 				rc = privkey.import_key(privkey_data);
 				if (rc != SSH_AUTH_SUCCESS && privkey.get_retry_countdown() > 0)
+				{
 					goto retry_passphrase;
+				}
 				else if (rc != SSH_AUTH_SUCCESS)
+				{
 					continue;
+				}
 
 				retries = 3;
 			ssh_try_publickey_again:
@@ -258,7 +278,9 @@ namespace lunas {
 					goto ssh_try_publickey_again;
 				}
 				else
+				{
 					return rc;
+				}
 			}
 		}
 		catch (const std::exception& e)
@@ -279,11 +301,17 @@ namespace lunas {
 	{
 		std::string method_str;
 		if (method & SSH_AUTH_METHOD_HOSTBASED)
+		{
 			method_str += "hostbased, ";
+		}
 		if (method & SSH_AUTH_METHOD_INTERACTIVE)
+		{
 			method_str += "keyboard-interactive, ";
+		}
 		if (method & SSH_AUTH_METHOD_GSSAPI_MIC)
+		{
 			method_str += "gssapi-mic";
+		}
 
 		return method_str;
 	}
@@ -292,23 +320,35 @@ namespace lunas {
 	{
 		int rc = ssh_userauth_none(ssh, NULL);
 		if (rc == SSH_AUTH_SUCCESS || rc == SSH_AUTH_ERROR)
+		{
 			return rc;
+		}
 
 		int method = ssh_userauth_list(ssh, NULL);
 		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_NONE)
+		{
 			rc = auth_none(ssh);
+		}
 
 		if (rc != SSH_AUTH_SUCCESS)
+		{
 			std::println("--> authenticating: '{}'", ip);
+		}
 
 		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PUBLICKEY)
+		{
 			rc = this->auth_publickey_manual(ssh);
+		}
 
 		if (rc != SSH_AUTH_SUCCESS && method & SSH_AUTH_METHOD_PASSWORD)
+		{
 			rc = this->auth_password(ssh, pw);
+		}
 
 		if (rc == SSH_AUTH_SUCCESS)
+		{
 			return rc;
+		}
 		else if (method & SSH_AUTH_METHOD_INTERACTIVE || method & SSH_AUTH_METHOD_GSSAPI_MIC || method & SSH_AUTH_METHOD_HOSTBASED)
 		{
 			llog::error("unsupported auth method for '" + ip + "', " + auth_method(method));
@@ -347,7 +387,9 @@ namespace lunas {
 				std::cin >> ok;
 
 				if (ok == "y")
+				{
 					rc = ssh_session_update_known_hosts(ssh);
+				}
 				else
 				{
 					err = fmt::err_color("server key verification failed");
@@ -367,6 +409,8 @@ namespace lunas {
 	ssh::~ssh()
 	{
 		if (m_ssh != NULL)
+		{
 			ssh_free(m_ssh);
+		}
 	}
 }

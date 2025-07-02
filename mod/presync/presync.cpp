@@ -30,9 +30,13 @@ namespace lunas {
 		for (const auto& path : ipaths)
 		{
 			if (not found_source && path.is_src())
+			{
 				found_source = true;
+			}
 			else if (found_source && path.is_src())
+			{
 				return true;
+			}
 		}
 
 		return false;
@@ -42,7 +46,9 @@ namespace lunas {
 	{
 
 		if (auto ok = presync::input_paths_are_different(cliopts.get_ipaths()); not ok)
+		{
 			return std::unexpected(ok.error());
+		}
 
 		const auto&    ipaths = cliopts.get_ipaths();
 		lunas::content content;
@@ -54,7 +60,9 @@ namespace lunas {
 
 			auto ok = lunas::presync::input_directory_check(data);
 			if (not ok)
+			{
 				return std::unexpected(ok.error());
+			}
 
 			if (more_than_one_source(ipaths))
 			{
@@ -62,14 +70,20 @@ namespace lunas {
 				auto ok = lunas::presync::readdir(content.files_table, ipaths[index].path, data);
 
 				if (not ok && ok.error().value() == lunas::error_type::no_such_file && cliopts.options.dry_run)
+				{
 					continue;
+				}
 				else if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 		}
 
 		if (not more_than_one_source(ipaths))
+		{
 			return std::monostate();
+		}
 
 		content.to_be_synced = lunas::presync::to_be_synced_counter(content.files_table);
 

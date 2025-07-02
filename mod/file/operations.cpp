@@ -25,13 +25,17 @@ export namespace lunas {
 			{
 				auto ok = sftp->mkdir(path);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 			else
 			{
 				auto ok = lunas::cppfs::mkdir(path, dry_run);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 
 			return std::monostate();

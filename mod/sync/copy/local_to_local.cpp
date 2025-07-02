@@ -58,7 +58,9 @@ export namespace lunas {
 			~jthread()
 			{
 				if (thread.joinable())
+				{
 					thread.join();
+				}
 			}
 	};
 
@@ -94,7 +96,9 @@ namespace lunas {
 			{
 				std::unique_lock<std::mutex> lock_file(file_mutex);
 				if (queue->size() >= queue_limit)
+				{
 					cv.wait(lock_file, [&queue, &queue_limit]() { return queue->size() < queue_limit; });
+				}
 
 				{
 					struct lbuffque bq(buffer_size);
@@ -152,20 +156,28 @@ namespace lunas {
 				{
 					auto syncstat = local_to_local::rfile(src, dest_lspart, misc);
 					if (syncstat)
+					{
 						struct lunas::local::original_name _(
 						    dest_lspart, dest, syncstat.value().code, misc.options.dry_run);
+					}
 					return syncstat;
 				};
 
 				syncstat = regular_file_sync(src, dest, misc.src_mtime, func);
 			}
 			else if (misc.file_type == lunas::file_types::directory)
+			{
 				syncstat = local_to_local::mkdir(src, dest, misc);
+			}
 			else if (misc.file_type == lunas::file_types::symlink)
+			{
 				syncstat = local_to_local::symlink(src, dest, misc);
+			}
 			else
+			{
 				return std::unexpected(
 				    lunas::error("can't sync special file '" + src + "'", lunas::error_type::sync_special_file_ignored));
+			}
 
 			return syncstat;
 		}
@@ -237,7 +249,9 @@ namespace lunas {
 			{
 				auto file_size = lunas::cppfs::file_size(dest);
 				if (not file_size && file_size.error().value() != lunas::error_type::no_such_file)
+				{
 					return std::unexpected(file_size.error());
+				}
 				if (file_size)
 				{
 					dest_size = file_size.value();
@@ -260,12 +274,16 @@ namespace lunas {
 			{
 				auto ok = lunas::permissions::local_to_local(src, dest, misc);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 			{
 				auto ok = lunas::ownership::local_to_local(src, dest, misc);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 
 			int		     bytes_written;
@@ -285,7 +303,9 @@ namespace lunas {
 					return std::unexpected(lunas::error(err, lunas::error_type::sync_error_reading));
 				}
 				else if (lbuffque.bytes_read == 0)
+				{
 					break;
+				}
 
 				std::fpos pos = dest_file->tellp();
 				dest_file->write(lbuffque.buffer.data(), lbuffque.bytes_read);
@@ -311,7 +331,9 @@ namespace lunas {
 			{
 				int rc = dest_file->sync();
 				if (rc != 0)
+				{
 					lunas::warn("couldn't fsync '{}', ", dest, std::strerror(errno));
+				}
 			}
 
 			syncstat.code = lunas::sync_code::success;
@@ -330,17 +352,23 @@ namespace lunas {
 			std::error_code ec;
 			auto		ok = lunas::cppfs::mkdir(dest, misc.options.dry_run);
 			if (not ok)
+			{
 				return std::unexpected(ok.error());
+			}
 
 			{
 				auto ok = lunas::permissions::local_to_local(src, dest, misc);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 			{
 				auto ok = lunas::ownership::local_to_local(src, dest, misc);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 			syncstat.code = lunas::sync_code::success;
 			return syncstat;
@@ -365,12 +393,16 @@ namespace lunas {
 
 			auto ok = lunas::cppfs::symlink(target, dest, misc.options.dry_run);
 			if (not ok)
+			{
 				return std::unexpected(ok.error());
+			}
 
 			{
 				auto ok = lunas::ownership::local_to_local(src, dest, misc);
 				if (not ok)
+				{
 					return std::unexpected(ok.error());
+				}
 			}
 			syncstat.code = lunas::sync_code::success;
 			return syncstat;

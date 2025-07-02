@@ -36,22 +36,32 @@ export namespace lunas {
 			{
 				if (not ipaths.at(potential_src_index).is_src() ||
 				    potential_src_metadata.file_type == lunas::file_types::not_found)
+				{
 					goto end;
+				}
 				if (first)
 				{
 					first = false;
 					goto assign;
 				}
 				else if (not data.options.rollback && src_mtime > potential_src_metadata.mtime)
+				{
 					goto end;
+				}
 				else if (data.options.rollback && src_mtime < potential_src_metadata.mtime)
+				{
 					goto end;
+				}
 				else if (src_mtime == potential_src_metadata.mtime)
 				{
 					if (ipaths.at(src_index).is_remote() && not ipaths.at(potential_src_index).is_remote())
+					{
 						goto assign;
+					}
 					else
+					{
 						goto end;
+					}
 				}
 
 			assign:
@@ -62,12 +72,18 @@ export namespace lunas {
 			}
 
 			if (file_table.metadatas.at(src_index).file_type == lunas::file_types::not_found)
+			{
 				return std::unexpected(lunas::error(lunas::error_type::source_not_found));
+			}
 			else if (not ipaths.at(src_index).is_src())
+			{
 				return std::unexpected(lunas::error(lunas::error_type::source_not_found));
+			}
 			else if (data.options.no_broken_symlink &&
 				 file_table.metadatas.at(src_index).file_type == lunas::file_types::brokenlink)
+			{
 				return std::unexpected(lunas::error(lunas::error_type::source_broken_symlink));
+			}
 
 			return src_index;
 		}
@@ -77,21 +93,35 @@ export namespace lunas {
 		    const struct lunas::parsed_data& data)
 		{
 			if (src_index == dest_index)
+			{
 				return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			}
 			else if (not data.get_ipaths().at(dest_index).is_dest())
+			{
 				return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			}
 			else if (dest_metadata.file_type == lunas::file_types::directory)
+			{
 				return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			}
 			else if (dest_metadata.mtime == src_metadata.mtime)
+			{
 				return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			}
 			else if (dest_metadata.file_type == lunas::file_types::brokenlink)
+			{
 				return std::unexpected(lunas::error_type::dest_check_brokenlink);
+			}
 			else if (src_metadata.file_type == lunas::file_types::resume_regular_file)
+			{
 				return std::unexpected(lunas::error_type::dest_check_skip_sync);
+			}
 			else if (dest_metadata.file_type != lunas::file_types::not_found &&
 				 dest_metadata.file_type != lunas::file_types::resume_regular_file &&
 				 dest_metadata.file_type != src_metadata.file_type)
+			{
 				return std::unexpected(lunas::error_type::dest_check_type_conflict);
+			}
 
 			return std::monostate();
 		}
@@ -106,15 +136,23 @@ export namespace lunas {
 			bool sync = false;
 
 			if (auto ok = sync_dest(src_metadata, dest_metadata, src_index, dest_index, data); not ok)
+			{
 				return std::unexpected(ok.error());
+			}
 
 			if (data.options.update && src_metadata.mtime > dest_metadata.mtime)
+			{
 				sync = true;
+			}
 			else if (data.options.rollback && src_metadata.mtime < dest_metadata.mtime)
+			{
 				sync = true;
+			}
 			else if (dest_metadata.file_type == lunas::file_types::not_found ||
 				 dest_metadata.file_type == lunas::file_types::resume_regular_file)
+			{
 				sync = true;
+			}
 
 			if (sync)
 			{
@@ -132,10 +170,14 @@ export namespace lunas {
 #endif // REMOTE_ENABLED
 
 				if (not syncstat)
+				{
 					return std::unexpected(syncstat.error());
+				}
 				else
+				{
 					lunas::register_synced_stats(
 					    syncstat.value(), misc.file_type, data.get_ipath(dest_index), progress_stats);
+				}
 			}
 
 			return std::monostate();
@@ -158,9 +200,13 @@ export namespace lunas {
 				if (not ok)
 				{
 					if (ok.error().value() == lunas::error_type::dest_check_type_conflict)
+					{
 						lunas::printerr("conflict in types between '{}' and '{}'", src, dest);
+					}
 					else if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
+					{
 						lunas::printerr("{}", ok.error().message());
+					}
 				}
 				dest_index++;
 			}

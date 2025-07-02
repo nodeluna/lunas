@@ -39,14 +39,18 @@ export namespace lunas {
 				    [&](char c)
 				    {
 					    if (std::isdigit(c))
+					    {
 						    return true;
+					    }
 					    else if (c == '.' && not has_decimal)
 					    {
 						    has_decimal = true;
 						    return true;
 					    }
 					    else
+					    {
 						    return false;
+					    }
 				    });
 			}
 
@@ -55,9 +59,13 @@ export namespace lunas {
 				struct lunas::ipath::local_path local_path;
 				auto				absolute_path = lunas::path::absolute(argument);
 				if (absolute_path)
+				{
 					local_path.path = absolute_path.value();
+				}
 				else
+				{
 					local_path.path = std::filesystem::absolute(argument);
+				}
 				local_path.srcdest = srcdest;
 				return local_path;
 			}
@@ -123,17 +131,29 @@ export namespace lunas {
 
 				std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::tolower(c); });
 				if (temp.find("kib") != data.npos)
+				{
 					temp.resize(temp.find("kib"));
+				}
 				else if (temp.find("mib") != temp.npos)
+				{
 					temp.resize(temp.find("mib"));
+				}
 				else if (temp.find("gib") != temp.npos)
+				{
 					temp.resize(temp.find("gib"));
+				}
 				else if (temp.find("tib") != temp.npos)
+				{
 					temp.resize(temp.find("tib"));
+				}
 				else if (temp.find("pib") != temp.npos)
+				{
 					temp.resize(temp.find("pib"));
+				}
 				else
+				{
 					temp = data;
+				}
 
 				if (is_num_decimal(temp) == false)
 				{
@@ -146,17 +166,29 @@ export namespace lunas {
 				std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::tolower(c); });
 
 				if (temp.find("kib") != data.npos)
+				{
 					options.minimum_space = num * KiB;
+				}
 				else if (temp.find("mib") != temp.npos)
+				{
 					options.minimum_space = num * MiB;
+				}
 				else if (temp.find("gib") != temp.npos)
+				{
 					options.minimum_space = num * GiB;
+				}
 				else if (temp.find("tib") != temp.npos)
+				{
 					options.minimum_space = num * TiB;
+				}
 				else if (temp.find("pib") != temp.npos)
+				{
 					options.minimum_space = num * PiB;
+				}
 				else
+				{
 					options.minimum_space = num;
+				}
 
 				return std::monostate();
 			}
@@ -183,11 +215,17 @@ export namespace lunas {
 			std::expected<std::monostate, lunas::error> mkdir(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.mkdir = true;
+				}
 				else if (data == "off")
+				{
 					options.mkdir = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -202,7 +240,9 @@ export namespace lunas {
 					options.progress_bar = false;
 				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -214,93 +254,141 @@ export namespace lunas {
 					options.dry_run = true;
 				}
 				else if (data == "off")
+				{
 					options.dry_run = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> quiet(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.quiet = true;
+				}
 				else if (data == "off")
+				{
 					options.quiet = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> verbose(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.verbose = true;
+				}
 				else if (data == "off")
+				{
 					options.verbose = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> follow_symlink(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.follow_symlink = lunas::follow_symlink::yes;
+				}
 				else if (data == "off")
+				{
 					options.follow_symlink = lunas::follow_symlink::no;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> no_broken_link(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.no_broken_symlink = true;
+				}
 				else if (data == "off")
+				{
 					options.no_broken_symlink = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> link(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.hardlink_regular_files = true;
+				}
 				else if (data == "off")
+				{
 					options.hardlink_regular_files = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> resume(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.resume = true;
+				}
 				else if (data == "off")
+				{
 					options.resume = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> compression(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.compression = true;
+				}
 				else if (data == "off")
+				{
 					options.compression = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> attributes_uid(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.attributes_uid = true;
+				}
 				else if (data == "off")
 				{
 					options.attributes_uid	     = false;
@@ -312,14 +400,18 @@ export namespace lunas {
 					options.attributes_uid_value = std::stoi(data);
 				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> attributes_gid(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.attributes_gid = true;
+				}
 				else if (data == "off")
 				{
 					options.attributes_gid	     = false;
@@ -331,7 +423,9 @@ export namespace lunas {
 					options.attributes_gid_value = std::stoi(data);
 				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -368,11 +462,17 @@ export namespace lunas {
 			    const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.attributes_atime = true;
+				}
 				else if (data == "off")
+				{
 					options.attributes_atime = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -380,11 +480,17 @@ export namespace lunas {
 			    const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.attributes_mtime = true;
+				}
 				else if (data == "off")
+				{
 					options.attributes_mtime = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -402,7 +508,9 @@ export namespace lunas {
 					options.attributes_mtime = false;
 				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -423,7 +531,9 @@ export namespace lunas {
 					options.attributes_gid	 = false;
 				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -448,7 +558,9 @@ export namespace lunas {
 					{
 						temp += *it;
 						if (std::next(it) != data.end())
+						{
 							continue;
+						}
 					}
 
 					auto itr = attributes_options.find(temp);
@@ -456,7 +568,9 @@ export namespace lunas {
 					{
 						temp = "";
 						if (*it == ',' || std::next(it) == data.end())
+						{
 							itr->second("on", options);
+						}
 						else if (*it == '=')
 						{
 							std::string arg;
@@ -467,11 +581,15 @@ export namespace lunas {
 								    if (c != '=' && c != ',' && not found_seperator)
 								    {
 									    if (std::next(it) != data.end())
+									    {
 										    ++it;
+									    }
 									    arg += c;
 								    }
 								    else
+								    {
 									    found_seperator = true;
+								    }
 							    });
 							if (not itr->second(arg, options))
 							{
@@ -498,22 +616,34 @@ export namespace lunas {
 			std::expected<std::monostate, lunas::error> fsync(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.fsync = true;
+				}
 				else if (data == "off")
+				{
 					options.fsync = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> remove_extra(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
+				{
 					options.remove_extra = true;
+				}
 				else if (data == "off")
+				{
 					options.remove_extra = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -525,9 +655,13 @@ export namespace lunas {
 					options.rollback = false;
 				}
 				else if (data == "off")
+				{
 					options.update = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
@@ -539,24 +673,38 @@ export namespace lunas {
 					options.update	 = false;
 				}
 				else if (data == "off")
+				{
 					options.rollback = false;
+				}
 				else
+				{
 					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
 				return std::monostate();
 			}
 
 			std::expected<std::monostate, lunas::error> ssh_log(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "nolog")
+				{
 					options.ssh_log_level = lunas::ssh_log_level::no_log;
+				}
 				else if (data == "warning")
+				{
 					options.ssh_log_level = lunas::ssh_log_level::warning;
+				}
 				else if (data == "protocol")
+				{
 					options.ssh_log_level = lunas::ssh_log_level::protocol;
+				}
 				else if (data == "packet")
+				{
 					options.ssh_log_level = lunas::ssh_log_level::packet;
+				}
 				else if (data == "functions")
+				{
 					options.ssh_log_level = lunas::ssh_log_level::functions;
+				}
 				else
 				{
 					lunas::warn("invalid ssh log level '{}'. valid levels [nolog, warning, protocol, packet, "

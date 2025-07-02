@@ -64,8 +64,12 @@ export namespace lunas {
 	file_types if_lspart_return_resume_type(const std::string& path, lunas::file_types type)
 	{
 		if (type == file_types::regular_file && path.size() > 8 && path.substr(path.size() - 8, path.size()) == ".ls.part")
+		{
 			return lunas::file_types::resume_regular_file;
+		}
 		else
+		{
 			return type;
+		}
 	}
 }

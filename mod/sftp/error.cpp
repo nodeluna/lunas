@@ -28,7 +28,9 @@ namespace lunas {
 
 		int num = sftp_get_error(sftp);
 		if (num >= 0)
+		{
 			type = static_cast<lunas::error_type>(num);
+		}
 		else
 		{
 			type = lunas::error_type::ssh_unknown;

@@ -31,7 +31,9 @@ namespace lunas {
 	{
 		limits = ::sftp_limits(sftp);
 		if (limits == NULL)
+		{
 			throw std::runtime_error(std::string("couldn't get sftp_limits, ") + ssh_get_error(sftp->session));
+		}
 	}
 
 	uint64_t sftp_limits::max_packet_length()

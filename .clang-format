@@ -56,3 +56,5 @@ LambdaBodyIndentation: Signature
 AllowShortCompoundRequirementOnASingleLine: false
 BreakBeforeConceptDeclarations: Always
 RequiresExpressionIndentation: OuterScope
+
+InsertBraces: true

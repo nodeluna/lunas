@@ -45,7 +45,9 @@ namespace lunas {
 			}
 
 			if ((perms.value() & fs::perms::owner_read) != fs::perms::none)
+			{
 				return true;
+			}
 			return false;
 		}
 
@@ -54,9 +56,13 @@ namespace lunas {
 			std::error_code	       ec;
 			std::filesystem::perms perms;
 			if (follow == lunas::follow_symlink::yes)
+			{
 				perms = std::filesystem::status(path, ec).permissions();
+			}
 			else
+			{
 				perms = std::filesystem::symlink_status(path, ec).permissions();
+			}
 			if (ec.value() != 0)
 			{
 				std::string err = "couldn't get permission '" + path + "', " + ec.message();
@@ -72,7 +78,9 @@ namespace lunas {
 			std::filesystem::perm_options perm_options = std::filesystem::perm_options::replace;
 
 			if (follow == lunas::follow_symlink::no)
+			{
 				perm_options |= std::filesystem::perm_options::nofollow;
+			}
 
 			std::filesystem::permissions(path, permissions, perm_options, ec);
 			if (ec.value() != 0)

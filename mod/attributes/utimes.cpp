@@ -75,7 +75,9 @@ namespace lunas {
 						time_val.mtime_nsec = timespec.tv_nsec;
 					}
 					else
+					{
 						return -1;
+					}
 					break;
 				case time_type::mtime:
 					timespec	    = stats.st_mtim;
@@ -89,7 +91,9 @@ namespace lunas {
 						time_val.atime_nsec = timespec.tv_nsec;
 					}
 					else
+					{
 						return -1;
+					}
 					break;
 				case time_type::utimes:
 					timespec	    = stats.st_atim;
@@ -115,9 +119,13 @@ namespace lunas {
 			int		rv = 0;
 
 			if (follow == follow_symlink::yes)
+			{
 				rv = stat(path.c_str(), &stats);
+			}
 			else
+			{
 				rv = lstat(path.c_str(), &stats);
+			}
 
 			if (rv != 0)
 			{
@@ -146,7 +154,9 @@ namespace lunas {
 			times[1].tv_usec  = time_val.mtime_nsec / 1000;
 
 			if (follow == follow_symlink::yes)
+			{
 				rv = utimes(path.c_str(), times);
+			}
 			else
 #ifdef LUTIMES_EXISTS
 				rv = lutimes(path.c_str(), times);

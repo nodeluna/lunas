@@ -31,7 +31,9 @@ namespace lunas {
 		{
 			std::error_code ec;
 			if (dry_run == false)
+			{
 				std::filesystem::remove(path, ec);
+			}
 
 			if (ec.value() != 0)
 			{
@@ -45,7 +47,9 @@ namespace lunas {
 		{
 			std::error_code ec;
 			if (dry_run == false)
+			{
 				std::filesystem::create_directory(path, ec);
+			}
 
 			if (ec.value() != 0)
 			{
@@ -59,7 +63,9 @@ namespace lunas {
 		{
 			std::error_code ec;
 			if (dry_run == false)
+			{
 				std::filesystem::create_symlink(target, dest, ec);
+			}
 
 			if (ec.value() != 0)
 			{

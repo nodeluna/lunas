@@ -74,11 +74,17 @@ namespace lunas {
 		for (;; i--)
 		{
 			if (dot_counter == 3)
+			{
 				break;
+			}
 			if (dest.at(i) == '.')
+			{
 				dot_counter++;
+			}
 			if (i == 0)
+			{
 				break;
+			}
 		}
 
 		return dest.substr(i + 2, std::to_string(src_mtimepath_hash).size());
@@ -100,9 +106,13 @@ namespace lunas {
 	std::expected<std::uintmax_t, lunas::error> file_size(const std::unique_ptr<lunas::sftp>& sftp, const std::string& path)
 	{
 		if (sftp != nullptr)
+		{
 			return sftp->file_size(path);
+		}
 		else
+		{
 			return lunas::cppfs::file_size(path);
+		}
 	}
 
 	namespace remote {
@@ -115,7 +125,9 @@ namespace lunas {
 		original_name::~original_name()
 		{
 			if (synccode != lunas::sync_code::success || dest == lspart)
+			{
 				return;
+			}
 
 			auto ok = sftp->rename(lspart, dest);
 			if (not ok)
@@ -136,9 +148,13 @@ namespace lunas {
 		original_name::~original_name()
 		{
 			if (dry_run)
+			{
 				return;
+			}
 			if (synccode != lunas::sync_code::success || dest == lspart)
+			{
 				return;
+			}
 
 			std::error_code ec;
 			std::filesystem::rename(lspart, dest, ec);
@@ -154,7 +170,9 @@ namespace lunas {
 	    struct progress_stats& progress_stats)
 	{
 		if (syncstat.code != lunas::sync_code::success)
+		{
 			return;
+		}
 
 		progress_stats.total_synced += 1;
 
@@ -163,7 +181,9 @@ namespace lunas {
 			ipath.increment_stats_synced_dirs();
 		}
 		else
+		{
 			ipath.increment_stats_synced_files();
+		}
 
 		ipath.increment_stats_synced_size(syncstat.copied_size);
 	}

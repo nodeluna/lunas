@@ -52,14 +52,18 @@ namespace lunas {
 		std::expected<std::monostate, lunas::error> next_arg_exists(const int& argc, const char* argv[], int i)
 		{
 			if ((argc - 1) == i)
+			{
 				return std::unexpected(
 				    lunas::error(std::format("argument for option '{}' wasn't provided, exiting", argv[i]),
 					lunas::error_type::config_missing_argument));
+			}
 
 			if (argv[i + 1][0] == '-')
+			{
 				return std::unexpected(
 				    lunas::error(std::format("invalid argument '{}' for option '{}', exiting", argv[i + 1], argv[i]),
 					lunas::error_type::config_invalid_argument));
+			}
 
 			return std::monostate();
 		}
@@ -77,7 +81,9 @@ namespace lunas {
 			{
 				std::string option = argv[index];
 				if (option.find('=') != option.npos)
+				{
 					option.resize(option.find('='));
+				}
 				if (option[0] == '-')
 				{
 					index--;
@@ -133,7 +139,9 @@ namespace lunas {
 
 			auto ok = config_file_preset("global", cliopts.options, cliopts.ipaths);
 			if (not ok)
+			{
 				return std::unexpected(ok.error());
+			}
 
 			for (int index = 1; index < argc; index++)
 			{
@@ -144,13 +152,17 @@ namespace lunas {
 					{
 						auto ok = next_arg_exists(argc, argv, index);
 						if (not ok)
+						{
 							return std::unexpected(ok.error());
+						}
 					}
 					{
 						std::string argument = argv[index + 1];
 						auto	    ok	     = config_file_preset(argument, cliopts.options, cliopts.ipaths);
 						if (not ok)
+						{
 							return std::unexpected(ok.error());
+						}
 					}
 					index++;
 				}
@@ -158,7 +170,9 @@ namespace lunas {
 				{
 					auto ok = next_arg_exists(argc, argv, index);
 					if (not ok)
+					{
 						return std::unexpected(ok.error());
+					}
 					std::string argument = argv[index + 1];
 					cliopts.ipaths.emplace_back(itr0->second(argument));
 					index++;
@@ -168,11 +182,15 @@ namespace lunas {
 				{
 					auto ok = next_arg_exists(argc, argv, index);
 					if (not ok)
+					{
 						return std::unexpected(ok.error());
+					}
 					lunas::ipath::srcdest srcdest	  = itr1->second();
 					auto		      remote_path = fill_remote_path(argc, argv, index, srcdest);
 					if (not remote_path)
+					{
 						return std::unexpected(remote_path.error());
+					}
 					cliopts.ipaths.emplace_back(std::move(remote_path.value()));
 #endif // REMOTE_ENABLED
 				}
@@ -181,7 +199,9 @@ namespace lunas {
 					auto	    ok = next_arg_exists(argc, argv, index);
 					std::string argument;
 					if (not ok)
+					{
 						argument = "on";
+					}
 					else
 					{
 						argument = argv[index + 1];
@@ -199,7 +219,9 @@ namespace lunas {
 				{
 					auto ok = next_arg_exists(argc, argv, index);
 					if (not ok)
+					{
 						return std::unexpected(ok.error());
+					}
 					std::string argument = argv[index + 1];
 					auto	    ok2	     = itr3->second(argument, cliopts.options);
 					if (not ok2)
@@ -209,7 +231,9 @@ namespace lunas {
 					index++;
 				}
 				else if (auto itr4 = info.find(option); itr4 != info.end())
+				{
 					itr4->second();
+				}
 				else
 				{
 					std::string err = std::format("option '{}' wasn't recognized, read the man page", option);
