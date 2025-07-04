@@ -121,7 +121,11 @@ namespace lunas
 #ifdef REMOTE_ENABLED
 		bool is_num(const std::string& x)
 		{
-			return std::all_of(x.begin(), x.end(), [](char c) { return std::isdigit(c); });
+			return std::all_of(x.begin(), x.end(),
+					   [](char c)
+					   {
+						   return std::isdigit(c);
+					   });
 		}
 
 		std::expected<struct lunas::ipath::remote_path, lunas::error>

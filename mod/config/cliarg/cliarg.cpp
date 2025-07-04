@@ -51,7 +51,11 @@ namespace lunas
 	{
 		bool is_num(const std::string& x)
 		{
-			return std::all_of(x.begin(), x.end(), [](char c) { return std::isdigit(c); });
+			return std::all_of(x.begin(), x.end(),
+					   [](char c)
+					   {
+						   return std::isdigit(c);
+					   });
 		}
 
 		std::expected<std::monostate, lunas::error> next_arg_exists(const int& argc, const char* argv[], int i)

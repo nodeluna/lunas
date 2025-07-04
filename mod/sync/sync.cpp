@@ -25,7 +25,7 @@ export import lunas.content;
 import lunas.file_table;
 import lunas.file_types;
 import lunas.file;
-import lunas.exclude;
+import lunas.filter;
 
 import lunas.stdout;
 
@@ -96,7 +96,7 @@ export namespace lunas
 				{
 					std::string relative = src_file.value().path;
 					relative	     = relative.substr(ipaths.at(src_index).path.size(), relative.size());
-					if (lunas::exclude(relative, data.options.exclude, data.options.exclude_pattern))
+					if (directory.value()->filter_out(relative, data.options))
 					{
 						continue;
 					}
@@ -213,10 +213,6 @@ export namespace lunas
 				{
 					if (metadata.file_type != lunas::file_types::not_found)
 					{
-						if (lunas::exclude(file->path, data.options.exclude, data.options.exclude_pattern))
-						{
-							continue;
-						}
 						std::string to_be_removed = ipaths.at(dest_index).path + file->path;
 						lunas::print_remove_extra(to_be_removed);
 						auto file_size = lunas::get_size_and_remove(ipaths.at(dest_index).sftp, to_be_removed,

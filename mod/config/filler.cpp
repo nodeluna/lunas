@@ -32,7 +32,11 @@ export namespace lunas
 		{
 			bool is_num(const std::string& x)
 			{
-				return std::all_of(x.begin(), x.end(), [](char c) { return std::isdigit(c); });
+				return std::all_of(x.begin(), x.end(),
+						   [](char c)
+						   {
+							   return std::isdigit(c);
+						   });
 			}
 
 			bool is_num_decimal(const std::string& x)
@@ -136,7 +140,11 @@ export namespace lunas
 				constexpr std::uintmax_t PiB  = 1024 * TiB;
 				std::string		 temp = data;
 
-				std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::tolower(c); });
+				std::transform(temp.begin(), temp.end(), temp.begin(),
+					       [](unsigned char c)
+					       {
+						       return std::tolower(c);
+					       });
 				if (temp.find("kib") != data.npos)
 				{
 					temp.resize(temp.find("kib"));
@@ -170,7 +178,11 @@ export namespace lunas
 
 				double num = std::stod(data);
 				temp	   = data;
-				std::transform(temp.begin(), temp.end(), temp.begin(), [](unsigned char c) { return std::tolower(c); });
+				std::transform(temp.begin(), temp.end(), temp.begin(),
+					       [](unsigned char c)
+					       {
+						       return std::tolower(c);
+					       });
 
 				if (temp.find("kib") != data.npos)
 				{
@@ -212,10 +224,22 @@ export namespace lunas
 			std::expected<std::monostate, lunas::error> exclude_pattern(const std::string&	    data,
 										    lunas::config::options& options)
 			{
+				options.exclude_pattern.insert(data);
+				return std::monostate();
+			}
+
+			std::expected<std::monostate, lunas::error> allow(const std::string& data, lunas::config::options& options)
+			{
 				std::string path = data;
 				lunas::path::pop_seperator(path);
-				options.exclude_pattern.insert(path);
+				options.allow.insert(path);
 
+				return std::monostate();
+			}
+
+			std::expected<std::monostate, lunas::error> allow_pattern(const std::string& data, lunas::config::options& options)
+			{
+				options.allow_pattern.insert(data);
 				return std::monostate();
 			}
 

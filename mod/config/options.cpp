@@ -40,6 +40,8 @@ export namespace lunas
 		struct options : public path_options {
 				std::unordered_set<std::string> exclude;
 				std::unordered_set<std::string> exclude_pattern;
+				std::unordered_set<std::string> allow;
+				std::unordered_set<std::string> allow_pattern;
 				bool				dry_run		  = false;
 				bool				progress_bar	  = true;
 				bool				remove_extra	  = false;

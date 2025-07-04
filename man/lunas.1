@@ -143,7 +143,42 @@ exclude a path from getting synced. this option can be used many times to *exclu
 .TP
 .B [-xp, --exclude-pattern] <pattern>
 
-exclude a path with a pattern from getting synced. this option can be used many times to *exclude* multiple patterns
+exclude files/dirs with a certain pattern from getting synced. this option can be used many times to *exclude* multiple patterns
+
+.TP
+[-a, --allow] <relative/path/inside/input/dir>
+
+allow a path to be synced. this option can be used many times to *allow* multiple directories/files
+
+	# only relative path starting from inside the input dir '/dir1/dir2/' like dir3/dir or dir3/file is allowed
+.br
+
+		example:  -r user@ip:/dir1/dir2/ -a dir3/dir -a dir3/file -a this_file_is_inside_dir2
+.br
+		example:  -p /dir1/dir2/ -a dir3/dir -a dir3/file -a dir3/dir4/dir5 -a this_dir_is_inside_dir2
+.br
+
+	# a /full/path or regular ./relative/paths aren't allowed, and would get ignored
+.br
+
+-> if this option is used, only files that are in the allowed list would be synced
+.br
+
+*Note* if exclude options are used with this option then, if found, the excluded files would be excluded from the allowed list
+
+.TP
+[-ap, --allow-pattern] <pattern>
+
+allow files/dirs with a certain pattern to be synced. this option can be used many times to *allow* multiple patterns
+
+.br
+		example:  p path1 -p path2 -ap .jpg -ap .png -ap name
+.br
+
+-> if this option is used, only files that are in the allowed list would be synced
+.br
+
+*Note* if exclude options are used with this option then, if found, the excluded files would be excluded from the allowed list
 
 .TP
 .B [-F, --fsync]
@@ -183,7 +218,7 @@ print the source of which files/dirs were copied from not just the destination
 disable print statements and only print errors
 
 .TP
-.B [-a, --attributes] <own,gid=off,uid=on,utimes,atime,mtime,all>
+.B [-A, --attributes] <own,gid=off,uid=on,utimes,atime,mtime,all>
    
 sync file attributes. own, ownership, is for uid and gid. utimes is for atime and mtime. all is for all attributes
 .br
@@ -202,8 +237,8 @@ mtime is enabled by default, to disable it --attributes mtime=off
 .br
 --attributes own=off # OFF
 
-        example: -r user@ip:/path/to/dir port=NUMBER -a all,mtime=off
-        example: -r user@ip:/path/to/dir -a uid,gid,atime=on
+        example: -r user@ip:/path/to/dir port=NUMBER -A all,mtime=off
+        example: -r user@ip:/path/to/dir -A uid,gid,atime=on
 
 --attributes all,mtime=off # this turns every attributes on then mtime off
 .br

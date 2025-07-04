@@ -17,7 +17,7 @@ export import lunas.sftp;
 export import lunas.file_types;
 export import lunas.error;
 import lunas.file;
-import lunas.exclude;
+import lunas.filter;
 import lunas.cppfs;
 
 export namespace lunas
@@ -158,7 +158,7 @@ namespace lunas
 				std::string relative = dest_file.value().path;
 				relative	     = relative.substr(ipaths.at(dest_index).path.size(), relative.size());
 				src_path	     = ipaths.at(src_index).path + relative;
-				if (lunas::exclude(relative, data.options.exclude, data.options.exclude_pattern))
+				if (directory.value()->filter_out(relative, data.options))
 				{
 					continue;
 				}

@@ -17,7 +17,7 @@ export import :types;
 export import lunas.error;
 export import lunas.file;
 export import lunas.file_table;
-import lunas.exclude;
+import lunas.filter;
 import lunas.stdout;
 
 export namespace lunas
@@ -78,7 +78,7 @@ namespace lunas
 
 				std::string relative_path = src_file.value().path;
 				relative_path		  = relative_path.substr(path.size(), relative_path.size());
-				if (lunas::exclude(relative_path, data.options->exclude, data.options->exclude_pattern))
+				if (directory.value()->filter_out(relative_path, *data.options))
 				{
 					continue;
 				}

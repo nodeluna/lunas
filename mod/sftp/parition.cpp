@@ -33,6 +33,11 @@ namespace lunas
 	{
 		assert(sftp != NULL);
 		statvfs = sftp_statvfs(sftp, path.string().c_str());
+		if (statvfs == NULL)
+		{
+			throw std::runtime_error("couldn't get partition info for '" + path.string() + "', " +
+						 ssh_get_error(sftp->session));
+		}
 	}
 
 	std::uintmax_t sftp_partition::available()

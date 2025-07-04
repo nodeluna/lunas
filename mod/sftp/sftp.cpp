@@ -102,6 +102,7 @@ export namespace lunas
 													follow_symlink	   type);
 
 			std::string get_str_error();
+			int	    get_error_code();
 	};
 }
 
@@ -655,6 +656,11 @@ namespace lunas
 	std::string sftp::get_str_error()
 	{
 		return ssh_get_error(m_ssh);
+	}
+
+	int sftp::get_error_code()
+	{
+		return sftp_get_error(this->get_sftp_session());
 	}
 
 	sftp::~sftp()

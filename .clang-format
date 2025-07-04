@@ -24,11 +24,18 @@ AlignConsecutiveDeclarations: true
 AlignArrayOfStructures: Right
 AlignAfterOpenBracket: true
 AlignEscapedNewlines: true
+AlignTrailingComments: Always
+AlignConsecutiveTableGenCondOperatorColons:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
 
 AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortEnumsOnASingleLine: false
+AllowShortLambdasOnASingleLine: None
+AllowShortCompoundRequirementOnASingleLine: false
 
 SeparateDefinitionBlocks: Always
 BreakBeforeBraces: Custom
@@ -60,7 +67,6 @@ IndentGotoLabels: true
 IndentPPDirectives: AfterHash
 LambdaBodyIndentation: Signature
 
-AllowShortCompoundRequirementOnASingleLine: false
 RequiresExpressionIndentation: OuterScope
 
 InsertBraces: true

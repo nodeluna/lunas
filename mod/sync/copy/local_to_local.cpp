@@ -104,7 +104,11 @@ namespace lunas
 				std::unique_lock<std::mutex> lock_file(file_mutex);
 				if (queue->size() >= queue_limit)
 				{
-					cv.wait(lock_file, [&queue, &queue_limit]() { return queue->size() < queue_limit; });
+					cv.wait(lock_file,
+						[&queue, &queue_limit]()
+						{
+							return queue->size() < queue_limit;
+						});
 				}
 
 				{
@@ -137,7 +141,11 @@ namespace lunas
 		struct lbuffque fstream_aio_wait_read(std::queue<lbuffque>& queue)
 		{
 			std::unique_lock<std::mutex> lock(file_mutex);
-			cv.wait(lock, [&queue]() { return !queue.empty(); });
+			cv.wait(lock,
+				[&queue]()
+				{
+					return !queue.empty();
+				});
 
 			struct lbuffque lbuffque = std::move(queue.front());
 			queue.pop();

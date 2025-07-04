@@ -25,6 +25,8 @@ export import lunas.attributes;
 export import lunas.error;
 export import lunas.stdout;
 export import lunas.file_types;
+export import lunas.filter;
+export import lunas.config.options;
 
 export namespace lunas
 {
@@ -93,6 +95,8 @@ export namespace lunas
 				  const struct directory_options& options);
 			bool							   eof();
 			[[nodiscard]] std::expected<directory_entry, lunas::error> read();
+
+			[[nodiscard]] bool filter_out(const std::filesystem::path& relative_path, const lunas::config::options& options);
 	};
 
 	std::expected<std::unique_ptr<lunas::directory>, lunas::error>
@@ -412,6 +416,22 @@ namespace lunas
 			}
 
 			return convert_to_directory_entry(entry.value());
+		}
+	}
+
+	[[nodiscard]] bool directory::filter_out(const std::filesystem::path& relative_path, const lunas::config::options& options)
+	{
+		if (not lunas::allow(relative_path, options.allow, options.allow_pattern))
+		{
+			return true;
+		}
+		else if (lunas::exclude(relative_path, options.exclude, options.exclude_pattern))
+		{
+			return true;
+		}
+		else
+		{
+			return false;
 		}
 	}
 

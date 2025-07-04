@@ -139,7 +139,7 @@ namespace lunas
 			auto ok = sftp->rename(lspart, dest);
 			if (not ok)
 			{
-				lunas::warn("couldn't rename '{}' to its original name", lspart);
+				lunas::warn("couldn't rename '{}' to its original name, {}", lspart, sftp->get_str_error());
 				synccode = lunas::sync_code::post_sync_fail;
 			}
 		}
@@ -168,7 +168,7 @@ namespace lunas
 			std::filesystem::rename(lspart, dest, ec);
 			if (ec.value() != 0)
 			{
-				lunas::warn("couldn't rename '{}' to its original name", lspart);
+				lunas::warn("couldn't rename '{}' to its original name, {}", lspart, ec.message());
 				synccode = lunas::sync_code::post_sync_fail;
 			}
 		}
