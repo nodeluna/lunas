@@ -54,8 +54,8 @@ export namespace lunas
 			[[nodiscard]] std::expected<int, lunas::error> aio_wait_read(std::unique_ptr<lunas::sftp_aio>& aio,
 										     std::vector<char>& buffer, size_t length);
 
-			std::expected<std::monostate, lunas::error> fsync();
-			std::expected<std::monostate, lunas::error> seek64(uint64_t new_offset);
+			std::expected<std::monostate, lunas::error>    fsync();
+			std::expected<std::monostate, lunas::error>    seek64(uint64_t new_offset);
 	};
 }
 

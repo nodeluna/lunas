@@ -83,7 +83,7 @@ namespace lunas
 	{
 		session_data = data;
 
-		m_ssh = ssh_new();
+		m_ssh	     = ssh_new();
 		int rc;
 		if (m_ssh == NULL)
 		{
@@ -212,7 +212,7 @@ namespace lunas
 				{
 					continue;
 				}
-				raii::ssh::key pubkey;
+				raii::ssh::key	    pubkey;
 
 				struct ssh_key_data pubkey_data;
 				{

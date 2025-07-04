@@ -140,12 +140,13 @@ namespace lunas
 
 	directory_entry directory::convert_to_directory_entry(std::unique_ptr<lunas::sftp_attributes>& attr)
 	{
-		abstract_entry.filename	 = attr->name();
-		abstract_entry.path	 = attr->path();
-		abstract_entry.file_type = attr->file_type();
+		abstract_entry.filename		= attr->name();
+		abstract_entry.path		= attr->path();
+		abstract_entry.file_type	= attr->file_type();
 
 		auto&	   file_type		= std::get<lunas::file_types>(abstract_entry.file_type);
 		const auto unfollowed_file_type = file_type;
+
 		if (file_type == lunas::file_types::symlink)
 		{
 			if (directory_options.no_broken_symlink && sftp->is_broken_link(abstract_entry.path))

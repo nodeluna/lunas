@@ -18,8 +18,8 @@ export namespace lunas
 {
 	namespace about
 	{
-		inline std::string author = "\n  -> nodeluna - nodeluna@proton.me"
-					    "\n  -> https://github.com/nodeluna\n";
+		inline std::string author  = "\n  -> nodeluna - nodeluna@proton.me"
+					     "\n  -> https://github.com/nodeluna\n";
 
 		inline std::string version = std::string("\n  -> lunas - modules rewrite") + (LOCAL_ONLY ? " (local)" : "");
 
@@ -111,7 +111,8 @@ export namespace lunas
 		    "get ignored\n"
 		    "\n"
 		    "    [-xp, --exclude-pattern] <pattern>\n"
-		    "        exclude files/dirs with a certain pattern from getting synced. this option can be used many times to *exclude* multiple "
+		    "        exclude files/dirs with a certain pattern from getting synced. this option can be used many times to "
+		    "*exclude* multiple "
 		    "patterns\n"
 		    "\n"
 		    "    [-a, --allow] <relative/path/inside/input/dir>\n"

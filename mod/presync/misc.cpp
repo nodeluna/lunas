@@ -26,7 +26,7 @@ export namespace lunas
 	namespace presync
 	{
 		std::expected<std::monostate, lunas::error>
-		input_paths_are_different(const std::vector<struct lunas::ipath::input_path>& ipaths);
+		       input_paths_are_different(const std::vector<struct lunas::ipath::input_path>& ipaths);
 
 		size_t to_be_synced_counter(const std::set<file_table>& conent);
 	}

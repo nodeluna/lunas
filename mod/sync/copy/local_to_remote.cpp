@@ -91,7 +91,7 @@ namespace lunas
 		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
 								   const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
 		{
-			struct syncstat syncstat;
+			struct syncstat		      syncstat;
 
 			std::unique_ptr<std::fstream> src_file = std::make_unique<std::fstream>(src, std::ios::in | std::ios::binary);
 			if (not src_file->is_open())
@@ -164,12 +164,12 @@ namespace lunas
 			{
 				return std::unexpected(limits.error());
 			}
-			const std::uint64_t buffer_size = limits.value()->max_write_length();
+			const std::uint64_t		 buffer_size = limits.value()->max_write_length();
 
-			std::queue<buffque> queue;
+			std::queue<buffque>		 queue;
 
-			constexpr int			 max_requests  = 5;
-			int				 requests_sent = 0;
+			constexpr int			 max_requests	    = 5;
+			int				 requests_sent	    = 0;
 			std::expected<int, lunas::error> bytes_written;
 			std::uintmax_t			 total_bytes_requested = dest_size, position = dest_size;
 			class progress_bar		 progress_bar(misc.options.progress_bar, misc.options.quiet);

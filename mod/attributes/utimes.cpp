@@ -52,8 +52,8 @@ export namespace lunas
 		std::expected<struct time_val, lunas::error> get(const std::string& path, const time_type utime,
 								 lunas::follow_symlink follow);
 
-		std::expected<std::monostate, lunas::error> set(const std::string& path, const struct time_val& time_val,
-								lunas::follow_symlink follow);
+		std::expected<std::monostate, lunas::error>  set(const std::string& path, const struct time_val& time_val,
+								 lunas::follow_symlink follow);
 	}
 }
 
@@ -72,7 +72,7 @@ namespace lunas
 					time_val.atime	    = timespec.tv_sec;
 					time_val.atime_nsec = timespec.tv_nsec;
 
-					rv = clock_gettime(CLOCK_REALTIME, &timespec);
+					rv		    = clock_gettime(CLOCK_REALTIME, &timespec);
 					if (rv == 0)
 					{
 						time_val.mtime	    = timespec.tv_sec;
@@ -88,7 +88,7 @@ namespace lunas
 					time_val.mtime	    = timespec.tv_sec;
 					time_val.mtime_nsec = timespec.tv_nsec;
 
-					rv = clock_gettime(CLOCK_REALTIME, &timespec);
+					rv		    = clock_gettime(CLOCK_REALTIME, &timespec);
 					if (rv == 0)
 					{
 						time_val.atime	    = timespec.tv_sec;

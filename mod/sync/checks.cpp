@@ -29,13 +29,13 @@ export namespace lunas
 {
 	std::expected<size_t, lunas::error> get_src(const lunas::file_table& file_table, const struct lunas::parsed_data& data)
 	{
-		time_t src_mtime	   = 0;
-		size_t src_index	   = 0;
-		size_t potential_src_index = 0;
+		time_t	    src_mtime		= 0;
+		size_t	    src_index		= 0;
+		size_t	    potential_src_index = 0;
 
-		const auto& ipaths = data.get_ipaths();
+		const auto& ipaths		= data.get_ipaths();
 
-		bool first = true;
+		bool	    first		= true;
 		for (const auto& potential_src_metadata : file_table.metadatas)
 		{
 			if (not ipaths.at(potential_src_index).is_src() || potential_src_metadata.file_type == lunas::file_types::not_found)

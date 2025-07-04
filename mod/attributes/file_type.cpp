@@ -86,7 +86,7 @@ namespace lunas
 		bool		exists = false;
 		std::string	target;
 
-		bool is_symlink = std::filesystem::is_symlink(path, ec);
+		bool		is_symlink = std::filesystem::is_symlink(path, ec);
 		if (ec.value() != 0)
 		{
 			goto err;

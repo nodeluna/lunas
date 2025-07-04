@@ -94,7 +94,7 @@ namespace lunas
 		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
 								   const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc)
 		{
-			struct syncstat syncstat;
+			struct syncstat						       syncstat;
 
 			std::expected<std::unique_ptr<lunas::sftp_file>, lunas::error> src_file = sftp->openfile(src, O_RDONLY, 0);
 			if (not src_file)
@@ -183,10 +183,10 @@ namespace lunas
 
 			std::queue<buffque> queue;
 
-			constexpr int	   max_requests		 = 5;
-			int		   requests_sent	 = 0, bytes_written;
-			std::uintmax_t	   total_bytes_requested = dest_size;
-			class progress_bar progress_bar(misc.options.progress_bar, misc.options.quiet);
+			constexpr int	    max_requests	  = 5;
+			int		    requests_sent	  = 0, bytes_written;
+			std::uintmax_t	    total_bytes_requested = dest_size;
+			class progress_bar  progress_bar(misc.options.progress_bar, misc.options.quiet);
 
 			while (dest_size < src_size)
 			{
@@ -228,7 +228,7 @@ namespace lunas
 
 				queue.front().bytes_xfered = read_done.value();
 
-				std::fpos pos = dest_file->tellp();
+				std::fpos pos		   = dest_file->tellp();
 				dest_file->write(queue.front().buffer.data(), queue.front().bytes_xfered);
 				bytes_written = dest_file->tellp() - pos;
 				if (bytes_written != queue.front().bytes_xfered || dest_file->bad() || dest_file->fail())

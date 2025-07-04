@@ -19,12 +19,18 @@ SpaceBeforeParensOptions:
   AfterFunctionDefinitionName: true
   AfterFunctionDeclarationName: true
 
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
 AlignArrayOfStructures: Right
 AlignAfterOpenBracket: true
 AlignEscapedNewlines: true
 AlignTrailingComments: Always
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
 AlignConsecutiveTableGenCondOperatorColons:
   Enabled: true
   AcrossEmptyLines: true

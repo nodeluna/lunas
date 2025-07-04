@@ -80,7 +80,7 @@ namespace lunas
 			constexpr char newline	= '\n';
 			constexpr char newline2 = ';';
 
-			bool is_line_empty(const std::string& string, const size_t& start)
+			bool	       is_line_empty(const std::string& string, const size_t& start)
 			{
 				for (size_t index = start; index < string.size(); index++)
 				{
@@ -236,7 +236,7 @@ namespace lunas
 			std::array<char, BUFFER_SIZE> buffer;
 			unsigned long int	      position = 0;
 
-			std::fstream conf_file;
+			std::fstream		      conf_file;
 			conf_file.open(config_file, std::ios::in);
 			if (conf_file.is_open() == false)
 			{
@@ -354,7 +354,7 @@ namespace lunas
 			size_t	    endline = lstring::endline(data, i);
 			std::string option, value;
 
-			bool first_char = false;
+			bool	    first_char = false;
 			for (; i < endline; i++)
 			{
 				if (data[i] == '=')

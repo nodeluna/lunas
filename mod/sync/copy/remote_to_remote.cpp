@@ -98,7 +98,7 @@ namespace lunas
 								   const std::unique_ptr<lunas::sftp>& dest_sftp,
 								   const struct syncmisc&	       misc)
 		{
-			struct syncstat syncstat;
+			struct syncstat						       syncstat;
 
 			std::expected<std::unique_ptr<lunas::sftp_file>, lunas::error> src_file = src_sftp->openfile(src, O_RDONLY, 0);
 			if (not src_file)
@@ -180,8 +180,8 @@ namespace lunas
 				return std::unexpected(src_limits.error());
 			}
 
-			std::queue<buffque> rqueue;
-			std::queue<buffque> wqueue;
+			std::queue<buffque>		 rqueue;
+			std::queue<buffque>		 wqueue;
 
 			constexpr int			 max_requests	    = 3;
 			int				 read_requests_sent = 0, write_requests_sent = 0;
@@ -189,7 +189,7 @@ namespace lunas
 			std::expected<int, lunas::error> bytes_written;
 			std::expected<int, lunas::error> read_done;
 
-			class progress_bar progress_bar(misc.options.progress_bar, misc.options.quiet);
+			class progress_bar		 progress_bar(misc.options.progress_bar, misc.options.quiet);
 
 			while (dest_size < src_size)
 			{

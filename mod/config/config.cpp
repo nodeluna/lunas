@@ -38,7 +38,7 @@ namespace lunas
 				return std::unexpected(parsed_data.error());
 			}
 
-			struct cliarg::cliopts& cliopts = parsed_data.value();
+			struct cliarg::cliopts&	  cliopts = parsed_data.value();
 
 			struct lunas::parsed_data data;
 

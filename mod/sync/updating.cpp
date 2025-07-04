@@ -34,7 +34,7 @@ export namespace lunas
 
 		const auto& ipaths = data.get_ipaths();
 
-		bool sync = false;
+		bool	    sync   = false;
 
 		if (auto ok = check_dest(src, dest, data); not ok)
 		{
@@ -107,8 +107,8 @@ export namespace lunas
 		{
 			const std::string dest = ipaths.at(dest_index).path + file_table.path;
 
-			auto ok = check_dest_and_sync(file_metadata(src, src_metadata, src_index, src_size),
-						      file_metadata(dest, dest_metadata, dest_index), data, progress_stats);
+			auto		  ok   = check_dest_and_sync(file_metadata(src, src_metadata, src_index, src_size),
+								     file_metadata(dest, dest_metadata, dest_index), data, progress_stats);
 			if (not ok)
 			{
 				if (ok.error().value() != lunas::error_type::dest_check_skip_sync)

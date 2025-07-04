@@ -176,7 +176,7 @@ export namespace lunas
 			std::vector<struct lunas::ipath::input_path> ipaths;
 
 		public:
-			struct lunas::config::options options;
+			struct lunas::config::options			    options;
 
 			const std::vector<struct lunas::ipath::input_path>& get_ipaths() const
 			{

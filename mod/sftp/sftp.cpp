@@ -61,7 +61,7 @@ export namespace lunas
 			sftp(const struct session_data& data);
 			~sftp();
 
-			const sftp_session& get_sftp_session();
+			const sftp_session&			    get_sftp_session();
 
 			std::expected<std::monostate, lunas::error> unlink(const std::string& path);
 			std::expected<std::monostate, lunas::error> rmdir(const std::string& path);
@@ -101,8 +101,8 @@ export namespace lunas
 			std::expected<std::unique_ptr<lunas::sftp_attributes>, lunas::error> attributes(const std::string& path,
 													follow_symlink	   type);
 
-			std::string get_str_error();
-			int	    get_error_code();
+			std::string							     get_str_error();
+			int								     get_error_code();
 	};
 }
 
@@ -273,7 +273,7 @@ namespace lunas
 		}
 		raii::sftp::channel channel_obj = raii::sftp::channel(&channel);
 
-		rc = ssh_channel_request_exec(channel, command.c_str());
+		rc				= ssh_channel_request_exec(channel, command.c_str());
 		if (rc != SSH_OK)
 		{
 			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't execute", command)));
@@ -398,7 +398,7 @@ namespace lunas
 		{
 			return std::unexpected(attr.error());
 		}
-		auto& attributes = attr.value();
+		auto&		attributes = attr.value();
 
 		struct_time_val time_val;
 		struct timespec timespec;
@@ -410,7 +410,7 @@ namespace lunas
 				time_val.atime	    = attributes->atime();
 				time_val.atime_nsec = attributes->atime_nseconds();
 
-				rv = clock_gettime(CLOCK_REALTIME, &timespec);
+				rv		    = clock_gettime(CLOCK_REALTIME, &timespec);
 				if (rv == 0)
 				{
 					time_val.mtime	    = timespec.tv_sec;
@@ -426,7 +426,7 @@ namespace lunas
 				time_val.mtime	    = attributes->mtime();
 				time_val.mtime_nsec = attributes->mtime_nseconds();
 
-				rv = clock_gettime(CLOCK_REALTIME, &timespec);
+				rv		    = clock_gettime(CLOCK_REALTIME, &timespec);
 				if (rv == 0)
 				{
 					time_val.atime	    = timespec.tv_sec;
@@ -463,7 +463,7 @@ namespace lunas
 		attributes.mtime	  = time_val.mtime;
 		attributes.mtime_nseconds = time_val.mtime_nsec;
 
-		int rc = SSH_OK;
+		int rc			  = SSH_OK;
 
 		if (follow == lunas::follow_symlink::yes)
 		{
@@ -486,15 +486,15 @@ namespace lunas
 	{
 		struct owner own;
 
-		auto attr = this->attributes(path, follow);
+		auto	     attr = this->attributes(path, follow);
 		if (not attr)
 		{
 			return std::unexpected(attr.error());
 		}
 		auto& attributes = attr.value();
 
-		own.uid = attributes->uid();
-		own.gid = attributes->gid();
+		own.uid		 = attributes->uid();
+		own.gid		 = attributes->gid();
 		return own;
 	}
 

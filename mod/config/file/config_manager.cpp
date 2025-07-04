@@ -136,7 +136,7 @@ namespace lunas
 			size_t				 nest_size = nest_path.size();
 			struct lunas::ipath::remote_path remote_path;
 
-			auto rpaths_options = config::get_rpaths_options();
+			auto				 rpaths_options = config::get_rpaths_options();
 
 			while (it != nest.end() && it->first.find(nest_path) != it->first.npos)
 			{

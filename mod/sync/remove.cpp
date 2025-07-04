@@ -78,7 +78,7 @@ namespace lunas
 		{
 			auto file_size = lunas::file_size(sftp, path);
 
-			auto ok = lunas::remove(sftp, path, file_type, dry_run);
+			auto ok	       = lunas::remove(sftp, path, file_type, dry_run);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());

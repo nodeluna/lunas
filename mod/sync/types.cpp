@@ -93,7 +93,7 @@ export namespace lunas
 
 	bool no_ownership_value(auto& options);
 
-	int ownership_value(auto& options, int uid, enum ownership_type type);
+	int  ownership_value(auto& options, int uid, enum ownership_type type);
 }
 
 namespace lunas

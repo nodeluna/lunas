@@ -147,7 +147,7 @@ namespace lunas
 			auto	       info	      = lunas::config::get_info_options();
 			struct cliopts cliopts;
 
-			auto ok = config_file_preset("global", cliopts.options, cliopts.ipaths);
+			auto	       ok = config_file_preset("global", cliopts.options, cliopts.ipaths);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());
