@@ -141,7 +141,7 @@ namespace lunas
 			while (it != nest.end() && it->first.find(nest_path) != it->first.npos)
 			{
 				std::string option = it->first.substr(nest_size, it->first.size());
-				if (auto itr1 = rpaths_options.find(option); itr1 != rpaths_options.end())
+				if (auto itr1 = rpaths_options.find("-" + option); itr1 != rpaths_options.end())
 				{
 					remote_path.srcdest	    = itr1->second();
 					remote_path.session_data.ip = it->second;
@@ -171,7 +171,7 @@ namespace lunas
 			}
 			if (remote_path.session_data.ip.empty())
 			{
-				std::string err = "remote path for nest'" + name + "' isn't provided";
+				std::string err = "remote path for nest '" + name + "' isn't provided";
 				return std::unexpected(lunas::error(err, lunas::error_type::config_missing_option));
 			}
 
@@ -191,7 +191,7 @@ namespace lunas
 
 			for (auto it = nest.begin(); it != nest.end(); ++it)
 			{
-				if (auto itr = onoff_options.find(it->first); itr != onoff_options.end())
+				if (auto itr = onoff_options.find("-" + it->first); itr != onoff_options.end())
 				{
 					if (not itr->second(it->second, options))
 					{
@@ -199,11 +199,11 @@ namespace lunas
 						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument));
 					}
 				}
-				else if (auto itr1 = lpaths_options.find(it->first); itr1 != lpaths_options.end())
+				else if (auto itr1 = lpaths_options.find("-" + it->first); itr1 != lpaths_options.end())
 				{
 					ipaths.emplace_back(itr1->second(it->second));
 				}
-				else if (auto itr2 = misc_options.find(it->first); itr2 != misc_options.end())
+				else if (auto itr2 = misc_options.find("-" + it->first); itr2 != misc_options.end())
 				{
 					auto ok = itr2->second(it->second, options);
 					if (not ok)
@@ -212,7 +212,7 @@ namespace lunas
 					}
 				}
 #ifdef REMOTE_ENABLED
-				else if (auto itr3 = rpaths_options.find(it->first); itr3 != rpaths_options.end())
+				else if (auto itr3 = rpaths_options.find("-" + it->first); itr3 != rpaths_options.end())
 				{
 					struct lunas::ipath::remote_path remote_path;
 					remote_path.session_data.ip = it->second;
@@ -232,7 +232,7 @@ namespace lunas
 					}
 				}
 #endif // REMOTE_ENABLED
-				else if (auto itr4 = info.find(it->first); itr4 != info.end())
+				else if (auto itr4 = info.find("-" + it->first); itr4 != info.end())
 				{
 					itr4->second();
 				}

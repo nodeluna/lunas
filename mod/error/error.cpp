@@ -8,6 +8,7 @@ import std;
 #	include <string>
 #	include <string_view>
 #	include <functional>
+#	include <format>
 #endif
 
 export module lunas.error;

@@ -11,6 +11,7 @@ import std.compat;
 #	include <vector>
 #	include <ctime>
 #	include <string>
+#	include <format>
 #endif
 
 export module lunas.sync:checks;

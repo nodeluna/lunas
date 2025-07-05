@@ -1,5 +1,3 @@
-## this branch (module) ISN'T READY
-
 this is an attempt to rewrite lunas using cpp modules
 
 ## lunas
@@ -16,9 +14,10 @@ A syncing cli tool that can handle more than two directories locally and remotel
 * for convenient syncing of recurring operations, lunas has a simple-to-use config file where presets can be defined
 * sync file attributes
 * reliable --resume for interrupted transfers with mtime check mechanism to avoid resuming with src/dest mismatch. check the man page
+* scriptable capability by allowing you to only sync certain files with --allow path --allow-pattern pattern --exclude path --exclude-pattern pattern
 * and more, check the man page to know about them
 
-## usage (this branch (module) ISN'T READY)
+## usage
 
 * lunas -p dir1 -p dir2 -r user@ip:dir3     # -p, -r are for two-ways syncing "-p" for local dirs, "-r" for remote dirs
 * lunas -s dir1 -rd user@ip:dir2            # -s local source, -rs remote src, -d local dest, -rd remote dest

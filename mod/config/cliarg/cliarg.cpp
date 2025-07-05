@@ -156,8 +156,12 @@ namespace lunas
 			for (int index = 1; index < argc; index++)
 			{
 				std::string option = argv[index];
+				if (option.size() >= 2 && option.substr(0, 2) == "--")
+				{
+					option = option.substr(1, option.size());
+				}
 
-				if (option == "-c" || option == "--config")
+				if (option == "-c" || option == "-config")
 				{
 					{
 						auto ok = next_arg_exists(argc, argv, index);
@@ -246,7 +250,7 @@ namespace lunas
 				}
 				else
 				{
-					std::string err = std::format("option '{}' wasn't recognized, read the man page", option);
+					std::string err = std::format("option '{}' wasn't recognized, read the man page", argv[index]);
 					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_option));
 				}
 			}
