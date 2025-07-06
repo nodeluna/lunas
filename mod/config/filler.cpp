@@ -738,7 +738,7 @@ export namespace lunas
 				}
 				else
 				{
-					lunas::warn("invalid ssh log level '{}'. valid levels [nolog, warning, protocol, packet, "
+					lunas::warnln("invalid ssh log level '{}'. valid levels [nolog, warning, protocol, packet, "
 						    "functions] default is nolog",
 						    data);
 					exit(1);

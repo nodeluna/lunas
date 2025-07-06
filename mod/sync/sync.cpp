@@ -112,7 +112,7 @@ export namespace lunas
 				auto dest_file = lunas::get_attributes(ipaths.at(dest_index).sftp, dest_path, data.options.follow_symlink);
 				if (not dest_file && dest_file.error().value() != lunas::error_type::no_such_file)
 				{
-					lunas::warn("{}", dest_file.error().message());
+					lunas::warnln("{}", dest_file.error().message());
 					continue;
 				}
 				else if (dest_file)

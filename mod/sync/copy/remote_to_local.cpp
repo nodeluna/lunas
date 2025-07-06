@@ -254,7 +254,7 @@ namespace lunas
 				int rc = dest_file->sync();
 				if (rc != 0)
 				{
-					lunas::warn("couldn't fsync '{}', ", dest, std::strerror(errno));
+					lunas::warnln("couldn't fsync '{}', ", dest, std::strerror(errno));
 				}
 			}
 

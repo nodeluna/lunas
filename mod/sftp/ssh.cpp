@@ -17,6 +17,7 @@ import std.compat;
 export module lunas.sftp:ssh;
 import :raii;
 import :log;
+import lunas.stdout;
 
 namespace fs = std::filesystem;
 typedef int auth_response;
@@ -87,8 +88,8 @@ namespace lunas
 		int rc;
 		if (m_ssh == NULL)
 		{
-			std::string err = fmt::err_color("Failed to create ssh session to, '" + data.ip + "'");
-			err += fmt::err_color(ssh_get_error(m_ssh));
+			std::string err = lunas::fmterr("{}", "Failed to create ssh session to, '" + data.ip + "'");
+			err += lunas::fmterr("{}", ssh_get_error(m_ssh));
 			throw std::runtime_error("\n" + err);
 		}
 
@@ -108,9 +109,9 @@ namespace lunas
 		rc = ssh_connect(m_ssh);
 		if (rc != SSH_OK)
 		{
-			std::string err = fmt::err_color("failed to create ssh session to '" + data.ip + "'");
-			err += fmt::err_color(ssh_get_error(m_ssh));
-			err += fmt::err_color("exiting...");
+			std::string err = lunas::fmterr("{}", "failed to create ssh session to '" + data.ip + "'");
+			err += lunas::fmterr("{}", ssh_get_error(m_ssh));
+			err += lunas::fmterr("{}", "exiting...");
 			ssh_free(m_ssh);
 			throw std::runtime_error("\n" + err);
 		}
@@ -131,9 +132,9 @@ namespace lunas
 		}
 		else
 		{
-			std::string err = fmt::err_color("couldn't authenticate to '" + data.ip + "'");
-			err += fmt::err_color(ssh_get_error(m_ssh));
-			err += fmt::err_color("exiting...");
+			std::string err = lunas::fmterr("{}", "couldn't authenticate to '" + data.ip + "'");
+			err += lunas::fmterr("{}", ssh_get_error(m_ssh));
+			err += lunas::fmterr("{}", "exiting...");
 			ssh_disconnect(m_ssh);
 			ssh_free(m_ssh);
 			throw std::runtime_error("\n" + err);
@@ -145,7 +146,7 @@ namespace lunas
 		int rc = SSH_OK;
 		if (rc = ssh_options_set(ssh, option, argument); rc != SSH_OK)
 		{
-			llog::warn("couldn't set " + warning_type + " for '" + session_data.ip + "'");
+			lunas::warnln("{}", "couldn't set " + warning_type + " for '" + session_data.ip + "'");
 		}
 
 		return rc;
@@ -189,7 +190,7 @@ namespace lunas
 			rc = ssh_userauth_password(ssh, NULL, password.c_str());
 			if (rc == SSH_AUTH_DENIED)
 			{
-				llog::error("access denied. retries left: " + std::to_string(retry));
+				lunas::printerr("{}", "access denied. retries left: " + std::to_string(retry));
 				continue;
 			}
 			else
@@ -287,7 +288,7 @@ namespace lunas
 		}
 		catch (const std::exception& e)
 		{
-			llog::warn(e.what());
+			lunas::warnln("{}", e.what());
 			rc = SSH_AUTH_DENIED;
 		}
 
@@ -353,7 +354,7 @@ namespace lunas
 		}
 		else if (method & SSH_AUTH_METHOD_INTERACTIVE || method & SSH_AUTH_METHOD_GSSAPI_MIC || method & SSH_AUTH_METHOD_HOSTBASED)
 		{
-			llog::error("unsupported auth method for '" + ip + "', " + auth_method(method));
+			lunas::printerr("{}", "unsupported auth method for '" + ip + "', " + auth_method(method));
 		}
 
 		return SSH_AUTH_ERROR;
@@ -368,24 +369,24 @@ namespace lunas
 			case SSH_KNOWN_HOSTS_OK:
 				break;
 			case SSH_KNOWN_HOSTS_CHANGED:
-				err = fmt::err_color("the server key for '" + ip +
-						     "' has changed! either you are under attack or the admin changed the key");
+				err = lunas::fmterr("{}", "the server key for '" + ip +
+							      "' has changed! either you are under attack or the admin changed the key");
 
 				throw std::runtime_error("\n" + err);
 			case SSH_KNOWN_HOSTS_OTHER:
-				err = fmt::err_color("-[X] the server for '" + ip +
-						     "' gave a key of type while we had another type! possible attack!");
+				err = lunas::fmterr("{}", "-[X] the server for '" + ip +
+							      "' gave a key of type while we had another type! possible attack!");
 				throw std::runtime_error("\n" + err);
 			case SSH_KNOWN_HOSTS_ERROR:
-				err = fmt::err_color("error while checking the server '" + ip + "', is the publickey valid? " +
-						     ssh_get_error(ssh));
+				err = lunas::fmterr("{}", "error while checking the server '" + ip + "', is the publickey valid? " +
+							      ssh_get_error(ssh));
 				throw std::runtime_error("\n" + err);
 			case SSH_KNOWN_HOSTS_UNKNOWN:
 			case SSH_KNOWN_HOSTS_NOT_FOUND:
 				std::string ok;
 				int	    rc;
-				llog::warn2("the autheticity of server '" + ip + "' can't be established\n");
-				llog::warn2("the publickey is not found, do you want to add it to '~/.ssh/known_hosts'? (y/n): ");
+				lunas::warnln("{}", "the autheticity of server '" + ip + "' can't be established");
+				lunas::warn("{}", "the publickey is not found, do you want to add it to '~/.ssh/known_hosts'? (y/n): ");
 				std::cin >> ok;
 
 				if (ok == "y")
@@ -394,13 +395,13 @@ namespace lunas
 				}
 				else
 				{
-					err = fmt::err_color("server key verification failed");
+					err = lunas::fmterr("{}", "server key verification failed");
 					throw std::runtime_error("\n" + err);
 				}
 				if (ok == "y" && rc != SSH_OK)
 				{
-					err = fmt::err_color("couldn't add the key to the '~/.ssh/known_hosts'");
-					err += fmt::err_color(ssh_get_error(ssh));
+					err = lunas::fmterr("{}", "couldn't add the key to the '~/.ssh/known_hosts'");
+					err += lunas::fmterr("{}", ssh_get_error(ssh));
 					throw std::runtime_error("\n" + err);
 				}
 				break;

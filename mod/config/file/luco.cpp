@@ -264,7 +264,7 @@ namespace lunas
 			conf_file.close();
 			if (conf_file.is_open() == true)
 			{
-				lunas::warn("couldn't close config file '{}', ", config_file, std::strerror(errno));
+				lunas::warnln("couldn't close config file '{}', ", config_file, std::strerror(errno));
 			}
 
 			return data;

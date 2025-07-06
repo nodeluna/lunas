@@ -111,7 +111,7 @@ namespace lunas
 			file.close();
 			if (file.is_open() == true)
 			{
-				lunas::warn("couldn't close config file '{}', {}", config_file, ec.message());
+				lunas::warnln("couldn't close config file '{}', {}", config_file, ec.message());
 			}
 
 			std::print(":: wrote a demo config file to '{}'", config_file);

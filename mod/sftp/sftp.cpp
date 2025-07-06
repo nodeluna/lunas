@@ -114,16 +114,16 @@ namespace lunas
 
 		if (m_sftp == NULL)
 		{
-			std::string err = fmt::err_color("failed to create an sftp session to '" + session_data.ip + "'");
-			err += fmt::err_color(ssh_get_error(m_ssh));
+			std::string err = lunas::fmterr("{}", "failed to create an sftp session to '" + session_data.ip + "'");
+			err += lunas::fmterr("{}", ssh_get_error(m_ssh));
 			throw std::runtime_error("\n" + err);
 		}
 
 		int rc = sftp_init(m_sftp);
 		if (rc != SSH_OK)
 		{
-			std::string err = fmt::err_color("failed to initialize an sftp session to '" + session_data.ip + "'");
-			err += fmt::err_color(ssh_get_error(m_ssh));
+			std::string err = lunas::fmterr("{}", "failed to initialize an sftp session to '" + session_data.ip + "'");
+			err += lunas::fmterr("{}", ssh_get_error(m_ssh));
 			throw std::runtime_error("\n" + err);
 		}
 	}
@@ -569,7 +569,7 @@ namespace lunas
 		if (session_data.ip.find(':') == session_data.ip.npos || session_data.ip.back() == ':')
 		{
 			return std::unexpected(
-			    ssh_error(fmt::err_color("hostname: " + session_data.ip + " doesn't include an input path")));
+			    ssh_error(lunas::fmterr("{}", "hostname: " + session_data.ip + " doesn't include an input path")));
 		}
 
 		std::string sftp_path = session_data.ip.substr(session_data.ip.find(":") + 1, session_data.ip.size());

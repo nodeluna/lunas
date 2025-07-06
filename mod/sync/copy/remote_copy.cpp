@@ -59,7 +59,7 @@ export namespace lunas
 				auto ok = lunas::utimes::remote(src, dest, src_sftp, dest_sftp, misc);
 				if (not ok)
 				{
-					lunas::warn("{}", ok.error().message());
+					lunas::warnln("{}", ok.error().message());
 				}
 			}
 

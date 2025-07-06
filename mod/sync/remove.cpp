@@ -180,7 +180,7 @@ namespace lunas
 			}
 			else if (not src_file && src_file.error().value() != lunas::error_type::no_such_file)
 			{
-				lunas::warn("{}", src_file.error().message());
+				lunas::warnln("{}", src_file.error().message());
 				continue;
 			}
 			else if (not src_file && src_file.error().value() == lunas::error_type::no_such_file)

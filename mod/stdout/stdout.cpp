@@ -16,7 +16,21 @@ export namespace lunas
 	template<typename... args_t>
 	void printerr(std::format_string<args_t...> fmt, args_t&&... args)
 	{
-		std::string output = "\x1b[1;31m-[X] " + std::format(fmt, std::forward<args_t>(args)...) + " \x1b[0m";
+		std::string output = std::format(fmt, std::forward<args_t>(args)...);
+		if (output.find("-[X]") == output.npos)
+		{
+			std::println("\x1b[1;31m-[X] {} \x1b[0m", output);
+		}
+		else
+		{
+			std::println("{}", output);
+		}
+	}
+
+	template<typename... args_t>
+	void warnln(std::format_string<args_t...> fmt, args_t&&... args)
+	{
+		std::string output = "\x1b[1;31m-[!!] " + std::format(fmt, std::forward<args_t>(args)...) + " \x1b[0m";
 		std::println("{}", output);
 	}
 
@@ -24,7 +38,7 @@ export namespace lunas
 	void warn(std::format_string<args_t...> fmt, args_t&&... args)
 	{
 		std::string output = "\x1b[1;31m-[!!] " + std::format(fmt, std::forward<args_t>(args)...) + " \x1b[0m";
-		std::println("{}", output);
+		std::print("{}", output);
 	}
 
 	template<typename... args_t>
@@ -53,14 +67,12 @@ export namespace lunas
 	template<typename... args_t>
 	void fmterr_multiline(std::string& err, std::format_string<args_t...> fmt, args_t&&... args)
 	{
-		bool empty = false;
 		if (not err.empty())
 		{
 			err += "\x1b[1;31m-[X] ";
-			empty = true;
 		}
 		err += std::format(fmt, std::forward<args_t>(args)...);
-		if (not empty)
+		if (not err.empty())
 		{
 			err += " \x1b[0m";
 		}

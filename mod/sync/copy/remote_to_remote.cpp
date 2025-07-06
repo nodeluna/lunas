@@ -296,7 +296,7 @@ namespace lunas
 				auto ok = dest_file.value()->fsync();
 				if (not ok)
 				{
-					lunas::warn("couldn't fsync '{}', ", dest, ok.error().message());
+					lunas::warnln("couldn't fsync '{}', ", dest, ok.error().message());
 				}
 			}
 

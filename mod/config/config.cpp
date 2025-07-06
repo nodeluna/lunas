@@ -64,16 +64,16 @@ namespace lunas
 					{
 						remote_path.session_data.options.compression_level = cliopts.options.compression_level;
 					}
+
 					try
 					{
 						auto ok = ipath.init_sftp(remote_path.session_data);
 						if (not ok)
 						{
-							auto& err = ok.error().message();
-							return std::unexpected(lunas::error(err, lunas::error_type::init_sftp_error));
+							return std::unexpected(ok.error());
 						}
 					}
-					catch (std::exception& e)
+					catch (const std::exception& e)
 					{
 						return std::unexpected(lunas::error(e.what(), lunas::error_type::init_sftp_error));
 					}
