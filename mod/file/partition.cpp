@@ -14,6 +14,7 @@ export module lunas.file:partition;
 
 export import lunas.sftp;
 export import lunas.error;
+import lunas.path;
 
 export namespace lunas
 {
@@ -38,6 +39,11 @@ namespace lunas
 		if (sftp != nullptr)
 		{
 			auto ok = sftp->sftp_partition(path);
+			if (not ok && ok.error().value() == lunas::error_type::no_such_file)
+			{
+				ok = sftp->sftp_partition(lunas::path::parent_directory(path));
+			}
+
 			if (ok)
 			{
 				_partition = std::move(ok.value());
@@ -51,6 +57,11 @@ namespace lunas
 		{
 			std::error_code ec;
 			_partition = std::filesystem::space(path, ec);
+			if (ec && ec == std::errc::no_such_file_or_directory)
+			{
+				_partition = std::filesystem::space(lunas::path::parent_directory(path), ec);
+			}
+
 			if (ec)
 			{
 				auto error_type = ec == std::errc::no_such_file_or_directory ? lunas::error_type::no_such_file

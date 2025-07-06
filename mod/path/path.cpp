@@ -19,7 +19,7 @@ export namespace lunas
 
 		void					 pop_seperator(std::string& path) noexcept;
 
-		std::string				 get_lower_dir_level(std::string path);
+		std::string				 parent_directory(std::string path);
 
 		std::expected<std::string, lunas::error> resolve_relative_path(std::string path, std::string cwd);
 
@@ -61,7 +61,7 @@ namespace lunas
 			return path.substr(path.rfind(std::filesystem::path::preferred_separator) + 1, path.length());
 		}
 
-		std::string get_lower_dir_level(std::string path)
+		std::string parent_directory(std::string path)
 		{
 			if (path.rfind(std::filesystem::path::preferred_separator) == path.npos)
 			{
