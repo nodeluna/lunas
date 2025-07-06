@@ -32,6 +32,11 @@ export namespace lunas
 								  const std::unique_ptr<lunas::sftp>& dest_sftp,
 								  const struct syncmisc&	      misc);
 
+		std::expected<struct syncstat, lunas::error> link(const std::string& src, const std::string& dest,
+								  const std::unique_ptr<lunas::sftp>& src_sftp,
+								  const std::unique_ptr<lunas::sftp>& dest_sftp,
+								  const struct syncmisc&	      misc);
+
 		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
 								   const std::unique_ptr<lunas::sftp>& src_sftp,
 								   const std::unique_ptr<lunas::sftp>& dest_sftp,
@@ -61,7 +66,13 @@ namespace lunas
 
 			std::expected<struct syncstat, lunas::error> syncstat;
 
-			if (misc.file_type == lunas::file_types::regular_file || misc.file_type == lunas::file_types::resume_regular_file)
+			if (misc.file_type == lunas::file_types::regular_file && misc.options.hardlink_regular_files &&
+			    src_sftp->get_hostname() == dest_sftp->get_hostname())
+			{
+				syncstat = remote_to_remote::link(src, dest, src_sftp, dest_sftp, misc);
+			}
+			else if (misc.file_type == lunas::file_types::regular_file ||
+				 misc.file_type == lunas::file_types::resume_regular_file)
 			{
 				auto func = [&](const std::string& dest_lspart) -> std::expected<struct syncstat, lunas::error>
 				{
@@ -91,6 +102,43 @@ namespace lunas
 			}
 
 			return syncstat;
+		}
+
+		std::expected<struct syncstat, lunas::error> link(const std::string& src, const std::string& dest,
+								  const std::unique_ptr<lunas::sftp>&,
+								  const std::unique_ptr<lunas::sftp>& dest_sftp,
+								  const struct syncmisc&	      misc)
+		{
+			struct syncstat syncstat;
+			if (misc.options.dry_run)
+			{
+				syncstat.code = lunas::sync_code::success;
+				return syncstat;
+			}
+
+			{
+				auto ok = dest_sftp->attributes(dest, misc.options.follow_symlink);
+				if (ok && ok.value()->exists())
+				{
+					auto ok2 = dest_sftp->unlink(dest);
+					if (not ok2)
+					{
+						return std::unexpected(ok2.error());
+					}
+				}
+			}
+
+			std::expected<std::monostate, lunas::error> ok = dest_sftp->hardlink(src, dest);
+			if (not ok)
+			{
+				return std::unexpected(ok.error());
+			}
+			else
+			{
+				syncstat.code	     = lunas::sync_code::success;
+				syncstat.copied_size = 0;
+				return syncstat;
+			}
 		}
 
 		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,

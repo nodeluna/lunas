@@ -203,7 +203,11 @@ don't sync broken symlinks
 .TP
 .B [-l, --link]
 
-hardlink regular files instead of copying them (works on local to local)
+hardlink regular files instead of copying them (works with files on the same machine (local to local) or (remote to remote with the same user@ip))
+
+if source and destination files are on different machines, then it is normally copied
+
+-> if the destination file already exists, then it is removed then hardlinked from source
 
 .TP
 .B [-P, --progress]

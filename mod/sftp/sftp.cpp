@@ -68,6 +68,7 @@ export namespace lunas
 			std::expected<std::monostate, lunas::error> mkdir(const std::string& path, const unsigned int& perms);
 			std::expected<std::monostate, lunas::error> mkdir(const std::string& path, const std::filesystem::perms& perms);
 			std::expected<std::monostate, lunas::error> symlink(const std::string& target, const std::string& path);
+			std::expected<std::monostate, lunas::error> hardlink(const std::string& target, const std::string& path);
 			std::expected<std::monostate, lunas::error> rename(const std::string& original, const std::string& newname);
 			std::expected<std::unique_ptr<lunas::sftp_partition>, lunas::error> sftp_partition(const std::string& path);
 			std::expected<std::unique_ptr<lunas::sftp_dir>, lunas::error>	    opendir(const std::string& path);
@@ -173,6 +174,16 @@ namespace lunas
 		if (not session_data.options.dry_run && sftp_symlink(m_sftp, target.c_str(), path.c_str()) != SSH_OK)
 		{
 			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't make symlink", path)));
+		}
+
+		return std::monostate();
+	}
+
+	std::expected<std::monostate, lunas::error> sftp::hardlink(const std::string& target, const std::string& path)
+	{
+		if (not session_data.options.dry_run && sftp_hardlink(m_sftp, target.c_str(), path.c_str()) != SSH_OK)
+		{
+			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't make hardlink", path)));
 		}
 
 		return std::monostate();
