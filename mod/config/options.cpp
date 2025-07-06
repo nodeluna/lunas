@@ -27,6 +27,7 @@ export namespace lunas
 				bool			      checksum		= false;
 				bool			      compression	= false;
 				int			      compression_level = 5;
+				bool			      recursive		= true;
 				bool			      attributes_uid	= false;
 				bool			      attributes_gid	= false;
 				std::optional<int>	      attributes_uid_value;

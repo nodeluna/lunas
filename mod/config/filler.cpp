@@ -380,6 +380,23 @@ export namespace lunas
 				return std::monostate();
 			}
 
+			std::expected<std::monostate, lunas::error> no_recursive(const std::string& data, lunas::config::options& options)
+			{
+				if (data == "on")
+				{
+					options.recursive = false;
+				}
+				else if (data == "off")
+				{
+					options.recursive = true;
+				}
+				else
+				{
+					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
+				return std::monostate();
+			}
+
 			std::expected<std::monostate, lunas::error> resume(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")
@@ -739,8 +756,8 @@ export namespace lunas
 				else
 				{
 					lunas::warnln("invalid ssh log level '{}'. valid levels [nolog, warning, protocol, packet, "
-						    "functions] default is nolog",
-						    data);
+						      "functions] default is nolog",
+						      data);
 					exit(1);
 				}
 

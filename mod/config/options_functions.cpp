@@ -54,6 +54,8 @@ export namespace lunas
 				{"-compression",	config::filler::compression	},
 				{"-link",		config::filler::link		},
 				{"-l",			config::filler::link		},
+				{"-no-recursive",	config::filler::no_recursive	},
+				{"-nr",			config::filler::no_recursive	},
 			};
 
 			// clang-format on 

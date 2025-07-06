@@ -164,7 +164,7 @@ namespace lunas
 				}
 			}
 
-			if (std::get<lunas::file_types>(dest_file->file_type) == lunas::file_types::directory)
+			if (std::get<lunas::file_types>(dest_file->file_type) == lunas::file_types::directory && data.options.recursive)
 			{
 				auto ok = remove_extra(data, dest_file.value().path, src_index, dest_index);
 				if (not ok)

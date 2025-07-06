@@ -59,6 +59,7 @@ namespace lunas
 			struct directory_options directory_options = {
 			    .follow_symlink    = data.options->follow_symlink,
 			    .no_broken_symlink = data.options->no_broken_symlink,
+			    .recursive	       = data.options->recursive,
 			};
 
 			auto directory = lunas::opendir(data.ipath->sftp, path, directory_options);
