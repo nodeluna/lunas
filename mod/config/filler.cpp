@@ -764,18 +764,57 @@ export namespace lunas
 				return std::monostate();
 			}
 
-			std::expected<std::monostate, lunas::error> timeout(const std::string& data, lunas::config::options& options)
+			std::expected<std::monostate, lunas::error> sftp_timeout(const std::string& data, lunas::config::options& options)
 			{
 				if (is_num(data) == false)
 				{
-					std::string err = "argument '" + data + "' for option timeout isn't a number";
+					std::string err = "argument '" + data + "' for option sftp-timeout isn't a number";
+					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
+				}
+
+				time_t timeout = std::stoull(data);
+				if (timeout < 0)
+				{
+					std::string err = "sftp-timeout must be >= 0 seconds. provided time is '" + data + "'";
+					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
+				}
+				options.disconnected_server_timeout = timeout;
+
+				return std::monostate();
+			}
+
+			std::expected<std::monostate, lunas::error> sftp_retries(const std::string& data, lunas::config::options& options)
+			{
+				if (is_num(data) == false)
+				{
+					std::string err = "argument '" + data + "' for option sftp-retries isn't a number";
+					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
+				}
+
+				time_t times = std::stoull(data);
+				if (times < 0)
+				{
+					std::string err = "sftp-retries must be >= 0. provided retries is '" + data + "'";
+					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
+				}
+
+				options.disconnected_server_retries = times;
+
+				return std::monostate();
+			}
+
+			std::expected<std::monostate, lunas::error> connect_timeout(const std::string& data, lunas::config::options& options)
+			{
+				if (is_num(data) == false)
+				{
+					std::string err = "argument '" + data + "' for option connect-timeout isn't a number";
 					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
 				}
 
 				time_t level = std::stoull(data);
 				if (level < 0)
 				{
-					std::string err = "timeout must be between > 0. provided level '" + data + "'";
+					std::string err = "connect-timeout must be >= 0. provided time is '" + data + "'";
 					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
 				}
 				options.timeout_sec = level;

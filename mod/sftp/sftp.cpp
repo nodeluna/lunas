@@ -104,6 +104,7 @@ export namespace lunas
 
 			std::string							     get_str_error();
 			int								     get_error_code();
+			lunas::error							     get_error(const std::string& msg);
 	};
 }
 
@@ -269,7 +270,7 @@ namespace lunas
 		}
 		else
 		{
-			return std::unexpected(ssh_error(this->get_sftp_session()));
+			return std::unexpected(ssh_error(this->get_sftp_session(), fmt::err_path("couldn't get attributes", path)));
 		}
 	}
 
@@ -672,6 +673,11 @@ namespace lunas
 	int sftp::get_error_code()
 	{
 		return sftp_get_error(this->get_sftp_session());
+	}
+
+	lunas::error sftp::get_error(const std::string& msg)
+	{
+		return ssh_error(this->get_sftp_session(), msg);
 	}
 
 	sftp::~sftp()

@@ -110,7 +110,25 @@ enable ssh logs. available levels are: nolog, warning, protocol, packet and func
 .br
 
 .TP
-.B [-t, --timeout] <seconds>
+.B [-sr, --sftp-retries] <times>
+
+if the ssh server was disconnected while copying a file, retry x times to recopy it before moving on to the next file
+
+-> check out --sftp-timeout
+
+-> default is 6 retries
+
+.TP
+.B [-st, --sftp-timeout] <seconds>
+
+if the ssh server was disconnected while copying a file, sleep x seconds between retries
+
+-> check out --sftp-retries
+
+-> default is 10 seconds
+
+.TP
+.B [-ct, --connect-timeout] <seconds>
 
 set a timeout for the ssh connection
 

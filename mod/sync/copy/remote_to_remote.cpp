@@ -280,7 +280,7 @@ namespace lunas
 				else if (not read_done)
 				{
 					std::string err = "error reading '" + src + "', " + src_sftp->get_str_error();
-					return std::unexpected(lunas::error(err, lunas::error_type::sync_error_reading));
+					return std::unexpected(src_sftp->get_error(err));
 				}
 
 				rqueue.front().bytes_xfered = read_done.value();
@@ -293,7 +293,7 @@ namespace lunas
 					if (not bytes_written)
 					{
 						std::string err = "error writing '" + dest + "', " + dest_sftp->get_str_error();
-						return std::unexpected(lunas::error(err, lunas::error_type::sync_error_writing));
+						return std::unexpected(dest_sftp->get_error(err));
 					}
 					else if (bytes_written.value() != wqueue.front().bytes_xfered)
 					{

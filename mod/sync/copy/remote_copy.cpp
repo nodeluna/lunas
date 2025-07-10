@@ -1,11 +1,15 @@
 module;
 
+#include <cassert>
+
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
 #	include <memory>
 #	include <string>
 #	include <expected>
+#	include <thread>
+#	include <chrono>
 #endif
 
 export module lunas.sync:remote_copy;
@@ -31,23 +35,56 @@ export namespace lunas
 								  const std::unique_ptr<lunas::sftp>& dest_sftp,
 								  const lunas::syncmisc&	      misc)
 		{
+			assert(src_sftp != nullptr || dest_sftp != nullptr);
 
 			lunas::print_sync(src, dest, misc);
 
-			std::expected<struct syncstat, lunas::error> syncstat;
+			std::expected<struct syncstat, lunas::error> syncstat = std::unexpected(lunas::error());
 
-			if (src_sftp != nullptr && dest_sftp == nullptr)
+			auto server_maybe_disconnected = [](const std::expected<struct syncstat, lunas::error>& syncstat)
 			{
-				syncstat = lunas::remote_to_local::copy(src, dest, src_sftp, misc);
-			}
-			else if (src_sftp == nullptr && dest_sftp != nullptr)
+				if (not syncstat && (syncstat.error().value() == lunas::error_type::sftp_genaric_failure ||
+						     syncstat.error().value() == lunas::error_type::sftp_none))
+				{
+					return true;
+				}
+				else
+				{
+					return false;
+				}
+			};
+
+			int retries = misc.options.disconnected_server_retries;
+
+			do
 			{
-				syncstat = lunas::local_to_remote::copy(src, dest, dest_sftp, misc);
-			}
-			else
-			{
-				syncstat = lunas::remote_to_remote::copy(src, dest, src_sftp, dest_sftp, misc);
-			}
+				if (src_sftp != nullptr && dest_sftp == nullptr)
+				{
+					syncstat = lunas::remote_to_local::copy(src, dest, src_sftp, misc);
+				}
+				else if (src_sftp == nullptr && dest_sftp != nullptr)
+				{
+					syncstat = lunas::local_to_remote::copy(src, dest, dest_sftp, misc);
+				}
+				else
+				{
+					syncstat = lunas::remote_to_remote::copy(src, dest, src_sftp, dest_sftp, misc);
+				}
+
+				if (retries > 0 && server_maybe_disconnected(syncstat))
+				{
+					retries--;
+					std::this_thread::sleep_for(std::chrono::seconds(misc.options.disconnected_server_timeout));
+
+					lunas::printerr("server '{}' maybe disconnected, retring in {} seconds. re-tries left: {}",
+							(dest_sftp != nullptr ? dest_sftp->get_hostname() : src_sftp->get_hostname()),
+							misc.options.disconnected_server_timeout, retries);
+				}
+				else
+				{
+					break;
+				}
+			} while (not syncstat);
 
 			if (not syncstat)
 			{

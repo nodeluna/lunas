@@ -32,10 +32,12 @@ export namespace lunas
 				bool			      attributes_gid	= false;
 				std::optional<int>	      attributes_uid_value;
 				std::optional<int>	      attributes_gid_value;
-				bool			      attributes_mtime	     = true;
-				bool			      attributes_atime	     = false;
-				bool			      hardlink_regular_files = false;
-				std::optional<std::uintmax_t> minimum_space	     = std::nullopt;
+				bool			      attributes_mtime		  = true;
+				bool			      attributes_atime		  = false;
+				bool			      hardlink_regular_files	  = false;
+				std::optional<std::uintmax_t> minimum_space		  = std::nullopt;
+				int			      disconnected_server_retries = 6;
+				time_t			      disconnected_server_timeout = 10;
 		};
 
 		struct options : public path_options {

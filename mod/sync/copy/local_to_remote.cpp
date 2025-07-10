@@ -168,8 +168,8 @@ namespace lunas
 
 			std::queue<buffque>		 queue;
 
-			constexpr int			 max_requests	    = 5;
-			int				 requests_sent	    = 0;
+			constexpr int			 max_requests  = 5;
+			int				 requests_sent = 0;
 			std::expected<int, lunas::error> bytes_written;
 			std::uintmax_t			 total_bytes_requested = dest_size, position = dest_size;
 			class progress_bar		 progress_bar(misc.options.progress_bar, misc.options.quiet);
@@ -207,7 +207,7 @@ namespace lunas
 					if (not bytes_written)
 					{
 						std::string err = "error writing '" + dest + "', " + sftp->get_str_error();
-						return std::unexpected(lunas::error(err, lunas::error_type::sync_error_writing));
+						return std::unexpected(sftp->get_error(err));
 					}
 					else if (bytes_written.value() != queue.front().bytes_xfered)
 					{

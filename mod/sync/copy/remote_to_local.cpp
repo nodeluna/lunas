@@ -63,7 +63,7 @@ namespace lunas
 			{
 				auto func = [&](const std::string& dest_lspart) -> std::expected<struct syncstat, lunas::error>
 				{
-					auto syncstat = remote_to_local::rfile(src, dest_lspart, sftp, misc);
+					syncstat = remote_to_local::rfile(src, dest_lspart, sftp, misc);
 					if (syncstat)
 					{
 						struct lunas::local::original_name _(dest_lspart, dest, syncstat.value().code,
@@ -223,7 +223,7 @@ namespace lunas
 				else if (not read_done)
 				{
 					std::string err = "error reading '" + src + "', " + sftp->get_str_error();
-					return std::unexpected(lunas::error(err, lunas::error_type::sync_error_reading));
+					return std::unexpected(sftp->get_error(err));
 				}
 
 				queue.front().bytes_xfered = read_done.value();
@@ -234,7 +234,7 @@ namespace lunas
 				if (bytes_written != queue.front().bytes_xfered || dest_file->bad() || dest_file->fail())
 				{
 					std::string err = "error writing '" + dest + "', " + std::strerror(errno);
-					return std::unexpected(lunas::error(err, lunas::error_type::sync_error_writing));
+					return std::unexpected(sftp->get_error(err));
 				}
 
 				dest_size += bytes_written;

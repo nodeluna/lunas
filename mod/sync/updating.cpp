@@ -93,7 +93,7 @@ export namespace lunas
 		std::optional<std::uintmax_t> src_size	   = std::nullopt;
 		const std::string	      src	   = ipaths.at(src_index).path + file_table.path;
 
-		if (data.options.minimum_space)
+		if (data.options.minimum_space && src_metadata.file_type == lunas::file_types::regular_file)
 		{
 			auto attr = lunas::get_attributes(ipaths.at(src_index).sftp, src, data.options.follow_symlink);
 			if (not attr)
