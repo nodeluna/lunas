@@ -106,7 +106,8 @@ export namespace lunas
 		sync_get_file_size		 = 102,
 		sync_hardlink			 = 103,
 
-		partition_info			 = 104
+		partition_info			 = 104,
+		file_size_limit			 = 105,
 	};
 
 	class error {

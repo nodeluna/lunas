@@ -127,12 +127,8 @@ export namespace lunas
 				return std::monostate();
 			}
 
-			std::expected<std::monostate, lunas::error> minimum_space(const std::string& data, lunas::config::options& options)
+			std::expected<std::uintmax_t, lunas::error> parse_size(const std::string& data)
 			{
-				if (data == "off")
-				{
-					return std::monostate();
-				}
 				constexpr std::uintmax_t KiB  = 1024;
 				constexpr std::uintmax_t MiB  = 1024 * KiB;
 				constexpr std::uintmax_t GiB  = 1024 * MiB;
@@ -186,30 +182,58 @@ export namespace lunas
 
 				if (temp.find("kib") != data.npos)
 				{
-					options.minimum_space = num * KiB;
+					return num * KiB;
 				}
 				else if (temp.find("mib") != temp.npos)
 				{
-					options.minimum_space = num * MiB;
+					return num * MiB;
 				}
 				else if (temp.find("gib") != temp.npos)
 				{
-					options.minimum_space = num * GiB;
+					return num * GiB;
 				}
 				else if (temp.find("tib") != temp.npos)
 				{
-					options.minimum_space = num * TiB;
+					return num * TiB;
 				}
 				else if (temp.find("pib") != temp.npos)
 				{
-					options.minimum_space = num * PiB;
+					return num * PiB;
 				}
 				else
 				{
-					options.minimum_space = num;
+					return num;
+				}
+			}
+
+			std::expected<std::monostate, lunas::error> handle_size(const std::string&	       data,
+										std::optional<std::uintmax_t>& size_variable)
+			{
+				if (data == "off")
+				{
+					return std::monostate();
 				}
 
-				return std::monostate();
+				auto ok = parse_size(data);
+				if (not ok)
+				{
+					return std::unexpected(ok.error());
+				}
+				else
+				{
+					size_variable = ok.value();
+					return std::monostate();
+				}
+			};
+
+			std::expected<std::monostate, lunas::error> minimum_space(const std::string& data, lunas::config::options& options)
+			{
+				return handle_size(data, options.minimum_space);
+			}
+
+			std::expected<std::monostate, lunas::error> max_file_size(const std::string& data, lunas::config::options& options)
+			{
+				return handle_size(data, options.max_file_size);
 			}
 
 			std::expected<std::monostate, lunas::error> exclude(const std::string& data, lunas::config::options& options)
@@ -803,7 +827,8 @@ export namespace lunas
 				return std::monostate();
 			}
 
-			std::expected<std::monostate, lunas::error> connect_timeout(const std::string& data, lunas::config::options& options)
+			std::expected<std::monostate, lunas::error> connect_timeout(const std::string&	    data,
+										    lunas::config::options& options)
 			{
 				if (is_num(data) == false)
 				{

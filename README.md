@@ -1,5 +1,3 @@
-this is an attempt to rewrite lunas using cpp modules
-
 ## lunas
 
 A syncing cli tool that can handle more than two directories locally and remotely

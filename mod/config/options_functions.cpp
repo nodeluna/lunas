@@ -123,6 +123,8 @@ export namespace lunas
 				{"-ap",			config::filler::allow_pattern		},
 				{"-minimum-space",	config::filler::minimum_space  		},
 				{"-ms",			config::filler::minimum_space  		},
+				{"-max-file-size",	config::filler::max_file_size  		},
+				{"-MFS",		config::filler::max_file_size  		},
 				{"-attributes",		config::filler::attributes     		},
 				{"-A",			config::filler::attributes     		},
 			};

@@ -282,6 +282,16 @@ possible units are kib, mib, gib, tib, pib. a number without a unit is considere
         example: -p dir -p dir2 -ms 100mib
 
 .TP
+.B [-MFS, --max-file-size] <sizeUnit>
+
+don't sync a regular file if it is bigger than sizeUnit
+.br
+possible units are kib, mib, gib, tib, pib. a number without a unit is considered bytes
+
+        example: -p dir -p dir2 -MFS 0.5Tib
+        example: -p dir -p dir2 -MFS 100mib
+
+.TP
 .B [-R, --resume]
 
 resume interrupted file transfer. enabled by default

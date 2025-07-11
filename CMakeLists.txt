@@ -63,11 +63,11 @@ target_sources(${PROJECT_NAME}
 	FILES ${MODS}
 )
 
-add_custom_target(local
-	COMMAND ${CMAKE_COMMAND} -D DISABLE_REMOTE=1 .
-	COMMAND ${CMAKE_COMMAND} --build .
-	COMMENT "Compiling without remote support"
-)
+# add_custom_target(local
+# 	COMMAND ${CMAKE_COMMAND} -D DISABLE_REMOTE=1 .
+# 	COMMAND ${CMAKE_COMMAND} --build .
+# 	COMMENT "Compiling without remote support"
+# )
 
 install(
 	TARGETS ${PROJECT_NAME}

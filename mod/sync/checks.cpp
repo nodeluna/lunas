@@ -126,6 +126,14 @@ export namespace lunas
 			return std::unexpected(error(lunas::error_type::dest_check_type_conflict, "conflict in types between '{}' and '{}'",
 						     src.path, dest.path));
 		}
+		else if (data.options.max_file_size && src.metadata.file_type == lunas::file_types::regular_file &&
+			 src.file_size > *data.options.max_file_size)
+		{
+			std::string err = std::format("  [File]  '{}' [size] '{}' is bigger than the [max-file-size] '{}'", src.path,
+						      size_units(*src.file_size), size_units(*data.options.max_file_size));
+
+			return std::unexpected(error(lunas::error_type::file_size_limit, "{}", err));
+		}
 		else if (data.options.minimum_space)
 		{
 			assert(src.file_size != std::nullopt);

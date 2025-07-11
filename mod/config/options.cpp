@@ -36,6 +36,7 @@ export namespace lunas
 				bool			      attributes_atime		  = false;
 				bool			      hardlink_regular_files	  = false;
 				std::optional<std::uintmax_t> minimum_space		  = std::nullopt;
+				std::optional<std::uintmax_t> max_file_size		  = std::nullopt;
 				int			      disconnected_server_retries = 6;
 				time_t			      disconnected_server_timeout = 10;
 		};

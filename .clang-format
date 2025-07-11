@@ -54,9 +54,9 @@ BraceWrapping:
   BeforeCatch: true
   BeforeWhile: false
   BeforeLambdaBody: true
-  SplitEmptyFunction: true 
-  SplitEmptyRecord: true 
-  SplitEmptyNamespace: true 
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
 AlwaysBreakTemplateDeclarations: true
 BreakBeforeConceptDeclarations: Always
 BreakConstructorInitializers: BeforeColon
