@@ -134,6 +134,14 @@ export namespace lunas
 
 			return std::unexpected(error(lunas::error_type::file_size_limit, "{}", err));
 		}
+		else if (data.options.min_file_size && src.metadata.file_type == lunas::file_types::regular_file &&
+			 src.file_size < *data.options.min_file_size)
+		{
+			std::string err = std::format("  [File]  '{}' [size] '{}' is smaller than the [min-file-size] '{}'", src.path,
+						      size_units(*src.file_size), size_units(*data.options.min_file_size));
+
+			return std::unexpected(error(lunas::error_type::file_size_limit, "{}", err));
+		}
 		else if (data.options.minimum_space)
 		{
 			assert(src.file_size != std::nullopt);

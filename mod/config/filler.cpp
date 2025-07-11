@@ -236,6 +236,11 @@ export namespace lunas
 				return handle_size(data, options.max_file_size);
 			}
 
+			std::expected<std::monostate, lunas::error> min_file_size(const std::string& data, lunas::config::options& options)
+			{
+				return handle_size(data, options.min_file_size);
+			}
+
 			std::expected<std::monostate, lunas::error> exclude(const std::string& data, lunas::config::options& options)
 			{
 				std::string path = data;

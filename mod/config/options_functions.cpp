@@ -125,6 +125,8 @@ export namespace lunas
 				{"-ms",			config::filler::minimum_space  		},
 				{"-max-file-size",	config::filler::max_file_size  		},
 				{"-MFS",		config::filler::max_file_size  		},
+				{"-min-file-size",	config::filler::min_file_size  		},
+				{"-mfs",		config::filler::min_file_size  		},
 				{"-attributes",		config::filler::attributes     		},
 				{"-A",			config::filler::attributes     		},
 			};
