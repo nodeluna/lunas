@@ -333,6 +333,11 @@ files that don't exist in 'dir1' AND 'dir2' but exists in 'dir3' or/and 'dir4' w
 if files exist in -p or -r paths, they wouldn't be removed from -d or -rd paths, since -p and -r are src+dest i.e they are still sources
 
 .TP
+.B [-rmb, --remove-before]
+
+remove the destination *regular* file, if it exists, before updating it
+
+.TP
 .B [-u, --update]
 
 check mtime of files and re-sync the file if mtime wasn't the same. this option enables -a mtime. the destination file, if exists, gets removed then re-synced again. it replaces old mtime files with newer mtime ones.

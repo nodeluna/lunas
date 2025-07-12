@@ -724,6 +724,23 @@ export namespace lunas
 				return std::monostate();
 			}
 
+			std::expected<std::monostate, lunas::error> remove_before(const std::string& data, lunas::config::options& options)
+			{
+				if (data == "on")
+				{
+					options.remove_before = true;
+				}
+				else if (data == "off")
+				{
+					options.remove_before = false;
+				}
+				else
+				{
+					return std::unexpected(lunas::error(lunas::error_type::config_invalid_argument));
+				}
+				return std::monostate();
+			}
+
 			std::expected<std::monostate, lunas::error> update(const std::string& data, lunas::config::options& options)
 			{
 				if (data == "on")

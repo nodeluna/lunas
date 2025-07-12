@@ -50,6 +50,8 @@ export namespace lunas
 				{"-fsync",		config::filler::fsync		},
 				{"-remove-extra",	config::filler::remove_extra	},
 				{"-rmx",		config::filler::remove_extra	},
+				{"-remove-before",	config::filler::remove_before	},
+				{"-rmb",		config::filler::remove_before	},
 				{"-C",			config::filler::compression	},
 				{"-compression",	config::filler::compression	},
 				{"-link",		config::filler::link		},

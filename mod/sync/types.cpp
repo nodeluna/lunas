@@ -67,8 +67,9 @@ export namespace lunas
 	};
 
 	struct syncmisc {
-			const time_t		      src_mtime = 0;
-			const lunas::file_types	      file_type = lunas::file_types::not_found;
+			const time_t		      src_mtime		   = 0;
+			const lunas::file_types	      file_type		   = lunas::file_types::not_found;
+			const bool		      is_dest_regular_file = false;
 			const lunas::config::options& options;
 			const lunas::progress_stats   progress_stats;
 	};
