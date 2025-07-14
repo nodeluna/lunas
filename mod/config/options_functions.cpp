@@ -52,6 +52,8 @@ export namespace lunas
 				{"-rmx",		config::filler::remove_extra	},
 				{"-remove-before",	config::filler::remove_before	},
 				{"-rmb",		config::filler::remove_before	},
+				{"-remove-partials",	config::filler::remove_partials	},
+				{"-rmp",		config::filler::remove_partials	},
 				{"-C",			config::filler::compression	},
 				{"-compression",	config::filler::compression	},
 				{"-link",		config::filler::link		},

@@ -36,6 +36,7 @@ export namespace lunas
 				bool			      attributes_atime		  = false;
 				bool			      hardlink_regular_files	  = false;
 				bool			      remove_before		  = false;
+				bool			      remove_partials		  = false;
 				std::optional<std::uintmax_t> minimum_space		  = std::nullopt;
 				std::optional<std::uintmax_t> max_file_size		  = std::nullopt;
 				std::optional<std::uintmax_t> min_file_size		  = std::nullopt;

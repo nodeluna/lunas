@@ -41,20 +41,7 @@ export namespace lunas
 
 			std::expected<struct syncstat, lunas::error> syncstat = std::unexpected(lunas::error());
 
-			auto server_maybe_disconnected = [](const std::expected<struct syncstat, lunas::error>& syncstat)
-			{
-				if (not syncstat && (syncstat.error().value() == lunas::error_type::sftp_genaric_failure ||
-						     syncstat.error().value() == lunas::error_type::sftp_none))
-				{
-					return true;
-				}
-				else
-				{
-					return false;
-				}
-			};
-
-			int retries = misc.options.disconnected_server_retries;
+			int					     retries  = misc.options.disconnected_server_retries;
 
 			do
 			{
@@ -71,7 +58,7 @@ export namespace lunas
 					syncstat = lunas::remote_to_remote::copy(src, dest, src_sftp, dest_sftp, misc);
 				}
 
-				if (retries > 0 && server_maybe_disconnected(syncstat))
+				if (retries > 0 && not syncstat && server_maybe_disconnected(syncstat.error().value()))
 				{
 					retries--;
 					std::this_thread::sleep_for(std::chrono::seconds(misc.options.disconnected_server_timeout));

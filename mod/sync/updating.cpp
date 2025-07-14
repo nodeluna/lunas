@@ -61,7 +61,7 @@ export namespace lunas
 			    .src_mtime = src.metadata.mtime,
 			    .file_type = dest.metadata.file_type == lunas::file_types::resume_regular_file ? dest.metadata.file_type
 													   : src.metadata.file_type,
-			    .is_dest_regular_file = dest.metadata.file_type == lunas::file_types::regular_file ? true : false,
+			    .is_dest_regular_file = src.metadata.file_type == lunas::file_types::regular_file ? true : false,
 			    .options		  = data.options,
 			    .progress_stats	  = progress_stats,
 			};

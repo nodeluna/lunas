@@ -61,13 +61,18 @@ namespace lunas
 
 			if (misc.file_type == lunas::file_types::regular_file || misc.file_type == lunas::file_types::resume_regular_file)
 			{
-				auto func = [&](const std::string& dest_lspart) -> std::expected<struct syncstat, lunas::error>
+				auto func =
+				    [&](const std::pair<std::string, size_t>& dest_lspart) -> std::expected<struct syncstat, lunas::error>
 				{
-					syncstat = remote_to_local::rfile(src, dest_lspart, sftp, misc);
+					syncstat = remote_to_local::rfile(src, dest_lspart.first, sftp, misc);
 					if (syncstat)
 					{
-						struct lunas::local::original_name _(dest_lspart, dest, syncstat.value().code,
+						struct lunas::local::original_name _(dest_lspart.first, dest, syncstat.value().code,
 										     misc.options.dry_run);
+					}
+					else if (not syncstat)
+					{
+						syncstat.error().set_user_data(dest_lspart.second);
 					}
 					return syncstat;
 				};

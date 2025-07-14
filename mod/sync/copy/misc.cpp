@@ -7,6 +7,7 @@ import std.compat;
 #	include <expected>
 #	include <functional>
 #	include <filesystem>
+#	include <string>
 #endif
 
 export module lunas.sync:misc;
@@ -95,17 +96,22 @@ namespace lunas
 		return dest.substr(i + 2, std::to_string(src_mtimepath_hash).size());
 	}
 
-	std::string dest_lspart(const std::string& src, const std::string& dest, const time_t src_mtime)
+	std::string make_dest_lspart(const std::string& dest, size_t src_quick_hash)
 	{
-		size_t src_quick_hash = get_src_hash(src, src_mtime);
 		return dest + "." + std::to_string(src_quick_hash) + ".ls.part";
 	}
 
+	std::pair<std::string, size_t> dest_lspart(const std::string& src, const std::string& dest, const time_t src_mtime)
+	{
+		size_t src_quick_hash = get_src_hash(src, src_mtime);
+		return {make_dest_lspart(dest, src_quick_hash), src_quick_hash};
+	}
+
 	auto regular_file_sync(const std::string& src, const std::string& dest, const time_t& src_mtime,
-			       std::function<std::expected<syncstat, lunas::error>(const std::string&)> func)
+			       std::function<std::expected<syncstat, lunas::error>(const std::pair<std::string, size_t>&)> func)
 	    -> std::expected<syncstat, lunas::error>
 	{
-		std::string dest_lspart_path = dest_lspart(src, dest, src_mtime);
+		std::pair<std::string, size_t> dest_lspart_path = dest_lspart(src, dest, src_mtime);
 		return func(dest_lspart_path);
 	}
 

@@ -9,6 +9,7 @@ import std;
 #	include <string_view>
 #	include <functional>
 #	include <format>
+#	include <any>
 #endif
 
 export module lunas.error;
@@ -57,17 +58,6 @@ export namespace lunas
 		cppfs_symlink			 = 62,
 		cppfs_file_size			 = 63,
 
-		attributes_get			 = 64,
-		attributes_set_utimes		 = 65,
-		attributes_get_utimes		 = 66,
-		attributes_set_permissions	 = 67,
-		attributes_get_permissions	 = 68,
-		attributes_set_ownership	 = 69,
-		attributes_get_ownership	 = 70,
-		attributes_permissions_check	 = 71,
-		attributes_file_type		 = 72,
-		attributes_symlink_check	 = 73,
-		attributes_space_info		 = 74,
 		attributes_no_such_file		 = sftp_no_such_file,
 
 		ipath				 = 75,
@@ -97,23 +87,76 @@ export namespace lunas
 
 		no_such_file			 = sftp_no_such_file,
 
-		sync_special_file_ignored	 = 96,
-		sync_is_open			 = 97,
-		sync_error_reading		 = 98,
-		sync_error_writing		 = 99,
-		sync_size_mismatch		 = 100,
-		sync_read_symlink		 = 101,
-		sync_get_file_size		 = 102,
-		sync_hardlink			 = 103,
+		attributes_space_info		 = 96,
+		attributes_symlink_check	 = 97,
+		attributes_get			 = 1000,
+		attributes_set_utimes		 = 1001,
+		attributes_get_utimes		 = 1002,
+		attributes_set_permissions	 = 1003,
+		attributes_get_permissions	 = 1004,
+		attributes_set_ownership	 = 1005,
+		attributes_get_ownership	 = 1006,
+		attributes_permissions_check	 = 1007,
+		attributes_file_type		 = 1008,
+		sync_error_reading		 = 1010,
+		sync_error_writing		 = 1011,
+		sync_size_mismatch		 = 1012,
+		sync_get_file_size		 = 1014,
+		sync_is_open			 = 98,
+		sync_special_file_ignored	 = 99,
+		sync_read_symlink		 = 100,
+		sync_hardlink			 = 101,
 
 		partition_info			 = 104,
 		file_size_limit			 = 105,
 	};
 
+	bool server_maybe_disconnected(const enum error_type type)
+	{
+		switch (type)
+		{
+			case error_type::sftp_genaric_failure:
+			case error_type::sftp_none:
+				return true;
+			default:
+				return false;
+		}
+	}
+
+	/* add error values that could happen during a regular file copy for --remove-partials to work properly */
+	bool sync_interrupted_error(const enum error_type type)
+	{
+		if (server_maybe_disconnected(type))
+		{
+			return true;
+		}
+		switch (type)
+		{
+			case error_type::attributes_space_info:
+			case error_type::attributes_get:
+			case error_type::attributes_set_utimes:
+			case error_type::attributes_get_utimes:
+			case error_type::attributes_set_permissions:
+			case error_type::attributes_get_permissions:
+			case error_type::attributes_set_ownership:
+			case error_type::attributes_get_ownership:
+			case error_type::attributes_permissions_check:
+			case error_type::attributes_file_type:
+			case error_type::sync_error_reading:
+			case error_type::sync_error_writing:
+			case error_type::sync_size_mismatch:
+			case error_type::sync_get_file_size:
+				return true;
+			default:
+				return false;
+		}
+	}
+
 	class error {
 		private:
 			std::string msg	 = "";
 			error_type  type = error_type::none;
+			std::any    data;
 
 		public:
 			error(const std::string_view& message, const enum error_type type);
@@ -124,6 +167,8 @@ export namespace lunas
 			error(error_type err, std::format_string<args_t...> fmt, args_t&&... args);
 			error();
 
+			void				set_user_data(const std::any& data) noexcept;
+			[[nodiscard]] std::any&		get_user_data() noexcept;
 			[[nodiscard]] const std::string message() const noexcept;
 			[[nodiscard]] const char*	what() const;
 			[[nodiscard]] enum error_type	value() const noexcept;
@@ -157,6 +202,16 @@ namespace lunas
 
 	error::error()
 	{
+	}
+
+	void error::set_user_data(const std::any& data) noexcept
+	{
+		this->data = data;
+	}
+
+	[[nodiscard]] std::any& error::get_user_data() noexcept
+	{
+		return data;
 	}
 
 	const std::string error::message() const noexcept
