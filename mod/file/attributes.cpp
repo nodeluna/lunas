@@ -35,12 +35,12 @@ export namespace lunas
 		public:
 			attributes(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path,
 				   lunas::follow_symlink follow);
-			bool		  exists();
-			std::string	  name();
-			std::string	  path();
-			time_t		  mtime();
-			lunas::file_types file_type();
-			std::uintmax_t	  file_size();
+			bool		      exists();
+			std::string	      name();
+			std::filesystem::path path();
+			time_t		      mtime();
+			lunas::file_types     file_type();
+			std::uintmax_t	      file_size();
 	};
 
 	std::expected<std::unique_ptr<lunas::attributes>, lunas::error>
@@ -110,7 +110,7 @@ namespace lunas
 		}
 	}
 
-	std::string attributes::path()
+	std::filesystem::path attributes::path()
 	{
 		if (std::holds_alternative<std::unique_ptr<lunas::sftp_attributes>>(file_attributes))
 		{

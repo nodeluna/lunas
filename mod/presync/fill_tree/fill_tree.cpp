@@ -85,8 +85,8 @@ namespace lunas
 				}
 
 				struct metadata metadata = {
-				    .mtime     = std::get<time_t>(src_file->mtime),
-				    .file_type = std::get<lunas::file_types>(src_file->file_type),
+				    .mtime     = src_file->mtime.value(),
+				    .file_type = src_file->file_type.value(),
 				};
 
 				lunas::content::insert(content, metadata, relative_path, data);

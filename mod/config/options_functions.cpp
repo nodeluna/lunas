@@ -133,6 +133,8 @@ export namespace lunas
 				{"-mfs",		config::filler::min_file_size  		},
 				{"-attributes",		config::filler::attributes     		},
 				{"-A",			config::filler::attributes     		},
+				{"-prehook",		config::filler::prehook     		},
+				{"-pre",		config::filler::prehook     		},
 			};
 
 			// clang-format on

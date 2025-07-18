@@ -353,6 +353,39 @@ check mtime of files and re-sync the file if mtime wasn't the same. this option 
         example:  -p /path/to/dir -p /path/to/dir2 -p /path/to/dir3 -r user@ip:/path/to/dir4 port=NUMBER pw=PASSWORD -u
 
 .TP
+.B [-prh, --prehook] <cmd {attributes}>
+
+*inject* a prehook/command prior to every file that is about to be synced
+
+*retrieve* metadata from the source file
+
+*control* whether this file is synced or not by the return value
+
+        example: -s dir1 -d dir2 --prehook "/path/to/meow.sh {path} {attributes.mtime} {name} {extension} {attributes.size} {attributes.type}"
+
+this meow.sh would recieve the information it requested and it must return 0 to sync or 1 to not sync
+
+*optional* it can also print to stdout for lunas to print it to the terminal
+
+
+placeholders:
+.br
+	{path}             : the full path of the source
+.br
+	{attributes.mtime} : the mtime (epoch) of the source
+.br
+	{attributes.size}  : the size (bytes) of the source
+.br
+	{attributes.type}  : the type of the source
+.br
+	{name}             : filename of the source
+.br
+	{extension}        : filename extension of the source
+
+*note* '{' and '}' are escaped by writing them twice like '{{' which would be translated to '{' not as part of the {data}
+
+
+.TP
 .B [-dr, --dry-run]
 
 outputs what would be synced without actually syncing them

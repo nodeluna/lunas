@@ -68,13 +68,14 @@ export namespace lunas
 	};
 
 	struct directory_entry {
-			std::string				      filename;
-			std::string				      path;
-			std::variant<lunas::file_types, lunas::error> file_type = lunas::error("empty directory_entry.file_type value");
-			std::variant<time_t, lunas::error>	      mtime	= lunas::error("empty directory_entry.mtime value");
-			std::uintmax_t				      file_size = 0;
-			std::expected<std::monostate, lunas::error>   holds_attributes();
-			std::expected<std::monostate, lunas::error>   holds_file_type();
+			std::string				       filename;
+			std::filesystem::path			       path;
+			std::expected<lunas::file_types, lunas::error> file_type =
+			    std::unexpected(error("empty directory_entry.file_type value"));
+			std::expected<time_t, lunas::error>	    mtime     = std::unexpected(error("empty directory_entry.mtime value"));
+			std::uintmax_t				    file_size = 0;
+			std::expected<std::monostate, lunas::error> holds_attributes();
+			std::expected<std::monostate, lunas::error> holds_file_type();
 	};
 
 	class directory {
@@ -144,7 +145,7 @@ namespace lunas
 		abstract_entry.path		= attr->path();
 		abstract_entry.file_type	= attr->file_type();
 
-		auto&	   file_type		= std::get<lunas::file_types>(abstract_entry.file_type);
+		auto&	   file_type		= abstract_entry.file_type.value();
 		const auto unfollowed_file_type = file_type;
 
 		if (file_type == lunas::file_types::symlink)
@@ -158,7 +159,7 @@ namespace lunas
 				auto attr = sftp->attributes(abstract_entry.path, lunas::follow_symlink::yes);
 				if (not attr)
 				{
-					abstract_entry.file_type = attr.error();
+					abstract_entry.file_type = std::unexpected(attr.error());
 				}
 				else
 				{
@@ -167,7 +168,7 @@ namespace lunas
 			}
 		}
 
-		if (not std::holds_alternative<lunas::file_types>(abstract_entry.file_type))
+		if (not abstract_entry.file_type)
 		{
 			return abstract_entry;
 		}
@@ -178,7 +179,7 @@ namespace lunas
 			auto ok = sftp->get_utimes(abstract_entry.path, lunas::sftp::time_type::mtime, directory_options.follow_symlink);
 			if (not ok)
 			{
-				abstract_entry.mtime = ok.error();
+				abstract_entry.mtime = std::unexpected(ok.error());
 			}
 			else
 			{
@@ -212,14 +213,14 @@ namespace lunas
 			abstract_entry.file_type = get_file_type(attr.symlink_status());
 		}
 
-		auto& file_type = std::get<lunas::file_types>(abstract_entry.file_type);
+		auto& file_type = abstract_entry.file_type.value();
 
 		if (directory_options.no_broken_symlink && file_type == lunas::file_types::symlink)
 		{
 			std::expected<bool, lunas::error> broken = lunas::is_broken_link(abstract_entry.path);
 			if (not broken)
 			{
-				abstract_entry.file_type = broken.error();
+				abstract_entry.file_type = std::unexpected(broken.error());
 			}
 			if (broken.value())
 			{
@@ -227,7 +228,7 @@ namespace lunas
 			}
 		}
 
-		if (not std::holds_alternative<lunas::file_types>(abstract_entry.file_type))
+		if (not abstract_entry.file_type)
 		{
 			return abstract_entry;
 		}
@@ -244,7 +245,7 @@ namespace lunas
 
 		if (not ok)
 		{
-			abstract_entry.mtime = ok.error();
+			abstract_entry.mtime = std::unexpected(ok.error());
 		}
 		else
 		{
@@ -290,13 +291,13 @@ namespace lunas
 
 	std::expected<std::monostate, lunas::error> directory_entry::holds_attributes()
 	{
-		if (not std::holds_alternative<lunas::file_types>(this->file_type))
+		if (not this->file_type)
 		{
-			return std::unexpected(std::get<lunas::error>(this->file_type));
+			return std::unexpected(this->file_type.error());
 		}
-		else if (not std::holds_alternative<time_t>(this->mtime))
+		else if (not this->mtime)
 		{
-			return std::unexpected(std::get<lunas::error>(this->mtime));
+			return std::unexpected(this->mtime.error());
 		}
 
 		return std::monostate();
@@ -304,9 +305,9 @@ namespace lunas
 
 	std::expected<std::monostate, lunas::error> directory_entry::holds_file_type()
 	{
-		if (not std::holds_alternative<lunas::file_types>(this->file_type))
+		if (not this->file_type)
 		{
-			return std::unexpected(std::get<lunas::error>(this->file_type));
+			return std::unexpected(this->file_type.error());
 		}
 
 		return std::monostate();
@@ -336,7 +337,7 @@ namespace lunas
 			auto& sftp_dirs = std::get<remote_dirs_stack>(dir);
 
 			if (directory_options.recursive && abstract_entry.holds_file_type() &&
-			    std::get<lunas::file_types>(abstract_entry.file_type) == lunas::file_types::directory)
+			    abstract_entry.file_type.value() == lunas::file_types::directory)
 			{
 				sftp_dirs.push(sftp->opendir(abstract_entry.path));
 				if (not sftp_dirs.top())
@@ -380,7 +381,7 @@ namespace lunas
 			auto& local_dirs = std::get<local_dirs_stack>(dir);
 
 			if (directory_options.recursive && abstract_entry.holds_file_type() &&
-			    std::get<lunas::file_types>(abstract_entry.file_type) == lunas::file_types::directory)
+			    abstract_entry.file_type.value() == lunas::file_types::directory)
 			{
 				auto local_dir = lunas::local_directory::init(abstract_entry.path, directory_options);
 				if (not local_dir)

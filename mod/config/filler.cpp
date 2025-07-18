@@ -886,6 +886,12 @@ export namespace lunas
 
 				return std::monostate();
 			}
+
+			std::expected<std::monostate, lunas::error> prehook(const std::string& data, lunas::config::options& options)
+			{
+				options.prehook = data;
+				return std::monostate();
+			}
 		}
 
 		namespace info

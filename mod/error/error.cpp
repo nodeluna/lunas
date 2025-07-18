@@ -109,6 +109,9 @@ export namespace lunas
 
 		partition_info			 = 104,
 		file_size_limit			 = 105,
+		parsing				 = 106,
+		syntax				 = 106,
+		cmd_execution			 = 107,
 	};
 
 	bool server_maybe_disconnected(const enum error_type type)

@@ -11,6 +11,7 @@ import std.compat;
 #	include <string>
 #	include <cstdint>
 #	include <optional>
+#	include <filesystem>
 #endif
 
 export module lunas.sync:updating;
@@ -27,19 +28,14 @@ export import lunas.file;
 
 export namespace lunas
 {
-	std::expected<std::monostate, lunas::error> check_dest_and_sync(const struct file_metadata src, const struct file_metadata& dest,
-									struct lunas::parsed_data& data,
-									struct progress_stats&	   progress_stats)
+	std::expected<std::monostate, lunas::error> check_mtime_and_sync(const struct file_metadata<std::filesystem::path>& src,
+									 const struct file_metadata<std::filesystem::path>& dest,
+									 struct lunas::parsed_data&			    data,
+									 struct progress_stats&				    progress_stats)
 	{
 
 		const auto& ipaths = data.get_ipaths();
-
 		bool	    sync   = false;
-
-		if (auto ok = check_dest(src, dest, data); not ok)
-		{
-			return std::unexpected(ok.error());
-		}
 
 		if (data.options.update && src.metadata.mtime > dest.metadata.mtime)
 		{
@@ -90,9 +86,9 @@ export namespace lunas
 
 		const auto&		      src_metadata = file_table.metadatas.at(src_index);
 		const auto&		      ipaths	   = data.get_ipaths();
-		size_t			      dest_index   = 0;
 		std::optional<std::uintmax_t> src_size	   = std::nullopt;
-		const std::string	      src	   = ipaths.at(src_index).path + file_table.path;
+		const std::filesystem::path   src	   = ipaths.at(src_index).path + file_table.path;
+		std::filesystem::path	      dest;
 
 		if (data.options.minimum_space && src_metadata.file_type == lunas::file_types::regular_file)
 		{
@@ -104,20 +100,31 @@ export namespace lunas
 			src_size = attr.value()->file_size();
 		}
 
-		for (const auto& dest_metadata : file_table.metadatas)
+		for (size_t dest_index = 0; dest_index < file_table.metadatas.size(); dest_index++)
 		{
-			const std::string dest = ipaths.at(dest_index).path + file_table.path;
+			const auto& dest_metadata = file_table.metadatas.at(dest_index);
+			dest			  = ipaths.at(dest_index).path + file_table.path;
 
-			auto		  ok   = check_dest_and_sync(file_metadata(src, src_metadata, src_index, src_size),
-								     file_metadata(dest, dest_metadata, dest_index), data, progress_stats);
-			if (not ok)
+			const struct file_metadata<std::filesystem::path> src_metadata_wrapper =
+			    file_metadata(src, src_metadata, src_index, src_size);
+
+			const struct file_metadata<std::filesystem::path> dest_metadata_wrapper =
+			    file_metadata(dest, dest_metadata, dest_index);
+
+			if (auto ok = check_dest(src_metadata_wrapper, dest_metadata_wrapper, data); not ok)
 			{
 				if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
 				{
 					lunas::printerr("{}", ok.error().message());
 				}
+				continue;
 			}
-			dest_index++;
+
+			auto ok = check_mtime_and_sync(src_metadata_wrapper, dest_metadata_wrapper, data, progress_stats);
+			if (not ok)
+			{
+				lunas::printerr("{}", ok.error().message());
+			}
 		}
 
 		return std::monostate();

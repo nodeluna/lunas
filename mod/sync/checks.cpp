@@ -91,8 +91,9 @@ export namespace lunas
 		return src_index;
 	}
 
-	std::expected<std::monostate, lunas::error> check_dest(const struct file_metadata& src, const struct file_metadata& dest,
-							       struct lunas::parsed_data& data)
+	std::expected<std::monostate, lunas::error> check_dest(const struct file_metadata<std::filesystem::path>& src,
+							       const struct file_metadata<std::filesystem::path>& dest,
+							       struct lunas::parsed_data&			  data)
 	{
 		if (src.index == dest.index)
 		{
@@ -113,7 +114,8 @@ export namespace lunas
 		else if (dest.metadata.file_type == lunas::file_types::brokenlink ||
 			 src.metadata.file_type == lunas::file_types::brokenlink)
 		{
-			return std::unexpected(error(lunas::error_type::dest_check_brokenlink, "ignoring broken link {}", src.path));
+			return std::unexpected(
+			    error(lunas::error_type::dest_check_brokenlink, "ignoring broken link {}", src.path.string()));
 		}
 		else if (src.metadata.file_type == lunas::file_types::resume_regular_file)
 		{
@@ -124,21 +126,23 @@ export namespace lunas
 			 dest.metadata.file_type != src.metadata.file_type)
 		{
 			return std::unexpected(error(lunas::error_type::dest_check_type_conflict, "conflict in types between '{}' and '{}'",
-						     src.path, dest.path));
+						     src.path.string(), dest.path.string()));
 		}
 		else if (data.options.max_file_size && src.metadata.file_type == lunas::file_types::regular_file &&
 			 src.file_size > *data.options.max_file_size)
 		{
-			std::string err = std::format("  [File]  '{}' [size] '{}' is bigger than the [max-file-size] '{}'", src.path,
-						      size_units(*src.file_size), size_units(*data.options.max_file_size));
+			std::string err =
+			    std::format("  [File]  '{}' [size] '{}' is bigger than the [max-file-size] '{}'", src.path.string(),
+					size_units(*src.file_size), size_units(*data.options.max_file_size));
 
 			return std::unexpected(error(lunas::error_type::file_size_limit, "{}", err));
 		}
 		else if (data.options.min_file_size && src.metadata.file_type == lunas::file_types::regular_file &&
 			 src.file_size < *data.options.min_file_size)
 		{
-			std::string err = std::format("  [File]  '{}' [size] '{}' is smaller than the [min-file-size] '{}'", src.path,
-						      size_units(*src.file_size), size_units(*data.options.min_file_size));
+			std::string err =
+			    std::format("  [File]  '{}' [size] '{}' is smaller than the [min-file-size] '{}'", src.path.string(),
+					size_units(*src.file_size), size_units(*data.options.min_file_size));
 
 			return std::unexpected(error(lunas::error_type::file_size_limit, "{}", err));
 		}

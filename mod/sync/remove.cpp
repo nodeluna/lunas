@@ -164,7 +164,7 @@ namespace lunas
 				}
 			}
 
-			if (std::get<lunas::file_types>(dest_file->file_type) == lunas::file_types::directory && data.options.recursive)
+			if (dest_file->file_type.value() == lunas::file_types::directory && data.options.recursive)
 			{
 				auto ok = remove_extra(data, dest_file.value().path, src_index, dest_index);
 				if (not ok)
@@ -186,17 +186,15 @@ namespace lunas
 			else if (not src_file && src_file.error().value() == lunas::error_type::no_such_file)
 			{
 				lunas::print_remove_extra(dest_file.value().path);
-				auto file_size =
-				    lunas::get_size_and_remove(ipaths.at(dest_index).sftp, dest_file.value().path,
-							       std::get<lunas::file_types>(dest_file->file_type), data.options.dry_run);
+				auto file_size = lunas::get_size_and_remove(ipaths.at(dest_index).sftp, dest_file.value().path,
+									    dest_file->file_type.value(), data.options.dry_run);
 				if (not file_size)
 				{
 					lunas::printerr("{}", file_size.error().message());
 				}
 				else
 				{
-					lunas::register_remove(file_size.value(), std::get<lunas::file_types>(dest_file->file_type),
-							       data.get_ipath(dest_index));
+					lunas::register_remove(file_size.value(), dest_file->file_type.value(), data.get_ipath(dest_index));
 				}
 			}
 		}

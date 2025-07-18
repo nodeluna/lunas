@@ -10,6 +10,7 @@ import std.compat;
 #	include <string>
 #	include <cstddef>
 #	include <exception>
+#	include <filesystem>
 #endif
 
 export module lunas.sync;
@@ -26,6 +27,7 @@ import lunas.file_table;
 import lunas.file_types;
 import lunas.file;
 import lunas.filter;
+import lunas.hooks;
 
 import lunas.stdout;
 
@@ -72,6 +74,17 @@ export namespace lunas
 			return std::unexpected(directory.error());
 		}
 
+		lunas::prehook prehook;
+		if (data.options.prehook)
+		{
+			auto ok = prehook.parse(*data.options.prehook);
+			if (not ok)
+			{
+				lunas::printerr("[prehook-parsing-error]");
+				return std::unexpected(ok.error());
+			}
+		}
+
 		lunas::println(data.options.quiet, "--> opened source directory '{}'", ipaths.at(src_index).path);
 		lunas::println(data.options.quiet, "");
 
@@ -93,7 +106,7 @@ export namespace lunas
 					continue;
 				}
 
-				std::string dest_path;
+				std::filesystem::path dest_path;
 				{
 					std::string relative = src_file.value().path;
 					relative	     = relative.substr(ipaths.at(src_index).path.size(), relative.size());
@@ -105,8 +118,8 @@ export namespace lunas
 				}
 
 				struct metadata src_metadata = {
-				    .mtime     = std::get<time_t>(src_file->mtime),
-				    .file_type = std::get<lunas::file_types>(src_file->file_type),
+				    .mtime     = src_file->mtime.value(),
+				    .file_type = src_file->file_type.value(),
 				};
 				struct metadata dest_metadata;
 
@@ -123,14 +136,38 @@ export namespace lunas
 				}
 				progress_stats.total_to_be_synced = progress_stats.total_synced;
 
-				ok = check_dest_and_sync(file_metadata(src_file->path, src_metadata, src_index, src_file->file_size),
-							 file_metadata(dest_path, dest_metadata, dest_index), data, progress_stats);
-				if (not ok)
+				const struct file_metadata<std::filesystem::path> src_metadata_wrapper =
+				    file_metadata(src_file.value().path, src_metadata, src_index, src_file->file_size);
+
+				const struct file_metadata<std::filesystem::path> dest_metadata_wrapper =
+				    file_metadata(dest_path, dest_metadata, dest_index);
+
+				if (auto ok = check_dest(src_metadata_wrapper, dest_metadata_wrapper, data); not ok)
 				{
 					if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
 					{
 						lunas::printerr("{}", ok.error().message());
 					}
+					continue;
+				}
+
+				if (data.options.prehook)
+				{
+					auto prehook_action = prehook::pipe_hook(prehook, src_file.value(), data.options);
+					if (not prehook_action)
+					{
+						return std::unexpected(prehook_action.error());
+					}
+					else if (prehook_action.value() == hook_action::dont_sync)
+					{
+						continue;
+					}
+				}
+
+				ok = check_mtime_and_sync(src_metadata_wrapper, dest_metadata_wrapper, data, progress_stats);
+				if (not ok)
+				{
+					lunas::printerr("{}", ok.error().message());
 				}
 			}
 		}

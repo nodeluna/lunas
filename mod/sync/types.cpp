@@ -12,6 +12,7 @@ import std.compat;
 #	include <iostream>
 #	include <iomanip>
 #	include <iostream>
+#	include <filesystem>
 #endif
 
 export module lunas.sync:types;
@@ -79,16 +80,27 @@ export namespace lunas
 		gid,
 	};
 
+	template<typename path_type = std::filesystem::path>
 	struct file_metadata {
-			const std::string&		    path;
+			const path_type&		    path;
 			const lunas::metadata&		    metadata;
-			const size_t&			    index;
+			const size_t			    index;
 			const std::optional<std::uintmax_t> file_size;
 
-			file_metadata(const std::string& path, const lunas::metadata& metadata, const size_t& index,
-				      std::optional<std::uintmax_t> size = std::nullopt)
+			file_metadata& operator=(file_metadata& other)	= delete("avoiding dangling reference situation");
+			file_metadata(file_metadata& other)		= delete("avoiding dangling reference situation");
+			file_metadata& operator=(file_metadata&& other) = delete("avoiding dangling reference situation");
+			file_metadata(file_metadata&& other)		= delete("avoiding dangling reference situation");
+
+			explicit file_metadata(const path_type& path, const lunas::metadata& metadata, const size_t& index,
+					       std::optional<std::uintmax_t> size = std::nullopt)
 			    : path(path), metadata(metadata), index(index), file_size(size)
 			{
+				if constexpr (not std::is_same_v<path_type, std::filesystem::path>)
+				{
+					static_assert(false, "dangling reference situation will happen if 'path' is an rvalue or not a "
+							     "std::filesystem::path");
+				}
 			}
 	};
 
