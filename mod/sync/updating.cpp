@@ -30,14 +30,33 @@ export import lunas.file;
 
 export namespace lunas
 {
-	std::expected<std::monostate, lunas::error> check_mtime_and_sync(const struct file_metadata<std::filesystem::path>& src,
-									 const struct file_metadata<std::filesystem::path>& dest,
-									 struct lunas::parsed_data&			    data,
-									 struct progress_stats&				    progress_stats)
+	using _file_metadata = struct file_metadata<std::filesystem::path>;
+
+	std::expected<std::monostate, lunas::error> check_dest_and_sync(const _file_metadata& src, const _file_metadata& dest,
+									struct lunas::parsed_data& data,
+									struct progress_stats& progress_stats, const hooks& hooks)
 	{
 
 		const auto& ipaths = data.get_ipaths();
 		bool	    sync   = false;
+
+		if (auto ok = check_dest(src, dest, data); not ok)
+		{
+			return std::unexpected(ok.error());
+		}
+
+		if (not hooks.prehooks.empty())
+		{
+			auto prehook_action = prehook::pipe_hook(hooks.prehooks, hooks.attributes, data.options);
+			if (not prehook_action)
+			{
+				return std::unexpected(prehook_action.error());
+			}
+			else if (prehook_action.value() == hook_action::dont_sync)
+			{
+				return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
+			}
+		}
 
 		if (data.options.update && src.metadata.mtime > dest.metadata.mtime)
 		{
@@ -84,15 +103,14 @@ export namespace lunas
 
 	std::expected<std::monostate, lunas::error> updating(const lunas::file_table& file_table, const size_t src_index,
 							     struct lunas::parsed_data& data, struct progress_stats& progress_stats,
-							     const struct hooks& hooks)
+							     hooks& hooks)
 	{
 
-		const auto&			   src_metadata = file_table.metadatas.at(src_index);
-		const auto&			   ipaths	= data.get_ipaths();
-		std::optional<std::uintmax_t>	   src_size	= std::nullopt;
-		const std::filesystem::path	   src		= ipaths.at(src_index).path + file_table.path;
-		std::filesystem::path		   dest;
-		std::shared_ptr<lunas::attributes> attributes = nullptr;
+		const auto&		      src_metadata = file_table.metadatas.at(src_index);
+		const auto&		      ipaths	   = data.get_ipaths();
+		std::optional<std::uintmax_t> src_size	   = std::nullopt;
+		const std::filesystem::path   src	   = ipaths.at(src_index).path + file_table.path;
+		std::filesystem::path	      dest;
 
 		if (data.options.minimum_space || not hooks.prehooks.empty())
 		{
@@ -106,47 +124,24 @@ export namespace lunas
 				src_size = attr.value()->file_size();
 			}
 
-			attributes = attr.value();
+			hooks.attributes = attr.value();
 		}
 
 		for (size_t dest_index = 0; dest_index < file_table.metadatas.size(); dest_index++)
 		{
-			const auto& dest_metadata = file_table.metadatas.at(dest_index);
-			dest			  = ipaths.at(dest_index).path + file_table.path;
+			const auto& dest_metadata		   = file_table.metadatas.at(dest_index);
+			dest					   = ipaths.at(dest_index).path + file_table.path;
 
-			const struct file_metadata<std::filesystem::path> src_metadata_wrapper =
-			    file_metadata(src, src_metadata, src_index, src_size);
+			const _file_metadata src_metadata_wrapper  = file_metadata(src, src_metadata, src_index, src_size);
+			const _file_metadata dest_metadata_wrapper = file_metadata(dest, dest_metadata, dest_index);
 
-			const struct file_metadata<std::filesystem::path> dest_metadata_wrapper =
-			    file_metadata(dest, dest_metadata, dest_index);
-
-			if (auto ok = check_dest(src_metadata_wrapper, dest_metadata_wrapper, data); not ok)
+			auto ok = check_dest_and_sync(src_metadata_wrapper, dest_metadata_wrapper, data, progress_stats, hooks);
+			if (not ok)
 			{
 				if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
 				{
 					lunas::printerr("{}", ok.error().message());
 				}
-				continue;
-			}
-
-			if (not hooks.prehooks.empty())
-			{
-				assert(attributes != nullptr);
-				auto prehook_action = prehook::pipe_hook(hooks.prehooks, attributes, data.options);
-				if (not prehook_action)
-				{
-					return std::unexpected(prehook_action.error());
-				}
-				else if (prehook_action.value() == hook_action::dont_sync)
-				{
-					continue;
-				}
-			}
-
-			auto ok = check_mtime_and_sync(src_metadata_wrapper, dest_metadata_wrapper, data, progress_stats);
-			if (not ok)
-			{
-				lunas::printerr("{}", ok.error().message());
 			}
 		}
 

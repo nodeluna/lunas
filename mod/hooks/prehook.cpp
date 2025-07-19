@@ -21,74 +21,88 @@ export import lunas.file;
 
 export namespace lunas
 {
+	class prehook;
+
+	using hooks = struct _hooks<prehook>;
+
+	template<typename attributes_type>
+	concept attributes_type_concept =
+	    std::is_same_v<attributes_type, lunas::directory_entry> || std::is_same_v<attributes_type, std::shared_ptr<lunas::attributes>>;
+
 	class prehook {
 		private:
-			std::string				 command;
-			std::vector<std::pair<size_t, size_t>>	 parsed_brackets;
+			std::string			       command;
+			std::vector<std::pair<size_t, size_t>> parsed_brackets;
 
-			std::expected<std::string, lunas::error> translate_syntax_to_data(const std::string&		parsed_bracket,
-											  const lunas::directory_entry& attributes) const
+			template<typename attributes_type_concept>
+			std::expected<std::string, lunas::error> translate_syntax_to_data(const std::string&		 parsed_bracket,
+											  const attributes_type_concept& attributes) const
 			{
 				if (parsed_bracket.find("attributes.mtime") != parsed_bracket.npos)
 				{
-					return std::to_string(attributes.mtime.value());
+					if constexpr (std::is_same_v<attributes_type_concept, lunas::directory_entry>)
+					{
+						return std::to_string(attributes.mtime.value());
+					}
+					else
+					{
+						return std::to_string(attributes->mtime());
+					}
 				}
 				else if (parsed_bracket.find("attributes.size") != parsed_bracket.npos)
 				{
-					return std::to_string(attributes.file_size);
+					if constexpr (std::is_same_v<attributes_type_concept, lunas::directory_entry>)
+					{
+						return std::to_string(attributes.file_size);
+					}
+					else
+					{
+						return std::to_string(attributes->file_size());
+					}
 				}
 				else if (parsed_bracket.find("name") != parsed_bracket.npos)
 				{
-					return attributes.filename;
+					if constexpr (std::is_same_v<attributes_type_concept, lunas::directory_entry>)
+					{
+						return attributes.filename;
+					}
+					else
+					{
+						return attributes->name();
+					}
 				}
 				else if (parsed_bracket.find("path") != parsed_bracket.npos)
 				{
-					return attributes.path.string();
+					if constexpr (std::is_same_v<attributes_type_concept, lunas::directory_entry>)
+					{
+						return attributes.path.string();
+					}
+					else
+					{
+						return attributes->path().string();
+					}
 				}
 				else if (parsed_bracket.find("extension") != parsed_bracket.npos)
 				{
-					return attributes.path.extension();
+					if constexpr (std::is_same_v<attributes_type_concept, lunas::directory_entry>)
+					{
+						return attributes.path.extension();
+					}
+					else
+					{
+						return attributes->path().extension();
+					}
 				}
 				else if (parsed_bracket.find("attributes.type") != parsed_bracket.npos)
 				{
-					return std::to_string(file_types_to_int(attributes.file_type.value()));
-				}
-				else
-				{
-					return std::unexpected(lunas::error(
-					    lunas::error_type::syntax, "[prehook] '{{{}' isn't a recognized hook option", parsed_bracket));
-				}
-			}
-
-			std::expected<std::string, lunas::error>
-			translate_syntax_to_data(const std::string&			  parsed_bracket,
-						 const std::shared_ptr<lunas::attributes> attributes) const
-			{
-				assert(attributes != nullptr);
-
-				if (parsed_bracket.find("attributes.mtime") != parsed_bracket.npos)
-				{
-					return std::to_string(attributes->mtime());
-				}
-				else if (parsed_bracket.find("attributes.size") != parsed_bracket.npos)
-				{
-					return std::to_string(attributes->file_size());
-				}
-				else if (parsed_bracket.find("name") != parsed_bracket.npos)
-				{
-					return attributes->name();
-				}
-				else if (parsed_bracket.find("path") != parsed_bracket.npos)
-				{
-					return attributes->path().string();
-				}
-				else if (parsed_bracket.find("extension") != parsed_bracket.npos)
-				{
-					return attributes->path().extension();
-				}
-				else if (parsed_bracket.find("attributes.type") != parsed_bracket.npos)
-				{
-					return std::to_string(file_types_to_int(attributes->file_type()));
+					if constexpr (std::is_same_v<attributes_type_concept, lunas::directory_entry>)
+					{
+						return std::to_string(file_types_to_int(attributes.file_type.value()));
+					}
+					else
+					{
+						return std::to_string(file_types_to_int(attributes->file_type()));
+					}
 				}
 				else
 				{
@@ -155,6 +169,24 @@ export namespace lunas
 				return hook_action::sync;
 			}
 
+			std::expected<std::pair<std::string, enum hook_action>, lunas::error> exec(const std::string& command) const
+			{
+
+				std::expected<std::pair<std::string, int>, lunas::error> cmd_return = lunas::cmd(command);
+				if (not cmd_return)
+				{
+					return std::unexpected(cmd_return.error());
+				}
+				else if (cmd_return.value().second == 0)
+				{
+					return std::make_pair(cmd_return.value().first, hook_action::sync);
+				}
+				else
+				{
+					return std::make_pair(cmd_return.value().first, hook_action::dont_sync);
+				}
+			}
+
 		public:
 			prehook()
 			{
@@ -174,17 +206,9 @@ export namespace lunas
 				return std::monostate();
 			}
 
-			std::expected<std::pair<std::string, hook_action>, lunas::error> operator|(const lunas::directory_entry& attr) const
-			{
-				return this->pipe_attributes(
-				    [&](const std::string& requested_data)
-				    {
-					    return this->translate_syntax_to_data(requested_data, attr);
-				    });
-			}
-
+			template<typename attributes_type_concept>
 			std::expected<std::pair<std::string, hook_action>, lunas::error>
-			operator|(const std::shared_ptr<lunas::attributes> attr) const
+			operator|(const attributes_type_concept& attr) const
 			{
 				return this->pipe_attributes(
 				    [&](const std::string& requested_data)
@@ -193,46 +217,41 @@ export namespace lunas
 				    });
 			}
 
-			std::expected<std::pair<std::string, enum hook_action>, lunas::error> exec(const std::string& command) const
+			template<typename attributes_type_concept>
+			static std::expected<hook_action, lunas::error> pipe_hook(const std::vector<prehook>&	prehooks,
+										  const attributes_type_concept attributes,
+										  const config::options&	options)
 			{
+				return prehook::pipe_hook(prehooks, options,
+							  [&](const prehook& prehook)
+							  {
+								  return prehook | attributes;
+							  });
+			}
 
-				std::expected<std::pair<std::string, int>, lunas::error> cmd_return = lunas::cmd(command);
-				if (not cmd_return)
+			static std::expected<hook_action, lunas::error>
+			pipe_hook(const std::vector<prehook>&							 prehooks,
+				  const std::variant<lunas::directory_entry, std::shared_ptr<lunas::attributes>> attributes,
+				  const config::options&							 options)
+
+			{
+				if (std::holds_alternative<lunas::directory_entry>(attributes))
 				{
-					return std::unexpected(cmd_return.error());
-				}
-				else if (cmd_return.value().second == 0)
-				{
-					return std::make_pair(cmd_return.value().first, hook_action::sync);
+					return prehook::pipe_hook(prehooks, options,
+								  [&](const prehook& prehook)
+								  {
+									  return prehook | std::get<lunas::directory_entry>(attributes);
+								  });
 				}
 				else
 				{
-					return std::make_pair(cmd_return.value().first, hook_action::dont_sync);
+					return prehook::pipe_hook(prehooks, options,
+								  [&](const prehook& prehook)
+								  {
+									  return prehook |
+										 std::get<std::shared_ptr<lunas::attributes>>(attributes);
+								  });
 				}
-			}
-
-			static std::expected<hook_action, lunas::error> pipe_hook(const std::vector<prehook>&	prehooks,
-										  const lunas::directory_entry& attributes,
-										  const config::options&	options)
-			{
-
-				return prehook::pipe_hook(prehooks, options,
-							  [&](const prehook& prehook)
-							  {
-								  return prehook | attributes;
-							  });
-			}
-
-			static std::expected<hook_action, lunas::error> pipe_hook(const std::vector<prehook>&		   prehooks,
-										  const std::shared_ptr<lunas::attributes> attributes,
-										  const config::options&		   options)
-			{
-
-				return prehook::pipe_hook(prehooks, options,
-							  [&](const prehook& prehook)
-							  {
-								  return prehook | attributes;
-							  });
 			}
 	};
 }

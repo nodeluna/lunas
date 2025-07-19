@@ -94,14 +94,14 @@ namespace lunas
 			return std::unexpected(directory.error());
 		}
 
-		std::vector<lunas::prehook> prehooks;
+		hooks hooks;
 		{
 			auto ok = setup_prehooks(data);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());
 			}
-			prehooks = std::move(ok.value());
+			hooks.prehooks = std::move(ok.value());
 		}
 
 		lunas::println(data.options.quiet, "--> opened source directory '{}'", ipaths.at(src_index).path);
@@ -112,16 +112,20 @@ namespace lunas
 
 		while (auto src_file = directory.value()->read())
 		{
+			if (auto ok = src_file.value().holds_attributes(); not ok)
+			{
+				lunas::printerr("{}", ok.error().message());
+				continue;
+			}
+			if (not hooks.prehooks.empty())
+			{
+				hooks.attributes = src_file.value();
+			}
+
 			for (size_t dest_index = 0; dest_index < ipaths.size(); dest_index++)
 			{
 				if (src_index == dest_index || not ipaths.at(dest_index).is_dest())
 				{
-					continue;
-				}
-
-				if (auto ok = src_file.value().holds_attributes(); not ok)
-				{
-					lunas::printerr("{}", ok.error().message());
 					continue;
 				}
 
@@ -155,38 +159,20 @@ namespace lunas
 				}
 				progress_stats.total_to_be_synced = progress_stats.total_synced;
 
-				const struct file_metadata<std::filesystem::path> src_metadata_wrapper =
+				using _file_metadata		  = struct file_metadata<std::filesystem::path>;
+
+				const _file_metadata src_metadata_wrapper =
 				    file_metadata(src_file.value().path, src_metadata, src_index, src_file->file_size);
 
-				const struct file_metadata<std::filesystem::path> dest_metadata_wrapper =
-				    file_metadata(dest_path, dest_metadata, dest_index);
+				const _file_metadata dest_metadata_wrapper = file_metadata(dest_path, dest_metadata, dest_index);
 
-				if (auto ok = check_dest(src_metadata_wrapper, dest_metadata_wrapper, data); not ok)
+				ok = check_dest_and_sync(src_metadata_wrapper, dest_metadata_wrapper, data, progress_stats, hooks);
+				if (not ok)
 				{
 					if (ok.error().value() != lunas::error_type::dest_check_skip_sync)
 					{
 						lunas::printerr("{}", ok.error().message());
 					}
-					continue;
-				}
-
-				if (not prehooks.empty())
-				{
-					auto prehook_action = prehook::pipe_hook(prehooks, src_file.value(), data.options);
-					if (not prehook_action)
-					{
-						return std::unexpected(prehook_action.error());
-					}
-					else if (prehook_action.value() == hook_action::dont_sync)
-					{
-						continue;
-					}
-				}
-
-				ok = check_mtime_and_sync(src_metadata_wrapper, dest_metadata_wrapper, data, progress_stats);
-				if (not ok)
-				{
-					lunas::printerr("{}", ok.error().message());
 				}
 			}
 		}
@@ -227,7 +213,7 @@ namespace lunas
 		std::expected<std::monostate, lunas::error> synced;
 		lunas::println(data.options.quiet, "");
 
-		struct hooks hooks;
+		hooks hooks;
 		{
 			auto ok = setup_prehooks(data);
 			if (not ok)
@@ -236,7 +222,6 @@ namespace lunas
 			}
 			hooks.prehooks = std::move(ok.value());
 		}
-
 
 		for (auto file = content.files_table.begin(); file != content.files_table.end();)
 		{

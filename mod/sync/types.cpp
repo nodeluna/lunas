@@ -35,10 +35,6 @@ export namespace lunas
 		interrupted,
 	};
 
-	struct hooks {
-			std::vector<lunas::prehook> prehooks;
-	};
-
 	class progress_bar {
 		private:
 			bool lock     = false;
