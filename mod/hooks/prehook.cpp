@@ -26,10 +26,8 @@ export namespace lunas
 			std::vector<std::pair<size_t, size_t>>	 parsed_brackets;
 
 			std::expected<std::string, lunas::error> translate_syntax_to_data(const std::string&		parsed_bracket,
-											  const lunas::directory_entry& attributes)
+											  const lunas::directory_entry& attributes) const
 			{
-				assert(attributes != nullptr);
-
 				if (parsed_bracket.find("attributes.mtime") != parsed_bracket.npos)
 				{
 					return std::to_string(attributes.mtime.value());
@@ -80,7 +78,7 @@ export namespace lunas
 				return std::monostate();
 			}
 
-			std::expected<std::pair<std::string, enum hook_action>, lunas::error> operator|(const lunas::directory_entry& attr)
+			std::expected<std::pair<std::string, hook_action>, lunas::error> operator|(const lunas::directory_entry& attr) const
 			{
 				std::string requested_data;
 				size_t	    i		  = 0;
@@ -99,6 +97,7 @@ export namespace lunas
 					}
 					final_command += data.value();
 					final_command += "\"";
+
 					i = begin_end.second + 1;
 				}
 
@@ -107,7 +106,7 @@ export namespace lunas
 				return this->exec(final_command);
 			}
 
-			std::expected<std::pair<std::string, enum hook_action>, lunas::error> exec(const std::string& command)
+			std::expected<std::pair<std::string, enum hook_action>, lunas::error> exec(const std::string& command) const
 			{
 
 				std::expected<std::pair<std::string, int>, lunas::error> cmd_return = lunas::cmd(command);
@@ -125,24 +124,28 @@ export namespace lunas
 				}
 			}
 
-			static std::expected<hook_action, lunas::error>
-			pipe_hook(class prehook& prehook, const lunas::directory_entry& attributes, const config::options& options)
+			static std::expected<hook_action, lunas::error> pipe_hook(const std::vector<prehook>&	prehooks,
+										  const lunas::directory_entry& attributes,
+										  const config::options&	options)
 			{
-				auto ok = prehook | attributes;
-				if (not ok)
+				for (const auto& prehook : prehooks)
 				{
-					return std::unexpected(ok.error());
-				}
-				else
-				{
-					if (ok.value().second == lunas::hook_action::dont_sync)
+					auto ok = prehook | attributes;
+					if (not ok)
 					{
-						lunas::printerr("[prehook] {}", ok.value().first);
-						return hook_action::dont_sync;
+						return std::unexpected(ok.error());
 					}
-					else if (ok.value().second == lunas::hook_action::sync && not ok.value().first.empty())
+					else
 					{
-						lunas::println(options.quiet, "[prehook] {}", ok.value().first);
+						if (ok.value().second == lunas::hook_action::dont_sync)
+						{
+							lunas::printerr("[prehook] {}", ok.value().first);
+							return hook_action::dont_sync;
+						}
+						else if (ok.value().second == lunas::hook_action::sync && not ok.value().first.empty())
+						{
+							lunas::println(options.quiet, "[prehook] {}", ok.value().first);
+						}
 					}
 				}
 

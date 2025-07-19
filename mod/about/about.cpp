@@ -219,7 +219,7 @@ export namespace lunas
 		    "        [-rb, --rollback] can be used to replace newer files with older ones\n"
 		    "\n"
 		    "    [-prh, --prehook] <cmd {attributes}>\n"
-		    "        *inject* a prehook/command prior to every file that is about to be synced\n"
+		    "        *inject* many prehooks/commands prior to every file that is about to be synced\n"
 		    "        *retrieve* metadata from the source file\n"
 		    "        *control* whether this file is synced or not\n"
 		    "        example: -s dir1 -d dir2 --prehook \"/path/to/meow.sh {path} {attributes.mtime} {name} {attributes.size}\"\n"

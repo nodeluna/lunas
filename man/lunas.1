@@ -355,18 +355,23 @@ check mtime of files and re-sync the file if mtime wasn't the same. this option 
 .TP
 .B [-prh, --prehook] <cmd {attributes}>
 
-*inject* a prehook/command prior to every file that is about to be synced
+*inject* many prehooks/commands prior to every file that is about to be synced
 
 *retrieve* metadata from the source file
 
 *control* whether this file is synced or not by the return value
 
-        example: -s dir1 -d dir2 --prehook "/path/to/meow.sh {path} {attributes.mtime} {name} {extension} {attributes.size} {attributes.type}"
+this option can be used many times to inject multiple hooks
 
-this meow.sh would recieve the information it requested and it must return 0 to sync or 1 to not sync
+        example: -s dir1 -d dir2 --prehook "/path/to/meow.sh {path} {attributes.mtime} {name} {extension} {attributes.size} {attributes.type}" \\
+
+		--prehook "./logger {path}"
+
+meow.sh/logger would recieve the information it requested and it must return 0 to sync or 1 to not sync
 
 *optional* it can also print to stdout for lunas to print it to the terminal
 
+when running multiple prehooks, the first prehook that returns a non 0 would prevent the rest of the hooks from executing
 
 placeholders:
 .br

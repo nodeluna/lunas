@@ -60,7 +60,7 @@ export namespace lunas
 				bool				rollback	  = false;
 				time_t				timeout_sec	  = 5;
 				lunas::ssh_log_level		ssh_log_level	  = lunas::ssh_log_level::no_log;
-				std::optional<std::string>	prehook		  = std::nullopt;
+				std::vector<std::string>	prehooks;
 		};
 	}
 }

@@ -74,14 +74,18 @@ export namespace lunas
 			return std::unexpected(directory.error());
 		}
 
-		lunas::prehook prehook;
-		if (data.options.prehook)
+		std::vector<lunas::prehook> prehooks;
+		if (not data.options.prehooks.empty())
 		{
-			auto ok = prehook.parse(*data.options.prehook);
-			if (not ok)
+			for (const auto& prehook : data.options.prehooks)
 			{
-				lunas::printerr("[prehook-parsing-error]");
-				return std::unexpected(ok.error());
+				prehooks.push_back({});
+				auto ok = prehooks.back().parse(prehook);
+				if (not ok)
+				{
+					lunas::printerr("[prehook-parsing-error]");
+					return std::unexpected(ok.error());
+				}
 			}
 		}
 
@@ -151,9 +155,9 @@ export namespace lunas
 					continue;
 				}
 
-				if (data.options.prehook)
+				if (not prehooks.empty())
 				{
-					auto prehook_action = prehook::pipe_hook(prehook, src_file.value(), data.options);
+					auto prehook_action = prehook::pipe_hook(prehooks, src_file.value(), data.options);
 					if (not prehook_action)
 					{
 						return std::unexpected(prehook_action.error());

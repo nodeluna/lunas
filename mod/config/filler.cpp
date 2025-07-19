@@ -889,7 +889,7 @@ export namespace lunas
 
 			std::expected<std::monostate, lunas::error> prehook(const std::string& data, lunas::config::options& options)
 			{
-				options.prehook = data;
+				options.prehooks.push_back(data);
 				return std::monostate();
 			}
 		}
