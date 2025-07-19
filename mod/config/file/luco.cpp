@@ -288,7 +288,7 @@ namespace lunas
 
 			size_t i;
 
-			if ((i = data.find('{', start)) != data.npos && i < endline)
+			if ((i = data.find('{', start)) != data.npos && i < endline && i < data.size() - 1 && data.at(i+1) != '{')
 			{
 				token |= token_type::NEST_NAME;
 			}
@@ -298,7 +298,7 @@ namespace lunas
 				token |= token_type::OPTION_VALUE;
 			}
 
-			if ((i = data.find('}', start)) != data.npos && i < endline)
+			if ((i = data.find('}', start)) != data.npos && i < endline && i < data.size() - 1 && data.at(i+1) != '}')
 			{
 				token |= token_type::END_NEST;
 			}
@@ -377,9 +377,17 @@ namespace lunas
 			first_char = false;
 			for (; i < endline; i++)
 			{
-				if (data[i] == '}')
+				if (data[i] == '}' && i > 0 && data.at(i-1) != '}' && i < data.size() - 1 && data.at(i+1) != '}')
 				{
 					break;
+				}
+				else if (data[i] == '}' && i < data.size() - 1 && data.at(i+1) != '}')
+				{
+					continue;
+				}
+				else if (data[i] == '{' && i < data.size() - 1 && data.at(i+1) != '{')
+				{
+					continue;
 				}
 				else if ((data[i] == ' ' || data[i] == '\t') && not first_char)
 				{

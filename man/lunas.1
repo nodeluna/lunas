@@ -436,6 +436,10 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
 .br
 - the ';' can be escaped with '\\;'
 .br
+- the '{' can be escaped by writing it twice '{{'
+.br
+- the '}' can be escaped by writing it twice '}}'
+.br
 - # commenting lines is done like '# key = value'
 .br
 
@@ -452,6 +456,9 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
                 #progress = on
                 #verbose = on
 
+                # the placeholder's brackets must be escaped as explained in config file syntax
+                prehook = /path/to/meow.sh {{path}} {{attributes.size}}
+
                 remote{ r = user@ip:/path/to/dir; port = 22 }; remote { ..... }
 
                 remote {
@@ -464,6 +471,9 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
                 path = /path/to/dir
                 d = /path/to/dir2
                 dereference = on ; update = on
+
+                # the placeholder's brackets must be escaped as explained in config file syntax
+                prehook = /path/to/meow.sh {{path}} {{attributes.size}}
         }
     
 .B     ------------------------------------------------------
