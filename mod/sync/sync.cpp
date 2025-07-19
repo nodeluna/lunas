@@ -37,8 +37,28 @@ export namespace lunas
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data, lunas::content& content);
 }
 
-export namespace lunas
+namespace lunas
 {
+	std::expected<std::vector<lunas::prehook>, lunas::error> setup_prehooks(const struct lunas::parsed_data& data)
+	{
+		std::vector<lunas::prehook> prehooks;
+		if (not data.options.prehooks.empty())
+		{
+			for (const auto& prehook : data.options.prehooks)
+			{
+				prehooks.push_back({});
+				auto ok = prehooks.back().parse(prehook);
+				if (not ok)
+				{
+					lunas::printerr("[prehook-parsing-error]");
+					return std::unexpected(ok.error());
+				}
+			}
+		}
+
+		return prehooks;
+	}
+
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data)
 	{
 		const auto& ipaths = data.get_ipaths();
@@ -75,18 +95,13 @@ export namespace lunas
 		}
 
 		std::vector<lunas::prehook> prehooks;
-		if (not data.options.prehooks.empty())
 		{
-			for (const auto& prehook : data.options.prehooks)
+			auto ok = setup_prehooks(data);
+			if (not ok)
 			{
-				prehooks.push_back({});
-				auto ok = prehooks.back().parse(prehook);
-				if (not ok)
-				{
-					lunas::printerr("[prehook-parsing-error]");
-					return std::unexpected(ok.error());
-				}
+				return std::unexpected(ok.error());
 			}
+			prehooks = std::move(ok.value());
 		}
 
 		lunas::println(data.options.quiet, "--> opened source directory '{}'", ipaths.at(src_index).path);
@@ -212,6 +227,17 @@ export namespace lunas
 		std::expected<std::monostate, lunas::error> synced;
 		lunas::println(data.options.quiet, "");
 
+		struct hooks hooks;
+		{
+			auto ok = setup_prehooks(data);
+			if (not ok)
+			{
+				return std::unexpected(ok.error());
+			}
+			hooks.prehooks = std::move(ok.value());
+		}
+
+
 		for (auto file = content.files_table.begin(); file != content.files_table.end();)
 		{
 			auto src_index = get_src(*file, data);
@@ -224,7 +250,7 @@ export namespace lunas
 				goto not_needed_in_the_files_table_any_longer;
 			}
 
-			synced = updating(*file, src_index.value(), data, progress_stats);
+			synced = updating(*file, src_index.value(), data, progress_stats, hooks);
 			if (not synced)
 			{
 				lunas::printerr("{}", synced.error().message());

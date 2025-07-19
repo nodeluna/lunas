@@ -45,6 +45,9 @@ export namespace lunas
 
 	std::expected<std::unique_ptr<lunas::attributes>, lunas::error>
 	get_attributes(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow);
+
+	std::expected<std::shared_ptr<lunas::attributes>, lunas::error>
+	get_attributes_shared(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow);
 }
 
 namespace lunas
@@ -169,6 +172,19 @@ namespace lunas
 		try
 		{
 			return std::make_unique<lunas::attributes>(sftp, path, follow);
+		}
+		catch (const lunas::error& e)
+		{
+			return std::unexpected(e);
+		}
+	}
+
+	std::expected<std::shared_ptr<lunas::attributes>, lunas::error>
+	get_attributes_shared(const std::unique_ptr<lunas::sftp>& sftp, const std::filesystem::path& path, lunas::follow_symlink follow)
+	{
+		try
+		{
+			return std::make_shared<lunas::attributes>(sftp, path, follow);
 		}
 		catch (const lunas::error& e)
 		{

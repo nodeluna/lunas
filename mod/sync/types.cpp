@@ -23,6 +23,7 @@ export import lunas.config.options;
 export import lunas.stats;
 export import lunas.terminal;
 export import lunas.error;
+export import lunas.hooks;
 
 export namespace lunas
 {
@@ -32,6 +33,10 @@ export namespace lunas
 		post_sync_fail,
 		failed,
 		interrupted,
+	};
+
+	struct hooks {
+			std::vector<lunas::prehook> prehooks;
 	};
 
 	class progress_bar {

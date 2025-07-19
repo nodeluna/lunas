@@ -1,5 +1,7 @@
 module;
 
+#include <cassert>
+
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -81,23 +83,30 @@ export namespace lunas
 	}
 
 	std::expected<std::monostate, lunas::error> updating(const lunas::file_table& file_table, const size_t src_index,
-							     struct lunas::parsed_data& data, struct progress_stats& progress_stats)
+							     struct lunas::parsed_data& data, struct progress_stats& progress_stats,
+							     const struct hooks& hooks)
 	{
 
-		const auto&		      src_metadata = file_table.metadatas.at(src_index);
-		const auto&		      ipaths	   = data.get_ipaths();
-		std::optional<std::uintmax_t> src_size	   = std::nullopt;
-		const std::filesystem::path   src	   = ipaths.at(src_index).path + file_table.path;
-		std::filesystem::path	      dest;
+		const auto&			   src_metadata = file_table.metadatas.at(src_index);
+		const auto&			   ipaths	= data.get_ipaths();
+		std::optional<std::uintmax_t>	   src_size	= std::nullopt;
+		const std::filesystem::path	   src		= ipaths.at(src_index).path + file_table.path;
+		std::filesystem::path		   dest;
+		std::shared_ptr<lunas::attributes> attributes = nullptr;
 
-		if (data.options.minimum_space && src_metadata.file_type == lunas::file_types::regular_file)
+		if (data.options.minimum_space || not hooks.prehooks.empty())
 		{
-			auto attr = lunas::get_attributes(ipaths.at(src_index).sftp, src, data.options.follow_symlink);
+			auto attr = lunas::get_attributes_shared(ipaths.at(src_index).sftp, src, data.options.follow_symlink);
 			if (not attr)
 			{
 				return std::unexpected(attr.error());
 			}
-			src_size = attr.value()->file_size();
+			if (src_metadata.file_type == lunas::file_types::regular_file)
+			{
+				src_size = attr.value()->file_size();
+			}
+
+			attributes = attr.value();
 		}
 
 		for (size_t dest_index = 0; dest_index < file_table.metadatas.size(); dest_index++)
@@ -118,6 +127,20 @@ export namespace lunas
 					lunas::printerr("{}", ok.error().message());
 				}
 				continue;
+			}
+
+			if (not hooks.prehooks.empty())
+			{
+				assert(attributes != nullptr);
+				auto prehook_action = prehook::pipe_hook(hooks.prehooks, attributes, data.options);
+				if (not prehook_action)
+				{
+					return std::unexpected(prehook_action.error());
+				}
+				else if (prehook_action.value() == hook_action::dont_sync)
+				{
+					continue;
+				}
 			}
 
 			auto ok = check_mtime_and_sync(src_metadata_wrapper, dest_metadata_wrapper, data, progress_stats);
