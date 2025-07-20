@@ -34,7 +34,8 @@ export namespace lunas
 
 	std::expected<std::monostate, lunas::error> check_dest_and_sync(const _file_metadata& src, const _file_metadata& dest,
 									struct lunas::parsed_data& data,
-									struct progress_stats& progress_stats, const hooks& hooks)
+									struct progress_stats&	   progress_stats,
+									const struct lunas::hooks& hooks)
 	{
 
 		const auto& ipaths = data.get_ipaths();
@@ -43,19 +44,6 @@ export namespace lunas
 		if (auto ok = check_dest(src, dest, data); not ok)
 		{
 			return std::unexpected(ok.error());
-		}
-
-		if (not hooks.prehooks.empty())
-		{
-			auto prehook_action = prehook::pipe_hook(hooks.prehooks, hooks.attributes, data.options);
-			if (not prehook_action)
-			{
-				return std::unexpected(prehook_action.error());
-			}
-			else if (prehook_action.value() == hook_action::dont_sync)
-			{
-				return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
-			}
 		}
 
 		if (data.options.update && src.metadata.mtime > dest.metadata.mtime)
@@ -74,6 +62,19 @@ export namespace lunas
 
 		if (sync)
 		{
+			if (not hooks.prehooks.empty())
+			{
+				auto prehook_action = hook<pre>::pipe_hook(hooks, data.options);
+				if (not prehook_action)
+				{
+					return std::unexpected(prehook_action.error());
+				}
+				else if (prehook_action.value() == hook_action::dont_sync)
+				{
+					return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
+				}
+			}
+
 			struct syncmisc misc = {
 			    .src_mtime = src.metadata.mtime,
 			    .file_type = dest.metadata.file_type == lunas::file_types::resume_regular_file ? dest.metadata.file_type
@@ -87,6 +88,15 @@ export namespace lunas
 #else
 			auto syncstat = lunas::copy(src.path, dest.path, misc);
 #endif // REMOTE_ENABLED
+
+			if (not hooks.posthooks.empty())
+			{
+				auto prehook_action = hook<post>::pipe_hook(hooks, data.options);
+				if (not prehook_action)
+				{
+					lunas::printerr("{}", prehook_action.error().message());
+				}
+			}
 
 			if (not syncstat)
 			{
@@ -103,7 +113,7 @@ export namespace lunas
 
 	std::expected<std::monostate, lunas::error> updating(const lunas::file_table& file_table, const size_t src_index,
 							     struct lunas::parsed_data& data, struct progress_stats& progress_stats,
-							     hooks& hooks)
+							     struct lunas::hooks& hooks)
 	{
 
 		const auto&		      src_metadata = file_table.metadatas.at(src_index);
@@ -112,7 +122,7 @@ export namespace lunas
 		const std::filesystem::path   src	   = ipaths.at(src_index).path + file_table.path;
 		std::filesystem::path	      dest;
 
-		if (data.options.minimum_space || not hooks.prehooks.empty())
+		if (data.options.minimum_space || not hooks.prehooks.empty() || not hooks.posthooks.empty())
 		{
 			auto attr = lunas::get_attributes_shared(ipaths.at(src_index).sftp, src, data.options.follow_symlink);
 			if (not attr)

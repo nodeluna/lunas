@@ -135,6 +135,8 @@ export namespace lunas
 				{"-A",			config::filler::attributes     		},
 				{"-prehook",		config::filler::prehook     		},
 				{"-pre",		config::filler::prehook     		},
+				{"-posthook",		config::filler::posthook     		},
+				{"-post",		config::filler::posthook     		},
 			};
 
 			// clang-format on

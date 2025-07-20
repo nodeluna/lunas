@@ -353,7 +353,7 @@ check mtime of files and re-sync the file if mtime wasn't the same. this option 
         example:  -p /path/to/dir -p /path/to/dir2 -p /path/to/dir3 -r user@ip:/path/to/dir4 port=NUMBER pw=PASSWORD -u
 
 .TP
-.B [-prh, --prehook] <cmd {attributes}>
+.B [-pre, --prehook] <cmd {attributes}>
 
 *inject* many prehooks/commands prior to every file that is about to be synced
 
@@ -388,6 +388,31 @@ placeholders:
 	{extension}        : filename extension of the source
 
 *note* '{' and '}' are escaped by writing them twice like '{{' which would be translated to '{' not as part of the {data}
+
+.TP
+.B [-post, --posthook] <cmd {attributes}>
+
+*inject* many posthooks/commands *after* every file that lunas tries to sync
+
+*retrieve* metadata from the source file
+
+this option can be used many times to inject multiple hooks
+
+        example: -s dir1 -d dir2 --posthook "logger.sh {path}"
+
+logger would recieve the information it requested
+
+*optional* it can also print to stdout for lunas to print it to the terminal
+
+return 0 from 'logger.sh' to print it as message or 1 as error
+
+when running multiple posthooks, the first posthook that returns a non 0 would prevent the rest of the hooks from executing
+
+placeholders:
+.br
+	same as --prehook
+
+*note* '{' and '}' are escaped as explained in --prehook
 
 
 .TP

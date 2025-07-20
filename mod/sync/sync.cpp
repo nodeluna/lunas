@@ -11,6 +11,7 @@ import std.compat;
 #	include <cstddef>
 #	include <exception>
 #	include <filesystem>
+#	include <algorithm>
 #endif
 
 export module lunas.sync;
@@ -39,24 +40,63 @@ export namespace lunas
 
 namespace lunas
 {
-	std::expected<std::vector<lunas::prehook>, lunas::error> setup_prehooks(const struct lunas::parsed_data& data)
+	template<typename hook_type>
+	std::expected<std::vector<lunas::hook<hook_type>>, lunas::error> setup_hooks(const struct lunas::parsed_data& data)
 	{
-		std::vector<lunas::prehook> prehooks;
-		if (not data.options.prehooks.empty())
+		std::vector<lunas::hook<hook_type>> hooks;
+
+		auto init_hooks = [&hooks](const std::string& prehook) -> std::expected<std::monostate, lunas::error>
+		{
+			hooks.push_back({});
+			auto ok = hooks.back().parse(prehook);
+			if (not ok)
+			{
+				if constexpr (std::is_same_v<hook_type, lunas::pre>)
+				{
+					lunas::printerr("[prehook-parsing-error]");
+				}
+				else if constexpr (std::is_same_v<hook_type, lunas::post>)
+				{
+					lunas::printerr("[posthook-parsing-error]");
+				}
+				else
+				{
+					lunas::printerr("[hook-parsing-error]");
+				}
+				return std::unexpected(ok.error());
+			}
+
+			return std::monostate();
+		};
+
+		if constexpr (std::is_same_v<hook_type, lunas::pre>)
 		{
 			for (const auto& prehook : data.options.prehooks)
 			{
-				prehooks.push_back({});
-				auto ok = prehooks.back().parse(prehook);
+				auto ok = init_hooks(prehook);
 				if (not ok)
 				{
-					lunas::printerr("[prehook-parsing-error]");
 					return std::unexpected(ok.error());
 				}
 			}
 		}
+		else if constexpr (std::is_same_v<hook_type, lunas::post>)
+		{
+			for (const auto& posthook : data.options.posthooks)
+			{
+				auto ok = init_hooks(posthook);
+				if (not ok)
+				{
+					return std::unexpected(ok.error());
+				}
+			}
+		}
+		else
+		{
+			static_assert(false, "unsupported tag type for lunas::hook<tag>");
+		}
 
-		return prehooks;
+		return hooks;
 	}
 
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data)
@@ -69,17 +109,22 @@ namespace lunas
 		}
 
 		size_t src_index = 0;
-		for (const auto& path : ipaths)
 		{
-			if (path.is_src())
+			auto itr = std::find_if(ipaths.begin(), ipaths.end(),
+						[&src_index](const ipath::input_path& path)
+						{
+							if (path.is_src())
+							{
+								return true;
+							}
+
+							src_index++;
+							return false;
+						});
+			if (itr == ipaths.end())
 			{
-				break;
+				return std::unexpected(lunas::error("didn't find any source in the input directories"));
 			}
-			src_index++;
-		}
-		if (not ipaths.at(src_index).is_src())
-		{
-			return std::unexpected(lunas::error("didn't find any source in the input directories"));
 		}
 
 		struct directory_options directory_options = {
@@ -94,14 +139,21 @@ namespace lunas
 			return std::unexpected(directory.error());
 		}
 
-		hooks hooks;
+		struct hooks hooks;
 		{
-			auto ok = setup_prehooks(data);
+			auto ok = setup_hooks<lunas::pre>(data);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());
 			}
 			hooks.prehooks = std::move(ok.value());
+
+			auto ok2       = setup_hooks<lunas::post>(data);
+			if (not ok)
+			{
+				return std::unexpected(ok.error());
+			}
+			hooks.posthooks = std::move(ok2.value());
 		}
 
 		lunas::println(data.options.quiet, "--> opened source directory '{}'", ipaths.at(src_index).path);
@@ -117,7 +169,7 @@ namespace lunas
 				lunas::printerr("{}", ok.error().message());
 				continue;
 			}
-			if (not hooks.prehooks.empty())
+			if (not hooks.prehooks.empty() || not hooks.posthooks.empty())
 			{
 				hooks.attributes = src_file.value();
 			}
@@ -213,14 +265,21 @@ namespace lunas
 		std::expected<std::monostate, lunas::error> synced;
 		lunas::println(data.options.quiet, "");
 
-		hooks hooks;
+		struct hooks hooks;
 		{
-			auto ok = setup_prehooks(data);
+			auto ok = setup_hooks<lunas::pre>(data);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());
 			}
 			hooks.prehooks = std::move(ok.value());
+
+			auto ok2       = setup_hooks<lunas::post>(data);
+			if (not ok)
+			{
+				return std::unexpected(ok.error());
+			}
+			hooks.posthooks = std::move(ok2.value());
 		}
 
 		for (auto file = content.files_table.begin(); file != content.files_table.end();)

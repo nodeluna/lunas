@@ -892,6 +892,12 @@ export namespace lunas
 				options.prehooks.push_back(data);
 				return std::monostate();
 			}
+
+			std::expected<std::monostate, lunas::error> posthook(const std::string& data, lunas::config::options& options)
+			{
+				options.posthooks.push_back(data);
+				return std::monostate();
+			}
 		}
 
 		namespace info

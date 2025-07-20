@@ -5,39 +5,65 @@ module;
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
-#	include <expected>
-#	include <string>
+#	include <vector>
 #	include <memory>
+#	include <expected>
 #	include <variant>
-#	include <functional>
 #endif
 
-export module lunas.hooks:pre;
+export module lunas.hooks:hook;
+export import lunas.file;
 import :parser;
 import :cmd;
 import :types;
-import lunas.file_types;
-export import lunas.file;
 
 export namespace lunas
 {
-	class prehook;
+	template<typename hook_type>
+	class hook;
 
-	using hooks = struct _hooks<prehook>;
+	class pre {};
+
+	class post {};
+
+	struct hooks {
+			std::vector<class hook<pre>>						 prehooks;
+			std::vector<class hook<post>>						 posthooks;
+			std::variant<lunas::directory_entry, std::shared_ptr<lunas::attributes>> attributes;
+	};
 
 	template<typename attributes_type>
 	concept attributes_type_concept =
 	    std::is_same_v<attributes_type, lunas::directory_entry> || std::is_same_v<attributes_type, std::shared_ptr<lunas::attributes>>;
 
-	class prehook {
+	template<typename hook_type>
+	class hook {
 		private:
 			std::string			       command;
 			std::vector<std::pair<size_t, size_t>> parsed_brackets;
 
 			template<typename attributes_type_concept>
-			std::expected<std::string, lunas::error> translate_syntax_to_data(const std::string&		 parsed_bracket,
-											  const attributes_type_concept& attributes) const
+			std::expected<std::string, lunas::error>
+			translate_attr_syntax_to_data(const std::string& parsed_bracket, const attributes_type_concept& attributes) const
 			{
+				std::string hook_type_msg = "[hook]";
+				if constexpr (std::is_same_v<hook_type, class pre>)
+				{
+					hook_type_msg = "[prehook]";
+				}
+				else if constexpr (std::is_same_v<hook_type, class post>)
+				{
+					hook_type_msg = "[posthook]";
+				}
+				if constexpr (std::is_same_v<attributes_type_concept, lunas::directory_entry>)
+				{
+					assert(attributes.mtime.has_value() && attributes.file_type.has_value());
+				}
+				else
+				{
+					assert(attributes != nullptr);
+				}
+
 				if (parsed_bracket.find("attributes.mtime") != parsed_bracket.npos)
 				{
 					if constexpr (std::is_same_v<attributes_type_concept, lunas::directory_entry>)
@@ -106,13 +132,32 @@ export namespace lunas
 				}
 				else
 				{
-					return std::unexpected(lunas::error(
-					    lunas::error_type::syntax, "[prehook] '{{{}' isn't a recognized hook option", parsed_bracket));
+					return std::unexpected(lunas::error(lunas::error_type::syntax,
+									    "{} '{{{}' isn't a recognized hook option", hook_type_msg,
+									    parsed_bracket));
 				}
 			}
 
-			std::expected<std::pair<std::string, hook_action>, lunas::error>
-			pipe_attributes(std::function<std::expected<std::string, lunas::error>(const std::string&)> translate_func) const
+			std::expected<std::string, lunas::error> translate_syntax_to_data(const std::string&  parsed_bracket,
+											  const struct hooks& hooks) const
+			{
+				std::expected<std::string, lunas::error> ok;
+
+				if (std::holds_alternative<lunas::directory_entry>(hooks.attributes))
+				{
+					ok = this->translate_attr_syntax_to_data(parsed_bracket,
+										 std::get<lunas::directory_entry>(hooks.attributes));
+				}
+				else
+				{
+					ok = this->translate_attr_syntax_to_data(
+					    parsed_bracket, std::get<std::shared_ptr<lunas::attributes>>(hooks.attributes));
+				}
+
+				return ok;
+			}
+
+			std::expected<std::pair<std::string, hook_action>, lunas::error> expand_and_execute(const struct hooks& hooks) const
 			{
 				std::string requested_data;
 				size_t	    i		  = 0;
@@ -124,7 +169,7 @@ export namespace lunas
 
 					final_command += command.substr(i, begin_end.first - i);
 					final_command += "\"";
-					auto data = translate_func(requested_data);
+					auto data = this->translate_syntax_to_data(requested_data, hooks);
 					if (not data)
 					{
 						return std::unexpected(data.error());
@@ -138,35 +183,6 @@ export namespace lunas
 				final_command += command.substr(i, command.size());
 
 				return this->exec(final_command);
-			}
-
-			static std::expected<hook_action, lunas::error>
-			pipe_hook(const std::vector<prehook>& prehooks, const config::options& options,
-				  const std::function<std::expected<std::pair<std::string, hook_action>, lunas::error>(const prehook&)>
-				      pipe_hook_attribtes)
-			{
-				for (const auto& prehook : prehooks)
-				{
-					auto ok = pipe_hook_attribtes(prehook);
-					if (not ok)
-					{
-						return std::unexpected(ok.error());
-					}
-					else
-					{
-						if (ok.value().second == lunas::hook_action::dont_sync)
-						{
-							lunas::printerr("[prehook] {}", ok.value().first);
-							return hook_action::dont_sync;
-						}
-						else if (ok.value().second == lunas::hook_action::sync && not ok.value().first.empty())
-						{
-							lunas::println(options.quiet, "[prehook] {}", ok.value().first);
-						}
-					}
-				}
-
-				return hook_action::sync;
 			}
 
 			std::expected<std::pair<std::string, enum hook_action>, lunas::error> exec(const std::string& command) const
@@ -188,7 +204,7 @@ export namespace lunas
 			}
 
 		public:
-			prehook()
+			hook()
 			{
 			}
 
@@ -206,52 +222,78 @@ export namespace lunas
 				return std::monostate();
 			}
 
-			template<typename attributes_type_concept>
-			std::expected<std::pair<std::string, hook_action>, lunas::error>
-			operator|(const attributes_type_concept& attr) const
+			static std::expected<hook_action, lunas::error> pipe_hook(const struct hooks& hooks, const config::options& options)
 			{
-				return this->pipe_attributes(
-				    [&](const std::string& requested_data)
-				    {
-					    return this->translate_syntax_to_data(requested_data, attr);
-				    });
-			}
-
-			template<typename attributes_type_concept>
-			static std::expected<hook_action, lunas::error> pipe_hook(const std::vector<prehook>&	prehooks,
-										  const attributes_type_concept attributes,
-										  const config::options&	options)
-			{
-				return prehook::pipe_hook(prehooks, options,
-							  [&](const prehook& prehook)
-							  {
-								  return prehook | attributes;
-							  });
-			}
-
-			static std::expected<hook_action, lunas::error>
-			pipe_hook(const std::vector<prehook>&							 prehooks,
-				  const std::variant<lunas::directory_entry, std::shared_ptr<lunas::attributes>> attributes,
-				  const config::options&							 options)
-
-			{
-				if (std::holds_alternative<lunas::directory_entry>(attributes))
+				std::string hook_type_msg = "[hook]";
+				if constexpr (std::is_same_v<hook_type, class pre>)
 				{
-					return prehook::pipe_hook(prehooks, options,
-								  [&](const prehook& prehook)
-								  {
-									  return prehook | std::get<lunas::directory_entry>(attributes);
-								  });
+					hook_type_msg = "[prehook]";
+				}
+				else if constexpr (std::is_same_v<hook_type, class post>)
+				{
+					hook_type_msg = "[posthook]";
+				}
+
+				auto handle_hook_expansion =
+				    [&](const class hook<hook_type>& hook) -> std::expected<hook_action, lunas::error>
+				{
+					auto ok = hook.expand_and_execute(hooks);
+					if (not ok)
+					{
+						return std::unexpected(ok.error());
+					}
+					else
+					{
+						if (ok.value().second == lunas::hook_action::dont_sync)
+						{
+							lunas::printerr("{} {}", hook_type_msg, ok.value().first);
+							return hook_action::dont_sync;
+						}
+						else if (ok.value().second == lunas::hook_action::sync && not ok.value().first.empty())
+						{
+							lunas::println(options.quiet, "{} {}", hook_type_msg, ok.value().first);
+						}
+
+						return hook_action::sync;
+					}
+				};
+
+				if constexpr (std::is_same_v<hook_type, class pre>)
+				{
+					for (const auto& hook : hooks.prehooks)
+					{
+						auto ok = handle_hook_expansion(hook);
+						if (not ok)
+						{
+							return std::unexpected(ok.error());
+						}
+						else if (ok.value() == hook_action::dont_sync)
+						{
+							return hook_action::dont_sync;
+						}
+					}
+				}
+				else if constexpr (std::is_same_v<hook_type, class post>)
+				{
+					for (const auto& hook : hooks.posthooks)
+					{
+						auto ok = handle_hook_expansion(hook);
+						if (not ok)
+						{
+							return std::unexpected(ok.error());
+						}
+						else if (ok.value() == hook_action::dont_sync)
+						{
+							return hook_action::dont_sync;
+						}
+					}
 				}
 				else
 				{
-					return prehook::pipe_hook(prehooks, options,
-								  [&](const prehook& prehook)
-								  {
-									  return prehook |
-										 std::get<std::shared_ptr<lunas::attributes>>(attributes);
-								  });
+					static_assert(false, "unsupported tag for lunas::hook<tag>");
 				}
+
+				return hook_action::sync;
 			}
 	};
 }

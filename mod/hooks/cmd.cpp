@@ -11,6 +11,7 @@ import std.compat;
 #	include <string>
 #	include <memory>
 #	include <utility>
+#	include <system_error>
 #endif
 
 export module lunas.hooks:cmd;

@@ -7,6 +7,7 @@ import std.compat;
 #	include <unordered_set>
 #	include <cstdint>
 #	include <optional>
+#	include <vector>
 #endif
 
 export module lunas.config.options;
@@ -61,6 +62,7 @@ export namespace lunas
 				time_t				timeout_sec	  = 5;
 				lunas::ssh_log_level		ssh_log_level	  = lunas::ssh_log_level::no_log;
 				std::vector<std::string>	prehooks;
+				std::vector<std::string>	posthooks;
 		};
 	}
 }

@@ -12,6 +12,7 @@ import std.compat;
 #	include <ctime>
 #	include <string>
 #	include <format>
+#	include <filesystem>
 #endif
 
 export module lunas.sync:checks;
