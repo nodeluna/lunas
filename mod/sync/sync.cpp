@@ -12,6 +12,7 @@ import std.compat;
 #	include <exception>
 #	include <filesystem>
 #	include <algorithm>
+#	include <type_traits>
 #endif
 
 export module lunas.sync;

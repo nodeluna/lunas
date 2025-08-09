@@ -22,7 +22,7 @@ if (EXISTS "${IMPORT_STD_PATH}")
 	endif()
 
 	add_definitions(-DIMPORT_STD_IS_SUPPORTED=1)
-	message("== import std; is supported")
+	message("== import std; is supported. compiling goes vroom vroom")
 else()
 	message("[X] import std; is NOT supported. it should compile but slower")
 endif()
@@ -31,6 +31,14 @@ project(lunas LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 26)
 add_compile_options(-Wall -Wextra -pedantic -O1)
+
+add_compile_options(
+	-Walloca -Wcast-align -Wcast-qual -Wchar-subscripts -Wctor-dtor-privacy
+	-Wdouble-promotion -Wenum-conversion -Wextra-semi -Wformat-signedness
+	-Wformat=2 -Wmismatched-tags -Wmissing-braces -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith
+	-Wrange-loop-construct -Wuninitialized -Wvla -Wwrite-strings -Werror=unused-result  -Werror=unused-but-set-variable -Werror
+	#-Wsign-conversion -Wdeprecated-copy-dtor -Wfloat-equal
+)
 
 set(output_dir "${PROJECT_SOURCE_DIR}/bin")
 set(mods_dir "${PROJECT_SOURCE_DIR}/mod")

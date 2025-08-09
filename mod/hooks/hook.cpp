@@ -9,6 +9,7 @@ import std.compat;
 #	include <memory>
 #	include <expected>
 #	include <variant>
+#	include <type_traits>
 #endif
 
 export module lunas.hooks:hook;
@@ -26,9 +27,12 @@ export namespace lunas
 
 	class post {};
 
+	using prehook  = hook<pre>;
+	using posthook = hook<post>;
+
 	struct hooks {
-			std::vector<class hook<pre>>						 prehooks;
-			std::vector<class hook<post>>						 posthooks;
+			std::vector<prehook>							 prehooks;
+			std::vector<posthook>							 posthooks;
 			std::variant<lunas::directory_entry, std::shared_ptr<lunas::attributes>> attributes;
 	};
 

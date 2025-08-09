@@ -224,7 +224,7 @@ export namespace lunas
 					size_variable = ok.value();
 					return std::monostate();
 				}
-			};
+			}
 
 			std::expected<std::monostate, lunas::error> minimum_space(const std::string& data, lunas::config::options& options)
 			{

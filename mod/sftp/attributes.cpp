@@ -78,13 +78,23 @@ namespace lunas
 		}
 	}
 
-	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute) : attr(attribute)
+	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute)
 	{
+		if (attr != nullptr && attr != NULL)
+		{
+			sftp_attributes_free(attr);
+		}
+		attr = attribute;
 	}
 
-	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute, const std::string& path) : attr(attribute)
+	sftp_attributes::sftp_attributes(const ::sftp_attributes& attribute, const std::string& path)
 	{
 		file_path = path;
+		if (attr != nullptr && attr != NULL)
+		{
+			sftp_attributes_free(attr);
+		}
+		attr = attribute;
 	}
 
 	std::string sftp_attributes::path()

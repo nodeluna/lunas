@@ -173,7 +173,7 @@ namespace lunas
 		( void ) prompt;
 		std::string _prompt = "   --> enter passphrase for key '" + *key_path + "': ";
 		return ssh_getpass(_prompt.c_str(), buffer, len, echo, verify);
-	};
+	}
 
 	auth_response ssh::auth_password(const ssh_session& ssh, const std::string& pw)
 	{

@@ -64,7 +64,7 @@ export namespace lunas
 		{
 			if (not hooks.prehooks.empty())
 			{
-				auto prehook_action = hook<pre>::pipe_hook(hooks, data.options);
+				auto prehook_action = prehook::pipe_hook(hooks, data.options);
 				if (not prehook_action)
 				{
 					return std::unexpected(prehook_action.error());
@@ -91,7 +91,7 @@ export namespace lunas
 
 			if (not hooks.posthooks.empty())
 			{
-				auto prehook_action = hook<post>::pipe_hook(hooks, data.options);
+				auto prehook_action = posthook::pipe_hook(hooks, data.options);
 				if (not prehook_action)
 				{
 					lunas::printerr("{}", prehook_action.error().message());

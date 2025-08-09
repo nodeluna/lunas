@@ -1,7 +1,7 @@
 module;
 
 export module lunas.hooks;
-export import :cmd;
+import :cmd;
 export import :types;
 export import :hook;
 import :parser;

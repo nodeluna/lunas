@@ -127,9 +127,9 @@ namespace lunas
 	{
 		std::string	stat		= "\r(" + lunas::size_units(occupied) + "/" + lunas::size_units(full_size) + ") [";
 		struct termsize term		= lunas::terminal_size();
-		float		term_width	= term.ts_col;
+		double		term_width	= term.ts_col;
 		std::string	size_percentage = " " + lunas::decimal_precision((occupied / full_size) * 100, 2) + " %";
-		double		bar_width	= term_width - stat.size() - size_percentage.size();
+		double		bar_width	= term_width - ( double ) (stat.size() - size_percentage.size());
 		int		occupied_width	= bar_width * (occupied / full_size);
 		int		free_width	= bar_width * (1 - (occupied / full_size));
 
