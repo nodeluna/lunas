@@ -1,0 +1,3 @@
+[submodule "lib/luco"]
+	path = lib/luco
+	url = https://github.com/nodeluna/luco

@@ -41,6 +41,7 @@ A syncing cli tool that can handle more than two directories locally and remotel
 
 or
 
+* git submodule update --init --recursive
 * cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++
 * ninja -C build
 

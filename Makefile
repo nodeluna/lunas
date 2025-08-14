@@ -4,6 +4,7 @@ DIRS = build bin
 CMAKE_CMD=cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++ -Wno-dev
 
 all:
+	@git submodule update --init --recursive
 	@$(CMAKE_CMD) -DCMAKE_BUILD_TYPE=Release
 	@ninja -C build
 

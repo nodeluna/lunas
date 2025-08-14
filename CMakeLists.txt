@@ -45,6 +45,10 @@ set(mods_dir "${PROJECT_SOURCE_DIR}/mod")
 file(GLOB_RECURSE MODS ${mods_dir}/*.cpp)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${output_dir}")
 
+include_directories(lib/luco/include/)
+set(luco_mod_dir ${PROJECT_SOURCE_DIR}/lib/luco/mod)
+set(MODS "${MODS};${luco_mod_dir}/luco.cpp")
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
         add_compile_options(-D__cpp_concepts=202002L -Wno-builtin-macro-redefined -Wno-macro-redefined -fcolor-diagnostics)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -67,7 +71,7 @@ target_link_libraries(${PROJECT_NAME} pthread)
 target_sources(${PROJECT_NAME}
 	PUBLIC
 	FILE_SET CXX_MODULES
-	BASE_DIRS ${mods_dir}
+	BASE_DIRS ${mods_dir} ${luco_mod_dir}
 	FILES ${MODS}
 )
 

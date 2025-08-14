@@ -19,7 +19,6 @@ import std.compat;
 #endif
 
 export module lunas.config.file:manager;
-import :luco;
 import lunas.config.options.functions;
 import lunas.config.options;
 import lunas.config.filler;
@@ -27,6 +26,8 @@ import lunas.cppfs;
 import lunas.ipath;
 import lunas.stdout;
 import lunas.error;
+
+import luco;
 
 export namespace lunas
 {
@@ -118,7 +119,6 @@ namespace lunas
 			return std::monostate();
 		}
 
-#ifdef REMOTE_ENABLED
 		bool is_num(const std::string& x)
 		{
 			return std::all_of(x.begin(), x.end(),
@@ -128,47 +128,39 @@ namespace lunas
 					   });
 		}
 
-		std::expected<struct lunas::ipath::remote_path, lunas::error>
-		fill_remote_path(const std::multimap<std::string, std::string>& nest, std::multimap<std::string, std::string>::iterator& it,
-				 const std::string& name)
+#ifdef REMOTE_ENABLED
+		std::expected<struct lunas::ipath::remote_path, lunas::error> fill_remote_path(const luco::node&  nest,
+											       const std::string& name)
 		{
-			std::string			 nest_path = it->first;
-			size_t				 nest_size = nest_path.size();
 			struct lunas::ipath::remote_path remote_path;
-
 			auto				 rpaths_options = config::get_rpaths_options();
 
-			while (it != nest.end() && it->first.find(nest_path) != it->first.npos)
+			for (const auto& [option, value] : *nest.as_object())
 			{
-				std::string option = it->first.substr(nest_size, it->first.size());
 				if (auto itr1 = rpaths_options.find("-" + option); itr1 != rpaths_options.end())
 				{
 					remote_path.srcdest	    = itr1->second();
-					remote_path.session_data.ip = it->second;
+					remote_path.session_data.ip = value.stringify();
 				}
 				else if (option == "N" || option == "port")
 				{
-					if (is_num(it->second))
+					if (value.is_number())
 					{
-						remote_path.session_data.port = std::stoi(it->second);
+						remote_path.session_data.port = value.as_number();
 					}
 					else
 					{
-						std::string err = "nest '" + name + "': port '" + it->second + "' isn't a valid number";
+						std::string err =
+						    "nest '" + name + "': port '" + value.stringify() + "' isn't a valid number";
 						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
 					}
 				}
 				else if (option == "pw" || option == "password")
 				{
-					remote_path.session_data.pw = it->second;
+					remote_path.session_data.pw = value.stringify();
 				}
-				++it;
 			}
 
-			if (it != nest.begin())
-			{
-				--it;
-			}
 			if (remote_path.session_data.ip.empty())
 			{
 				std::string err = "remote path for nest '" + name + "' isn't provided";
@@ -180,7 +172,7 @@ namespace lunas
 #endif // REMOTE_ENABLED
 
 		std::expected<std::monostate, lunas::error>
-		config_fill(std::multimap<std::string, std::string>& nest, const std::string& name, lunas::config::options& options,
+		config_fill(const luco::node& nest, const std::string& name, lunas::config::options& options,
 			    std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths)
 		{
 			auto lpaths_options = config::get_lpaths_options();
@@ -189,56 +181,130 @@ namespace lunas
 			auto misc_options   = config::get_misc_options();
 			auto info	    = config::get_info_options();
 
-			for (auto it = nest.begin(); it != nest.end(); ++it)
+			for (const auto [key, value] : *nest.as_object())
 			{
-				if (auto itr = onoff_options.find("-" + it->first); itr != onoff_options.end())
+				if (auto itr = onoff_options.find("-" + key); itr != onoff_options.end())
 				{
-					if (not itr->second(it->second, options))
+					if (not value.is_boolean())
 					{
-						std::string err = "wrong value '" + it->second + "' for on/off option '" + it->first + "'";
+						std::string err = "wrong value '" + value.stringify() + "' for on/off option '" + key + "'";
 						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument));
 					}
+
+					itr->second(value.as_boolean() ? "on" : "off", options);
 				}
-				else if (auto itr1 = lpaths_options.find("-" + it->first); itr1 != lpaths_options.end())
+				else if (auto itr1 = lpaths_options.find("-" + key); itr1 != lpaths_options.end())
 				{
-					ipaths.emplace_back(itr1->second(it->second));
+					if (value.is_array())
+					{
+						for (const auto& val : *value.as_array())
+						{
+							ipaths.emplace_back(itr1->second(val.stringify()));
+						}
+					}
+					else if (value.is_object())
+					{
+						std::string err =
+						    "wrong value type for option '" + key + "' expected array or simple value";
+						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument));
+					}
+					else
+					{
+						ipaths.emplace_back(itr1->second(value.stringify()));
+					}
 				}
-				else if (auto itr2 = misc_options.find("-" + it->first); itr2 != misc_options.end())
+				else if (auto itr2 = misc_options.find("-" + key); itr2 != misc_options.end())
 				{
-					auto ok = itr2->second(it->second, options);
+					auto ok = itr2->second(value.stringify(), options);
 					if (not ok)
 					{
 						return std::unexpected(ok.error());
 					}
 				}
 #ifdef REMOTE_ENABLED
-				else if (auto itr3 = rpaths_options.find("-" + it->first); itr3 != rpaths_options.end())
+				else if (auto itr3 = rpaths_options.find("-" + key); itr3 != rpaths_options.end())
 				{
-					struct lunas::ipath::remote_path remote_path;
-					remote_path.session_data.ip = it->second;
-					remote_path.srcdest	    = itr3->second();
-					ipaths.emplace_back(std::move(remote_path));
-				}
-				else if (it->first.find("remote::") != it->first.npos && it->first.front() != '#')
-				{
-					auto remote_path = fill_remote_path(nest, it, name);
-					if (remote_path)
+					if (value.is_array())
 					{
-						ipaths.emplace_back(std::move(remote_path.value()));
+						for (const auto& val : *value.as_array())
+						{
+							struct lunas::ipath::remote_path remote_path;
+							remote_path.session_data.ip = val.stringify();
+							remote_path.srcdest	    = itr3->second();
+							ipaths.emplace_back(std::move(remote_path));
+						}
+					}
+					else if (value.is_object())
+					{
+						std::string err =
+						    "wrong value type for option '" + key + "' expected array or simple value";
+						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument));
 					}
 					else
 					{
-						return std::unexpected(remote_path.error());
+						struct lunas::ipath::remote_path remote_path;
+						remote_path.session_data.ip = value.stringify();
+						remote_path.srcdest	    = itr3->second();
+						ipaths.emplace_back(std::move(remote_path));
+					}
+				}
+				else if (key == "remote")
+				{
+					auto handle_rpath = [&](const luco::node& val) -> std::expected<std::monostate, lunas::error>
+					{
+						auto remote_path = fill_remote_path(val, name);
+						if (remote_path)
+						{
+							ipaths.emplace_back(std::move(remote_path.value()));
+							return std::monostate();
+						}
+						else
+						{
+							return std::unexpected(remote_path.error());
+						}
+					};
+
+					if (value.is_array())
+					{
+						for (const auto& val : *value.as_array())
+						{
+							if (not val.is_object())
+							{
+								std::string err = "wrong value type for option '" + key +
+										  "' expected objects inside the array";
+								return std::unexpected(
+								    lunas::error(err, lunas::error_type::config_invalid_argument));
+							}
+							auto ok = handle_rpath(val);
+							if (not ok)
+							{
+								return ok;
+							}
+						}
+					}
+					else if (value.is_object())
+					{
+						auto ok = handle_rpath(value);
+						if (not ok)
+						{
+							return ok;
+						}
+					}
+					else
+					{
+						std::string err = "wrong type '" + value.type_name() + "' for option '" + key +
+								  "'. expected array or object";
+						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument));
 					}
 				}
 #endif // REMOTE_ENABLED
-				else if (auto itr4 = info.find("-" + it->first); itr4 != info.end())
+				else if (auto itr4 = info.find("-" + key); itr4 != info.end())
 				{
 					itr4->second();
 				}
-				else if (it->first.front() != '#')
+				else
 				{
-					return std::unexpected(lunas::error("nest '" + name + "': wrong option '" + it->first + "'",
+					return std::unexpected(lunas::error("nest '" + name + "': wrong option '" + key + "'",
 									    lunas::error_type::config_invalid_option));
 				}
 			}
@@ -257,10 +323,9 @@ namespace lunas
 
 			try
 			{
-				luco nests = luco(config_dir + file_name);
-				nests.parse();
-				auto itr = nests.find_preset(name);
-				if (itr == nests.get_map().end())
+				luco::node node = luco::parser::parse(std::filesystem::path(config_dir + file_name));
+				luco::expected<std::reference_wrapper<luco::node>, luco::error> nest = node.try_at(name);
+				if (not nest)
 				{
 					std::string err = "preset '" + name + "' doesn't exist";
 					return std::unexpected(lunas::error(err, lunas::error_type::config_preset_name_doesnt_exists));
@@ -268,10 +333,13 @@ namespace lunas
 
 				lunas::println(options.quiet, ":: running preset '{}'", name);
 
-				auto nest = nests.preset(name);
-				return config_fill(nest, name, options, ipaths);
+				return config_fill(nest.value().get(), name, options, ipaths);
 			}
 			catch (const std::exception& e)
+			{
+				return std::unexpected(lunas::error(e.what(), lunas::error_type::config_file_parsing_error));
+			}
+			catch (const luco::error& e)
 			{
 				return std::unexpected(lunas::error(e.what(), lunas::error_type::config_file_parsing_error));
 			}

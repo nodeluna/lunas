@@ -442,7 +442,7 @@ print the program's license
 print the help statement
 
 
-.SH CONFIG FILE
+.SH CONFIG FILE (luco)
 .B where presets of certain paths and options to be defined with a preset name.
 .br
 the way to run a preset is with 'lunas -c NAME' after defining this preset in the config file.
@@ -453,13 +453,9 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
 .br
 - options use a simple key=value pair where each key is seperated from its value with an '=' sign
 .br
-- every key=value option must be on a different line or ended with a ';' if there's an option after it, option = value; option2 = value2;
+- every key=value option must be on a different line
 .br
 - nested options, such as "remote", are also encapsulated within {} and options inside it are key=value pairs
-.br
-- the ending bracket '}' must have a ';' after it, if something comes after it on the same line like an option or another preset/nest 
-.br
-- the ';' can be escaped with '\\;'
 .br
 - the '{' can be escaped by writing it twice '{{'
 .br
@@ -477,14 +473,19 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
                 path = /path/to/dir
                 remote-path = user@ip:/path/to/dir
                 rdest = user@ip:/path/to/dir
-                dry-run = on ; mkdir = on; update = on
+                dry-run = on
+                mkdir = on
+                update = on
                 #progress = on
                 #verbose = on
 
                 # the placeholder's brackets must be escaped as explained in config file syntax
                 prehook = /path/to/meow.sh {{path}} {{attributes.size}}
 
-                remote{ r = user@ip:/path/to/dir; port = 22 }; remote { ..... }
+                remote {
+                        r = user@ip:/path/to/dir
+                        port = 22
+                }
 
                 remote {
                         r = user@ip:/path/to/dir2
@@ -495,7 +496,8 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
         luna{
                 path = /path/to/dir
                 d = /path/to/dir2
-                dereference = on ; update = on
+                dereference = on
+                update = on
 
                 # the placeholder's brackets must be escaped as explained in config file syntax
                 prehook = /path/to/meow.sh {{path}} {{attributes.size}}
