@@ -45,6 +45,13 @@ or
 * cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++
 * ninja -C build
 
+## install
+
+* \# make install
+
+or
+
+* \# ninja -C build install
 ## remote syncing
 
 thanks to libssh, lunas can sync remote directories with local or/and remote ones using sftp. Read the --help statement
