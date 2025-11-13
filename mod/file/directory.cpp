@@ -118,7 +118,7 @@ namespace lunas
 		{
 			auto error_type =
 			    ec == std::errc::no_such_file_or_directory ? lunas::error_type::no_such_file : lunas::error_type::opendir;
-			throw lunas::error("couldn't open directory '" + path.string() + ", " + ec.message(), error_type);
+			throw lunas::error("couldn't open directory '" + path.string() + "', " + ec.message(), error_type);
 		}
 	}
 

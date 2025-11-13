@@ -35,6 +35,13 @@ A syncing cli tool that can handle more than two directories locally and remotel
 
 * lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
 
+## build dependencies
+
+* makefile
+* ninja
+* cmake
+* git
+
 ## build
 
 * make

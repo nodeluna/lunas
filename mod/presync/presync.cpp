@@ -87,8 +87,6 @@ namespace lunas
 			return std::monostate();
 		}
 
-		content.to_be_synced = lunas::presync::to_be_synced_counter(content.files_table);
-
 		return content;
 	}
 }

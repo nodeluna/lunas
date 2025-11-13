@@ -153,6 +153,8 @@ export namespace lunas
 					lunas::printerr("{}", ok.error().message());
 				}
 			}
+
+			progress_stats.total_to_be_synced = progress_stats.total_synced;
 		}
 
 		return std::monostate();

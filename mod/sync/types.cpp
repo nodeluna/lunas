@@ -88,10 +88,10 @@ export namespace lunas
 			const size_t			    index;
 			const std::optional<std::uintmax_t> file_size;
 
-			file_metadata& operator=(file_metadata& other)	= delete("avoiding dangling reference situation");
-			file_metadata(file_metadata& other)		= delete("avoiding dangling reference situation");
-			file_metadata& operator=(file_metadata&& other) = delete("avoiding dangling reference situation");
-			file_metadata(file_metadata&& other)		= delete("avoiding dangling reference situation");
+			file_metadata& operator=(file_metadata& other)	= delete ("avoiding dangling reference situation");
+			file_metadata(file_metadata& other)		= delete ("avoiding dangling reference situation");
+			file_metadata& operator=(file_metadata&& other) = delete ("avoiding dangling reference situation");
+			file_metadata(file_metadata&& other)		= delete ("avoiding dangling reference situation");
 
 			explicit file_metadata(const path_type& path, const lunas::metadata& metadata, const size_t& index,
 					       std::optional<std::uintmax_t> size = std::nullopt)

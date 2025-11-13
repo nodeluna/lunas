@@ -181,7 +181,7 @@ namespace lunas
 			auto misc_options   = config::get_misc_options();
 			auto info	    = config::get_info_options();
 
-			for (const auto [key, value] : *nest.as_object())
+			for (const auto& [key, value] : *nest.as_object())
 			{
 				if (auto itr = onoff_options.find("-" + key); itr != onoff_options.end())
 				{

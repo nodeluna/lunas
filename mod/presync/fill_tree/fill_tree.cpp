@@ -68,9 +68,10 @@ namespace lunas
 				return std::unexpected(directory.error());
 			}
 
-			std::expected<std::monostate, lunas::error> ok;
+			std::expected<std::monostate, lunas::error>  ok;
+			std::expected<directory_entry, lunas::error> src_file;
 
-			while (auto src_file = directory.value()->read())
+			while ((src_file = directory.value()->read()))
 			{
 				if (auto ok = src_file.value().holds_attributes(); not ok)
 				{
@@ -92,7 +93,11 @@ namespace lunas
 				lunas::content::insert(content, metadata, relative_path, data);
 			}
 
-			if (not directory.value()->eof())
+			if (not src_file && src_file.error().value() != lunas::error_type::readdir_eof)
+			{
+				return std::unexpected(src_file.error());
+			}
+			else if (not directory.value()->eof())
 			{
 				return std::unexpected(lunas::error("didn't reach eof", lunas::error_type::readdir_eof));
 			}

@@ -80,7 +80,7 @@ namespace lunas
 			}
 
 			path::pop_seperator(cwd);
-			std::string prefix("", 3);
+			std::string prefix;
 			for (auto itr = path.begin(); itr != path.end(); ++itr)
 			{
 				if (prefix.size() >= 3)

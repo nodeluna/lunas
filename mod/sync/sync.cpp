@@ -41,65 +41,6 @@ export namespace lunas
 
 namespace lunas
 {
-	template<typename hook_type>
-	std::expected<std::vector<lunas::hook<hook_type>>, lunas::error> setup_hooks(const struct lunas::parsed_data& data)
-	{
-		std::vector<lunas::hook<hook_type>> hooks;
-
-		auto init_hooks = [&hooks](const std::string& prehook) -> std::expected<std::monostate, lunas::error>
-		{
-			hooks.push_back({});
-			auto ok = hooks.back().parse(prehook);
-			if (not ok)
-			{
-				if constexpr (std::is_same_v<hook_type, lunas::pre>)
-				{
-					lunas::printerr("[prehook-parsing-error]");
-				}
-				else if constexpr (std::is_same_v<hook_type, lunas::post>)
-				{
-					lunas::printerr("[posthook-parsing-error]");
-				}
-				else
-				{
-					lunas::printerr("[hook-parsing-error]");
-				}
-				return std::unexpected(ok.error());
-			}
-
-			return std::monostate();
-		};
-
-		if constexpr (std::is_same_v<hook_type, lunas::pre>)
-		{
-			for (const auto& prehook : data.options.prehooks)
-			{
-				auto ok = init_hooks(prehook);
-				if (not ok)
-				{
-					return std::unexpected(ok.error());
-				}
-			}
-		}
-		else if constexpr (std::is_same_v<hook_type, lunas::post>)
-		{
-			for (const auto& posthook : data.options.posthooks)
-			{
-				auto ok = init_hooks(posthook);
-				if (not ok)
-				{
-					return std::unexpected(ok.error());
-				}
-			}
-		}
-		else
-		{
-			static_assert(false, "unsupported tag type for lunas::hook<tag>");
-		}
-
-		return hooks;
-	}
-
 	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data)
 	{
 		const auto& ipaths = data.get_ipaths();
@@ -142,14 +83,14 @@ namespace lunas
 
 		struct hooks hooks;
 		{
-			auto ok = setup_hooks<lunas::pre>(data);
+			auto ok = setup_hooks<lunas::pre>(data.options.posthooks);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());
 			}
 			hooks.prehooks = std::move(ok.value());
 
-			auto ok2       = setup_hooks<lunas::post>(data);
+			auto ok2       = setup_hooks<lunas::post>(data.options.posthooks);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());
@@ -268,14 +209,14 @@ namespace lunas
 
 		struct hooks hooks;
 		{
-			auto ok = setup_hooks<lunas::pre>(data);
+			auto ok = setup_hooks<lunas::pre>(data.options.prehooks);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());
 			}
 			hooks.prehooks = std::move(ok.value());
 
-			auto ok2       = setup_hooks<lunas::post>(data);
+			auto ok2       = setup_hooks<lunas::post>(data.options.prehooks);
 			if (not ok)
 			{
 				return std::unexpected(ok.error());
