@@ -887,6 +887,20 @@ export namespace lunas
 				return std::monostate();
 			}
 
+			std::expected<std::monostate, lunas::error> mtime_grace(const std::string&	     data,
+										     lunas::config::options& options)
+			{
+				if (is_num(data) == false)
+				{
+					std::string err = "argument '" + data + "' for option mtime-grace isn't a number";
+					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
+				}
+
+				options.mtime_grace = std::stoull(data);
+
+				return std::monostate();
+			}
+
 			std::expected<std::monostate, lunas::error> prehook(const std::string& data, lunas::config::options& options)
 			{
 				options.prehooks.push_back(data);

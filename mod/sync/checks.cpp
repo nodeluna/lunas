@@ -112,6 +112,10 @@ export namespace lunas
 		{
 			return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
 		}
+		else if (std::abs(src.metadata.mtime - dest.metadata.mtime) <= data.options.mtime_grace)
+		{
+			return std::unexpected(error(lunas::error_type::dest_check_skip_sync));
+		}
 		else if (dest.metadata.file_type == lunas::file_types::brokenlink ||
 			 src.metadata.file_type == lunas::file_types::brokenlink)
 		{

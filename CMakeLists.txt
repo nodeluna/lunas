@@ -11,8 +11,10 @@ if (EXISTS "${IMPORT_STD_PATH}")
 		set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
 	elseif(CMAKE_VERSION VERSION_LESS "4.0.3")
 		set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "a9e1cf81-9932-4810-974b-6eccaf14e457")
-	else()
+	elseif(CMAKE_VERSION VERSION_LESS "4.3.0")
 		set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "d0edc3af-4c50-42ea-a356-e2862fe7a444")
+	else()
+		set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD "451f2fe2-a8a2-47c3-bc32-94786d8fc91b")
 	endif()
 	set(CMAKE_CXX_STANDARD_REQUIRED OFF)
 	set(CMAKE_CXX_MODULE_STD ON)
@@ -33,9 +35,9 @@ set(CMAKE_CXX_STANDARD 26)
 add_compile_options(-Wall -Wextra -pedantic -O1)
 
 add_compile_options(
-	-Walloca -Wcast-align -Wcast-qual -Wchar-subscripts -Wctor-dtor-privacy
+	-Walloca -Wcast-align -Wchar-subscripts -Wctor-dtor-privacy
 	-Wdouble-promotion -Wenum-conversion -Wextra-semi -Wformat-signedness
-	-Wformat=2 -Wmismatched-tags -Wmissing-braces -Wmultichar -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith
+	-Wformat=2 -Wmismatched-tags -Wmissing-braces -Wmultichar -Wno-unused-command-line-argument -Wno-reserved-module-identifier -Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith
 	-Wrange-loop-construct -Wuninitialized -Wvla -Wwrite-strings -Werror=unused-result  -Werror=unused-but-set-variable -Werror
 	#-Wsign-conversion -Wdeprecated-copy-dtor -Wfloat-equal
 )

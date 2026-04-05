@@ -137,6 +137,8 @@ export namespace lunas
 				{"-pre",		config::filler::prehook     		},
 				{"-posthook",		config::filler::posthook     		},
 				{"-post",		config::filler::posthook     		},
+				{"-mtime-grace",	config::filler::mtime_grace		},
+				{"-mg",			config::filler::mtime_grace		},
 			};
 
 			// clang-format on

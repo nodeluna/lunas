@@ -351,6 +351,9 @@ check mtime of files and re-sync the file if mtime wasn't the same. this option 
 
         example: -s /path/to/dir -rd user@ip:/path/to/dir port=NUMBER -u
         example:  -p /path/to/dir -p /path/to/dir2 -p /path/to/dir3 -r user@ip:/path/to/dir4 port=NUMBER pw=PASSWORD -u
+.TP
+.B [-mg, --mtime-grace] <value>
+avoid syncing a file if there is an absolute epoch mtime difference between source and destination files which is less than or equal to <value>
 
 .TP
 .B [-pre, --prehook] <cmd {attributes}>

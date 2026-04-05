@@ -35,6 +35,7 @@ export namespace lunas
 				std::optional<int>	      attributes_gid_value;
 				bool			      attributes_mtime		  = true;
 				bool			      attributes_atime		  = false;
+				time_t			      mtime_grace		  = 0;
 				bool			      hardlink_regular_files	  = false;
 				bool			      remove_before		  = false;
 				bool			      remove_partials		  = false;
