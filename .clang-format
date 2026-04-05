@@ -5,6 +5,7 @@ ColumnLimit: 140
 SortIncludes: false
 IncludeBlocks: Preserve
 PointerAlignment: Left
+ReferenceAlignment: Left
 
 SpaceBeforeAssignmentOperators: true
 SpaceAfterCStyleCast: true
@@ -18,20 +19,48 @@ SpaceBeforeParensOptions:
   AfterFunctionDefinitionName: true
   AfterFunctionDeclarationName: true
 
-AlignConsecutiveAssignments: true
-AlignConsecutiveDeclarations: true
 AlignArrayOfStructures: Right
-AlignAfterOpenBracket: false
+AlignAfterOpenBracket: true
 AlignEscapedNewlines: true
+AlignTrailingComments: Always
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+AlignConsecutiveDeclarations:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+AlignConsecutiveTableGenCondOperatorColons:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
 
 AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortEnumsOnASingleLine: false
+AllowShortLambdasOnASingleLine: None
+AllowShortCompoundRequirementOnASingleLine: false
 
 SeparateDefinitionBlocks: Always
-BreakBeforeBraces: Attach
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterFunction: true
+  AfterControlStatement: true
+  AfterExternBlock: true
+  AfterNamespace: true
+  BeforeElse: true
+  BeforeCatch: true
+  BeforeWhile: false
+  BeforeLambdaBody: true
+  SplitEmptyFunction: true
+  SplitEmptyRecord: true
+  SplitEmptyNamespace: true
 AlwaysBreakTemplateDeclarations: true
+BreakBeforeConceptDeclarations: Always
+BreakConstructorInitializers: BeforeColon
+BreakAfterAttributes: Never
 
 AccessModifierOffset: 0
 NamespaceIndentation: All
@@ -43,3 +72,13 @@ IndentExternBlock: true
 IndentGotoLabels: true
 IndentPPDirectives: AfterHash
 LambdaBodyIndentation: Signature
+
+RequiresExpressionIndentation: OuterScope
+
+InsertBraces: true
+
+WrapNamespaceBodyWithEmptyLines: Never
+BinPackParameters: true
+BinPackArguments: true
+
+SpaceAfterLogicalNot: false

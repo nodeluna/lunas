@@ -1,6 +1,6 @@
 ## lunas
 
-    A syncing cli tool that can handle more than two directories locally and remotely
+A syncing cli tool that can handle more than two directories locally and remotely
 
 ## features
 
@@ -12,6 +12,7 @@
 * for convenient syncing of recurring operations, lunas has a simple-to-use config file where presets can be defined
 * sync file attributes
 * reliable --resume for interrupted transfers with mtime check mechanism to avoid resuming with src/dest mismatch. check the man page
+* scriptable capability by allowing you to only sync certain files with --allow path --allow-pattern pattern --exclude path --exclude-pattern pattern
 * and more, check the man page to know about them
 
 ## usage
@@ -28,65 +29,43 @@
 * by default, lunas only syncs files that do not already exist in destination directories, to overwrite older or newer files, --update or --rollback can be used.
 * if files with same relative path were found in different input dirs but with different file types, an error is printed and it won't be synced
 
-## installation
-
-    $ make
-    # make install
-
-## un-installation
-
-    $ make clean
-    # make uninstall
-
-## installation with cmake
-
-    $ cmake -B build
-    $ cd build
-    $ make
-    # make install
-
-## un-installation with cmake
-
-    $ cd build
-    # make uninstall
-    $ cd ..
-    $ rm -rf build
-
-## installation with nix flakes
-
-    $ nix profile install github:nodeluna/lunas
-
-    to install lunas without remote syncing, i.e without libssh
-    $ nix profile install github:nodeluna/lunas#lunas-local
-
 ## dependencies
 
-    gcc >= 12 or clang >= 16
+* (clang >= 17) OR (clang >= 18.1.2 and libc++) for faster compliation
 
-    lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
+* lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
 
-    lunas can be compiled without libssh, with local syncing only, as follows
+## build dependencies
 
-    $ make local
-    # make install
+* makefile
+* ninja
+* cmake
+* git
 
-    remove the old 'build' directory first if exists
+## build
 
-## files
+* make
 
-    when running "$ make" compiles the program and the binary is placed in the repo's main directory and build files in ./build
-    when running "# make install" the binary file is copied to /usr/bin/lunas , and the man page to /usr/share/man/man1/lunas.1
+or
 
-    when running "$ make clean" the ./build is removed. And the binary is removed from the repo's directory but not from /usr/bin/lunas
-    when running "# make uninstall" the binary file is removed from /usr/bin/lunas as well as /usr/share/man/man1/lunas.1
+* git submodule update --init --recursive
+* cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++
+* ninja -C build
 
+## install
+
+* \# make install
+
+or
+
+* \# ninja -C build install
 ## remote syncing
 
-    thanks to libssh, lunas can sync remote directories with local or/and remote ones using sftp. Read the --help statement
+thanks to libssh, lunas can sync remote directories with local or/and remote ones using sftp. Read the --help statement
 
 ## author
 
-    nodeluna - nodeluna@proton.me
+nodeluna - nodeluna@proton.me
 
 ## license
     This program is free software: you can redistribute it and/or modify it under the terms of

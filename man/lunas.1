@@ -33,11 +33,15 @@ For convenient syncing of recurring operations, lunas has a simple-to-use config
 
 .SH USAGE
 
-.B lunas -p dir1 -p dir2 -r user@ip:dir3 -rd user2@ip2:dir4 --update --compression --compression-level 9
+.B lunas -p dir1 -p dir2 -r user@ip:dir3     # -p, -r are for two-ways syncing '-p' for local dirs, '-r' for remote dirs
 .br
-.B lunas -s dir1 -rd user@ip:dir2 --update --compression --compression-level 9
+.B lunas -s dir1 -rd user@ip:dir2            # -s local source, -rs remote src, -d local dest, -rd remote dest
 .br
-.B lunas --config preset_name --update off --compression-level 9
+.B lunas -s dir1 -rd user@ip:dir2 -u         # -u/--update overwrite older files with newer ones based on their mtime
+.br
+.B lunas -s dir1 -rd user@ip:dir2 -rb        # -rb/--rollback overwrite newer files with older ones based on their mtime
+.br
+.B lunas -c preset                           # -c/--config preset with predefined options to be synced. check the man page 'CONFIG FILE' section
 
 .SH OPTIONS
 .TP
@@ -106,7 +110,25 @@ enable ssh logs. available levels are: nolog, warning, protocol, packet and func
 .br
 
 .TP
-.B [-t, --timeout] <seconds>
+.B [-sr, --sftp-retries] <times>
+
+if the ssh server was disconnected while copying a file, retry x times to recopy it before moving on to the next file
+
+-> check out --sftp-timeout
+
+-> default is 6 retries
+
+.TP
+.B [-st, --sftp-timeout] <seconds>
+
+if the ssh server was disconnected while copying a file, sleep x seconds between retries
+
+-> check out --sftp-retries
+
+-> default is 10 seconds
+
+.TP
+.B [-ct, --connect-timeout] <seconds>
 
 set a timeout for the ssh connection
 
@@ -119,6 +141,11 @@ chose the compression level, 1-9, 9 being the most efficient but slower
 .B [-mkdir, --make-directory]
 
 make any input directory if it doesn't exists, locally and remotely
+
+.TP
+.B [-nr, --no-recursive]
+
+do not recursively sync input directories regardless of the other options used
 
 .TP
 .B [-x, --exclude] <relative/path/inside/input/dir>
@@ -139,7 +166,42 @@ exclude a path from getting synced. this option can be used many times to *exclu
 .TP
 .B [-xp, --exclude-pattern] <pattern>
 
-exclude a path with a pattern from getting synced. this option can be used many times to *exclude* multiple patterns
+exclude files/dirs with a certain pattern from getting synced. this option can be used many times to *exclude* multiple patterns
+
+.TP
+[-a, --allow] <relative/path/inside/input/dir>
+
+allow a path to be synced. this option can be used many times to *allow* multiple directories/files
+
+	# only relative path starting from inside the input dir '/dir1/dir2/' like dir3/dir or dir3/file is allowed
+.br
+
+		example:  -r user@ip:/dir1/dir2/ -a dir3/dir -a dir3/file -a this_file_is_inside_dir2
+.br
+		example:  -p /dir1/dir2/ -a dir3/dir -a dir3/file -a dir3/dir4/dir5 -a this_dir_is_inside_dir2
+.br
+
+	# a /full/path or regular ./relative/paths aren't allowed, and would get ignored
+.br
+
+-> if this option is used, only files that are in the allowed list would be synced
+.br
+
+*Note* if exclude options are used with this option then, if found, the excluded files would be excluded from the allowed list
+
+.TP
+[-ap, --allow-pattern] <pattern>
+
+allow files/dirs with a certain pattern to be synced. this option can be used many times to *allow* multiple patterns
+
+.br
+		example:  p path1 -p path2 -ap .jpg -ap .png -ap name
+.br
+
+-> if this option is used, only files that are in the allowed list would be synced
+.br
+
+*Note* if exclude options are used with this option then, if found, the excluded files would be excluded from the allowed list
 
 .TP
 .B [-F, --fsync]
@@ -155,6 +217,15 @@ follow symlinks. sync the target the symlink is pointing to instead of the symli
 .B [-B, --no-broken-link]
 
 don't sync broken symlinks 
+
+.TP
+.B [-l, --link]
+
+hardlink regular files instead of copying them (works with files on the same machine (local to local) or (remote to remote with the same user@ip))
+
+if source and destination files are on different machines, then it is normally copied
+
+-> if the destination file already exists, then it is removed then hardlinked from source
 
 .TP
 .B [-P, --progress]
@@ -174,11 +245,18 @@ print the source of which files/dirs were copied from not just the destination
 disable print statements and only print errors
 
 .TP
-.B [-a, --attributes] <own,gid=off,uid=on,utimes,atime,mtime,all>
+.B [-A, --attributes] <own,gid=off,uid=on,utimes,atime,mtime,all>
    
 sync file attributes. own, ownership, is for uid and gid. utimes is for atime and mtime. all is for all attributes
 .br
+
+uid, gid and own can be set manually. uid=NUMBER,gid=1000. own=1000 sets both uid AND gid
+.br
+using uid, gid or own without providing a NUMBER makes it sync the attribute from the source file
+
+.br
 mtime is enabled by default, to disable it --attributes mtime=off
+
 .br
 --attributes own # ON
 .br
@@ -186,8 +264,8 @@ mtime is enabled by default, to disable it --attributes mtime=off
 .br
 --attributes own=off # OFF
 
-        example: -r user@ip:/path/to/dir port=NUMBER -a all,mtime=off
-        example: -r user@ip:/path/to/dir -a uid,gid,atime=on
+        example: -r user@ip:/path/to/dir port=NUMBER -A all,mtime=off
+        example: -r user@ip:/path/to/dir -A uid,gid,atime=on
 
 --attributes all,mtime=off # this turns every attributes on then mtime off
 .br
@@ -196,13 +274,32 @@ mtime is enabled by default, to disable it --attributes mtime=off
 .TP
 .B [-ms, --minimum-space] <sizeUnit>
 
-prevent a partition from filling up by setting a threshold to prevent syncing files to it once it's reached. default is 1GiB
+prevent a partition from filling up by setting a threshold to prevent syncing files to it once it's reached. default is off
 .br
 possible units are kib, mib, gib, tib, pib. a number without a unit is considered bytes
 
         example: -p dir -p dir2 -ms 0.5Tib
         example: -p dir -p dir2 -ms 100mib
 
+.TP
+.B [-MFS, --max-file-size] <sizeUnit>
+
+don't sync a regular file if it is bigger than sizeUnit
+.br
+possible units are kib, mib, gib, tib, pib. a number without a unit is considered bytes
+
+        example: -p dir -p dir2 -MFS 0.5Tib
+        example: -p dir -p dir2 -MFS 100mib
+
+.TP
+.B [-mfs, --min-file-size] <sizeUnit>
+
+don't sync a regular file if it is smaller than sizeUnit
+.br
+possible units are kib, mib, gib, tib, pib. a number without a unit is considered bytes
+
+        example: -p dir -p dir2 -mfs 0.5Tib
+        example: -p dir -p dir2 -mfs 100mib
 .TP
 .B [-R, --resume]
 
@@ -236,6 +333,16 @@ files that don't exist in 'dir1' AND 'dir2' but exists in 'dir3' or/and 'dir4' w
 if files exist in -p or -r paths, they wouldn't be removed from -d or -rd paths, since -p and -r are src+dest i.e they are still sources
 
 .TP
+.B [-rmb, --remove-before]
+
+remove the destination *regular* file, if it exists, before updating it
+
+.TP
+.B [-rmp, --remove-partials]
+
+remove the files.ls.part, if an error occured which interrupted the file transfer
+
+.TP
 .B [-u, --update]
 
 check mtime of files and re-sync the file if mtime wasn't the same. this option enables -a mtime. the destination file, if exists, gets removed then re-synced again. it replaces old mtime files with newer mtime ones.
@@ -244,6 +351,72 @@ check mtime of files and re-sync the file if mtime wasn't the same. this option 
 
         example: -s /path/to/dir -rd user@ip:/path/to/dir port=NUMBER -u
         example:  -p /path/to/dir -p /path/to/dir2 -p /path/to/dir3 -r user@ip:/path/to/dir4 port=NUMBER pw=PASSWORD -u
+.TP
+.B [-mg, --mtime-grace] <value>
+avoid syncing a file if there is an absolute epoch mtime difference between source and destination files which is less than or equal to <value>
+
+.TP
+.B [-pre, --prehook] <cmd {attributes}>
+
+*inject* many prehooks/commands prior to every file that is about to be synced
+
+*retrieve* metadata from the source file
+
+*control* whether this file is synced or not by the return value
+
+this option can be used many times to inject multiple hooks
+
+        example: -s dir1 -d dir2 --prehook "/path/to/meow.sh {path} {attributes.mtime} {name} {extension} {attributes.size} {attributes.type}" \\
+
+		--prehook "./logger {path}"
+
+meow.sh/logger would recieve the information it requested and it must return 0 to sync or 1 to not sync
+
+*optional* it can also print to stdout for lunas to print it to the terminal
+
+when running multiple prehooks, the first prehook that returns a non 0 would prevent the rest of the hooks from executing
+
+placeholders:
+.br
+	{path}             : the full path of the source
+.br
+	{attributes.mtime} : the mtime (epoch) of the source
+.br
+	{attributes.size}  : the size (bytes) of the source
+.br
+	{attributes.type}  : the type of the source
+.br
+	{name}             : filename of the source
+.br
+	{extension}        : filename extension of the source
+
+*note* '{' and '}' are escaped by writing them twice like '{{' which would be translated to '{' not as part of the {data}
+
+.TP
+.B [-post, --posthook] <cmd {attributes}>
+
+*inject* many posthooks/commands *after* every file that lunas tries to sync
+
+*retrieve* metadata from the source file
+
+this option can be used many times to inject multiple hooks
+
+        example: -s dir1 -d dir2 --posthook "logger.sh {path}"
+
+logger would recieve the information it requested
+
+*optional* it can also print to stdout for lunas to print it to the terminal
+
+return 0 from 'logger.sh' to print it as message or 1 as error
+
+when running multiple posthooks, the first posthook that returns a non 0 would prevent the rest of the hooks from executing
+
+placeholders:
+.br
+	same as --prehook
+
+*note* '{' and '}' are escaped as explained in --prehook
+
 
 .TP
 .B [-dr, --dry-run]
@@ -272,7 +445,7 @@ print the program's license
 print the help statement
 
 
-.SH CONFIG FILE
+.SH CONFIG FILE (luco)
 .B where presets of certain paths and options to be defined with a preset name.
 .br
 the way to run a preset is with 'lunas -c NAME' after defining this preset in the config file.
@@ -283,13 +456,13 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
 .br
 - options use a simple key=value pair where each key is seperated from its value with an '=' sign
 .br
-- every key=value option must be on a different line or ended with a ';' if there's an option after it, option = value; option2 = value2;
+- every key=value option must be on a different line
 .br
 - nested options, such as "remote", are also encapsulated within {} and options inside it are key=value pairs
 .br
-- the ending bracket '}' must have a ';' after it, if something comes after it on the same line like an option or another preset/nest 
+- the '{' can be escaped by writing it twice '{{'
 .br
-- the ';' can be escaped with '\\;'
+- the '}' can be escaped by writing it twice '}}'
 .br
 - # commenting lines is done like '# key = value'
 .br
@@ -303,11 +476,19 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
                 path = /path/to/dir
                 remote-path = user@ip:/path/to/dir
                 rdest = user@ip:/path/to/dir
-                dry-run = on ; mkdir = on; update = on
+                dry-run = on
+                mkdir = on
+                update = on
                 #progress = on
                 #verbose = on
 
-                remote{ r = user@ip:/path/to/dir; port = 22 }; remote { ..... }
+                # the placeholder's brackets must be escaped as explained in config file syntax
+                prehook = /path/to/meow.sh {{path}} {{attributes.size}}
+
+                remote {
+                        r = user@ip:/path/to/dir
+                        port = 22
+                }
 
                 remote {
                         r = user@ip:/path/to/dir2
@@ -318,7 +499,11 @@ the way to run a preset is with 'lunas -c NAME' after defining this preset in th
         luna{
                 path = /path/to/dir
                 d = /path/to/dir2
-                dereference = on ; update = on
+                dereference = on
+                update = on
+
+                # the placeholder's brackets must be escaped as explained in config file syntax
+                prehook = /path/to/meow.sh {{path}} {{attributes.size}}
         }
     
 .B     ------------------------------------------------------
