@@ -25,7 +25,7 @@ export import lunas.file_table;
 export import lunas.file_types;
 export import lunas.stdout;
 export import lunas.file;
-import lunas.stats;
+export import lunas.stats;
 
 export namespace lunas
 {

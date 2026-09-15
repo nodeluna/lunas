@@ -18,6 +18,7 @@ import std.compat;
 #endif
 
 export module lunas.config.cliarg;
+export import :kvoptions;
 import lunas.config.options;
 import lunas.config.options.functions;
 import lunas.about;
@@ -86,45 +87,43 @@ namespace lunas
 			rpath.session_data.ip = argv[index + 1];
 
 			index++;
+			std::string options;
 			while (index++ != (argc - 1))
 			{
-				std::string option = argv[index];
-				if (option.find('=') != option.npos)
-				{
-					option.resize(option.find('='));
-				}
-				if (option[0] == '-')
+				if (options[0] == '-')
 				{
 					index--;
 					break;
 				}
-				std::string argument = argv[index];
-				argument	     = argument.substr(argument.find('=') + 1, argument.size());
 
-				if ((option == "N" || option == "port") && is_num(argument) == false)
+				options += argv[index];
+				options += " ";
+			}
+
+			std::map<std::string, luco::node> kv_map = {
+			    {	     "N",		  luco::node(0)},
+			    {    "port",	     luco::node(0)},
+			    {	     "pw", luco::node(std::string())},
+			    {"password", luco::node(std::string())},
+			};
+
+			std::expected<std::vector<std::pair<std::string, luco::node>>, lunas::error> kv_mapped =
+			    kvoption_parser(options, kv_map);
+
+			if (not kv_mapped)
+			{
+				return std::unexpected(kv_mapped.error());
+			}
+
+			for (auto& [k, v] : kv_mapped.value())
+			{
+				if (k == "N" || k == "port")
 				{
-					std::string err = std::format("argument '{}' for option '{}' isn't a number", argument, option);
-					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
+					rpath.session_data.port = v.as_number();
 				}
-				else if (option == "N" || option == "port")
+				else if (k == "pw" || k == "password")
 				{
-					int port = std::stoi(argument);
-					if (port < 0)
-					{
-						std::string err = std::format("port number '{}' for '{}' can't be negative ",
-									      std::to_string(port), rpath.session_data.ip);
-						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument_type));
-					}
-					rpath.session_data.port = port;
-				}
-				else if (option == "pw" || option == "password")
-				{
-					rpath.session_data.pw = argument;
-				}
-				else
-				{
-					std::string err = std::format("option '{}' isn't recognized", option);
-					return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_option));
+					rpath.session_data.pw = v.as_string();
 				}
 			}
 

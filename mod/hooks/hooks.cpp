@@ -10,10 +10,10 @@ import std.compat;
 #endif
 
 export module lunas.hooks;
-import :cmd;
+export import :cmd;
 export import :types;
 export import :hook;
-import :parser;
+export import :parser;
 
 export namespace lunas
 {

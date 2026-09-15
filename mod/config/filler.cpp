@@ -887,8 +887,7 @@ export namespace lunas
 				return std::monostate();
 			}
 
-			std::expected<std::monostate, lunas::error> mtime_grace(const std::string&	     data,
-										     lunas::config::options& options)
+			std::expected<std::monostate, lunas::error> mtime_grace(const std::string& data, lunas::config::options& options)
 			{
 				if (is_num(data) == false)
 				{

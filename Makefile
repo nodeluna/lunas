@@ -1,7 +1,7 @@
 SRCS := $(wildcard src/*.cpp)
 MODS := $(shell find mod -name "*.cpp")
 DIRS = build bin
-CMAKE_CMD=cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++ -Wno-dev
+CMAKE_CMD=cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++ -Wno-author
 
 all:
 	@git submodule update --init --recursive
