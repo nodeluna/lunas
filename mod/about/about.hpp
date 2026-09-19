@@ -19,7 +19,7 @@ namespace lunas
 		inline std::string author  = "\n  -> nodeluna - nodeluna@proton.me"
 					     "\n  -> https://github.com/nodeluna\n";
 
-		inline std::string version = std::string("\n  -> lunas - 3.0-beta") + (LOCAL_ONLY ? " (local)" : "");
+		inline std::string version = std::string("\n  -> lunas - 3.1-beta") + (LOCAL_ONLY ? " (local)" : "");
 
 		inline std::string license = "\n  -> GPLv3+\n"
 					     "  -> This program is distributed in the hope that it will be useful,\n"
