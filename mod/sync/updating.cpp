@@ -1,20 +1,18 @@
 #include <cassert>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <set>
-#	include <expected>
-#	include <variant>
-#	include <vector>
-#	include <ctime>
-#	include <string>
-#	include <cstdint>
-#	include <optional>
-#	include <filesystem>
-#endif
+#include <expected>
+#include <variant>
+#include <ctime>
+#include <cstdint>
+#include <optional>
 
 #include "updating.hpp"
+#include "checks.hpp"
+#include "copy/copy.hpp"
+#include "file_types/file_types.hpp"
+#include "stdout/stdout.hpp"
+#include "file/file.hpp"
+#include "copy/misc.hpp"
 
 namespace lunas
 {

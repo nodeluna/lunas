@@ -1,18 +1,11 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <expected>
-#	include <variant>
-#	include <cstring>
-#	include <cstdint>
-#	include <system_error>
-#	include <sys/stat.h>
-#	include <sys/time.h>
-#	include <ctime>
-#endif
+#include <string>
+#include <expected>
+#include <variant>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <ctime>
 
 #include "file_types/file_types.hpp"
 #include "error/error.hpp"

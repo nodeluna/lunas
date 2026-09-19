@@ -1,13 +1,7 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <filesystem>
-#	include <memory>
-#	include <expected>
-#	include <variant>
-#endif
+#include <expected>
+#include <variant>
 
 #include <luco.hpp>
 #include "error/error.hpp"

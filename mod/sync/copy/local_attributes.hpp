@@ -1,12 +1,8 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <expected>
-#	include <variant>
-#endif
+#include <string>
+#include <expected>
+#include <variant>
 
 #include "../types.hpp"
 #include "file_types/file_types.hpp"

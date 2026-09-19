@@ -1,17 +1,11 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <ctime>
-#include <system_error>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <expected>
-#	include <variant>
-#	include <cstring>
-#	include <cstdint>
-#endif
+#include <string>
+#include <expected>
+#include <variant>
+#include <cstring>
 
 #include "utimes.hpp"
 

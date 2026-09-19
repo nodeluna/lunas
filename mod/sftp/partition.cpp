@@ -2,12 +2,8 @@
 #include <libssh/libssh.h>
 #include <cassert>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <filesystem>
-#endif
+#include <string>
+#include <filesystem>
 
 #include "partition.hpp"
 

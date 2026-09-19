@@ -3,12 +3,7 @@
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <typeinfo>
-#endif
+#include <string>
 
 #include "error/error.hpp"
 

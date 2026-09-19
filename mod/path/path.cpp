@@ -1,10 +1,6 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <expected>
-#	include <filesystem>
-#endif
+#include <string>
+#include <expected>
+#include <filesystem>
 
 #include "path.hpp"
 

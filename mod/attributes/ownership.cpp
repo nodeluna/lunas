@@ -1,16 +1,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
-#include <system_error>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <expected>
-#	include <variant>
-#	include <cerrno>
-#	include <cstring>
-#endif
+#include <string>
+#include <expected>
+#include <variant>
+#include <cerrno>
+#include <cstring>
 
 #include "ownership.hpp"
 

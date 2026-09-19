@@ -18,6 +18,3 @@ target("lunas")
 	add_links("ssh")
 	add_defines("REMOTE_ENABLED")
 	add_installfiles("man/lunas.1", { prefixdir = "share/man/man1"})
-
-	-- add_defines("IMPORT_STD_IS_SUPPORTED")
-	-- set_policy("build.c++.modules", true)

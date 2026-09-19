@@ -1,19 +1,8 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <cstdint>
-#	include <ctime>
-#	include <vector>
-#	include <memory>
-#	include <expected>
-#	include <string>
-#	include <iostream>
-#	include <iomanip>
-#	include <iostream>
-#	include <filesystem>
-#endif
+#include <iostream>
 
 #include "types.hpp"
+#include "stats/stats.hpp"
+#include "terminal/terminal.hpp"
 
 namespace lunas
 {

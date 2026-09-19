@@ -1,11 +1,5 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <algorithm>
-#	include <ranges>
-#	include <unordered_set>
-#endif
+#include <string>
+#include <unordered_set>
 
 #include "exclude.hpp"
 #include "find.hpp"

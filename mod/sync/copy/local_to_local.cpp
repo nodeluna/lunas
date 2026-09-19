@@ -1,24 +1,22 @@
 #include <system_error>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <fstream>
-#	include <filesystem>
-#	include <queue>
-#	include <expected>
-#	include <thread>
-#	include <mutex>
-#	include <cstring>
-#	include <cerrno>
-#	include <cstdint>
-#	include <condition_variable>
-#	include <memory>
-#	include <utility>
-#endif
+#include <string>
+#include <fstream>
+#include <filesystem>
+#include <queue>
+#include <expected>
+#include <thread>
+#include <mutex>
+#include <cstring>
+#include <cerrno>
+#include <cstdint>
+#include <condition_variable>
+#include <memory>
+#include <utility>
 
 #include "local_to_local.hpp"
+#include "misc.hpp"
+#include "local_attributes.hpp"
 
 namespace lunas
 {

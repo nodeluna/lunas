@@ -1,29 +1,14 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <cctype>
-#	include <cstdlib>
-#	include <iostream>
-#	include <string>
-#	include <vector>
-#	include <functional>
-#	include <optional>
-#	include <unordered_map>
-#	include <algorithm>
-#	include <expected>
-#	include <variant>
-#	include <print>
-#endif
+#include <string>
+#include <vector>
+#include <functional>
+#include <expected>
+#include <variant>
 
 #include "../options.hpp"
-#include "../options_functions.hpp"
-#include "about/about.hpp"
-#include "sftp/sftp.hpp"
 #include "input_path/input_path.hpp"
 #include "error/error.hpp"
-#include "kvoption.hpp"
 
 namespace lunas
 {

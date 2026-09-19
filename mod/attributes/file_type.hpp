@@ -1,14 +1,7 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <expected>
-#	include <filesystem>
-#	include <cstring>
-#	include <cerrno>
-#	include <system_error>
-#endif
+#include <filesystem>
+#include <expected>
 
 #include "error/error.hpp"
 #include "file_types/file_types.hpp"

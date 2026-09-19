@@ -1,17 +1,12 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <vector>
-#	include <memory>
-#	include <cstdint>
-#	include <variant>
-#	include <expected>
-#	include <cstddef>
-#	include <print>
-#endif
+#include <string>
+#include <vector>
+#include <memory>
+#include <cstdint>
+#include <variant>
+#include <expected>
+#include <cstddef>
 
 #include "sftp/sftp.hpp"
 #include "path/path.hpp"

@@ -1,15 +1,10 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <filesystem>
-#	include <expected>
-#	include <variant>
-#	include <cstring>
-#	include <system_error>
-#endif
+#include <filesystem>
+#include <expected>
+#include <variant>
+#include <system_error>
 
 #include "permissions.hpp"
 

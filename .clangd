@@ -1,0 +1,36 @@
+CompileFlags:
+  Add:
+    - -I./mod
+    - -I./lib/luco/include/
+    - -DREMOTE_ENABLED
+    - -std=c++23
+    - -Wall
+    - -Wextra
+    - -Wpedantic
+    - -Wno-c++26-extensions 
+    - -Wno-error=c++26-extensions 
+    - -Wno-changes-meaning
+    - -Walloca 
+    - -Wcast-align 
+    - -Wchar-subscripts 
+    - -Wctor-dtor-privacy 
+    - -Wdouble-promotion 
+    - -Wenum-conversion 
+    - -Wextra-semi 
+    - -Wformat-signedness 
+    - -Wformat=2 
+    - -Wmismatched-tags 
+    - -Wmissing-braces 
+    - -Wmultichar 
+    - -Wno-unused-command-line-argument 
+    - -Wno-reserved-module-identifier 
+    - -Wnon-virtual-dtor 
+    - -Woverloaded-virtual
+    - -Wpointer-arith 
+    - -Wrange-loop-construct 
+    - -Wuninitialized 
+    - -Wvla 
+    - -Wwrite-strings 
+    - -Werror=unused-result  
+    - -Werror=unused-but-set-variable 
+    - -Werror

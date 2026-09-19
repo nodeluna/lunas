@@ -1,20 +1,18 @@
 #include <system_error>
 #include <fcntl.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <expected>
-#	include <memory>
-#	include <string>
-#	include <fstream>
-#	include <filesystem>
-#	include <queue>
-#	include <cstring>
-#	include <cerrno>
-#endif
+#include <expected>
+#include <memory>
+#include <string>
+#include <fstream>
+#include <filesystem>
+#include <queue>
+#include <cstring>
+#include <cerrno>
 
 #include "local_to_remote.hpp"
+#include "misc.hpp"
+#include "remote_attributes.hpp"
 
 #ifdef REMOTE_ENABLED
 

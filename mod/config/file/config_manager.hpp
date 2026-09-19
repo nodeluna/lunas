@@ -1,29 +1,13 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <print>
-#	include <string>
-#	include <fstream>
-#	include <filesystem>
-#	include <expected>
-#	include <cstdlib>
-#	include <cstring>
-#	include <cerrno>
-#	include <unordered_map>
-#	include <map>
-#	include <variant>
-#	include <algorithm>
-#endif
+#include <string>
+#include <string>
+#include <expected>
+#include <cstdlib>
+#include <variant>
 
-#include "../options_functions.hpp"
 #include "../options.hpp"
-#include "../filler.hpp"
-#include "cppfs/cppfs.hpp"
 #include "input_path/input_path.hpp"
-#include "stdout/stdout.hpp"
 #include "error/error.hpp"
 
 #include <luco.hpp>

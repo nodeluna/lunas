@@ -1,18 +1,16 @@
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <filesystem>
-#	include <chrono>
-#	include <thread>
-#	include <print>
-#	include <iostream>
-#endif
+#include <string>
+#include <filesystem>
+#include <chrono>
+#include <thread>
+#include <print>
+#include <iostream>
 
 #include "ssh.hpp"
+#include "raii.hpp"
+#include "stdout/stdout.hpp"
 
 namespace fs = std::filesystem;
 

@@ -1,12 +1,8 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <memory>
-#	include <expected>
-#	include <functional>
-#	include <filesystem>
-#	include <string>
-#endif
+#include <memory>
+#include <expected>
+#include <functional>
+#include <filesystem>
+#include <string>
 
 #include "misc.hpp"
 

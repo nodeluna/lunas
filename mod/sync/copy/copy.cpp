@@ -1,17 +1,16 @@
 #include <cassert>
 #include <thread>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <expected>
-#	include <string>
-#	include <memory>
-#	include <any>
-#	include <cstddef>
-#endif
+#include <memory>
+#include <any>
+#include <cstddef>
 
 #include "copy.hpp"
+#include "misc.hpp"
+#include "remote_copy.hpp"
+#include "local_copy.hpp"
+#include "../remove.hpp"
+#include "../stdout.hpp"
 
 namespace lunas
 {

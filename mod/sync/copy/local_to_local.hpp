@@ -1,28 +1,16 @@
 #pragma once
 
-#include <system_error>
-
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <fstream>
-#	include <filesystem>
-#	include <queue>
-#	include <expected>
-#	include <thread>
-#	include <mutex>
-#	include <cstring>
-#	include <cerrno>
-#	include <cstdint>
-#	include <condition_variable>
-#	include <memory>
-#	include <utility>
-#endif
+#include <string>
+#include <fstream>
+#include <queue>
+#include <thread>
+#include <cstring>
+#include <cstdint>
+#include <memory>
+#include <utility>
+#include <expected>
 
 #include "../types.hpp"
-#include "misc.hpp"
-#include "local_attributes.hpp"
 #include "file_types/file_types.hpp"
 #include "error/error.hpp"
 #include "config/options.hpp"

@@ -3,12 +3,7 @@
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <filesystem>
-#endif
+#include <filesystem>
 
 namespace lunas
 {

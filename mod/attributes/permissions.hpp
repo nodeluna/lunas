@@ -1,21 +1,13 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <filesystem>
-#	include <expected>
-#	include <variant>
-#	include <cstring>
-#	include <system_error>
-#	include <fcntl.h>
-#	include <sys/stat.h>
-#endif
+#include <filesystem>
+#include <expected>
+#include <variant>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #include "error/error.hpp"
 #include "file_types/file_types.hpp"
-
-namespace fs = std::filesystem;
 
 namespace lunas
 {

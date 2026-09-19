@@ -1,9 +1,5 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <cstdint>
-#	include <string>
-#endif
+#include <cstdint>
+#include <string>
 
 #include "file_types.hpp"
 

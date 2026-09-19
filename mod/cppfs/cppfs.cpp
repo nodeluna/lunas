@@ -1,14 +1,8 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <filesystem>
-#	include <string>
-#	include <expected>
-#	include <system_error>
-#	include <variant>
-#	include <cerrno>
-#	include <cstring>
-#endif
+#include <filesystem>
+#include <string>
+#include <expected>
+#include <system_error>
+#include <variant>
 
 #include "cppfs.hpp"
 

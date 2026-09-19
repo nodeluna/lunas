@@ -1,14 +1,7 @@
-
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <filesystem>
-#	include <memory>
-#	include <expected>
-#	include <variant>
-#	include <string>
-#	include <print>
-#endif
+#include <expected>
+#include <variant>
+#include <string>
+#include <print>
 
 #include "kvoption.hpp"
 

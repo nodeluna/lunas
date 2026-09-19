@@ -1,11 +1,7 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <filesystem>
-#endif
+#include <string>
+#include <filesystem>
 
 inline auto& path_seperator = std::filesystem::path::preferred_separator;
 

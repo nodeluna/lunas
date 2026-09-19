@@ -1,11 +1,7 @@
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#endif
+#include <string>
 
 #include "raii.hpp"
 

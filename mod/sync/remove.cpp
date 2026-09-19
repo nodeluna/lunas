@@ -1,14 +1,16 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <filesystem>
-#	include <string>
-#	include <expected>
-#	include <variant>
-#	include <memory>
-#endif
+#include <filesystem>
+#include <string>
+#include <expected>
+#include <variant>
+#include <memory>
 
 #include "remove.hpp"
+#include "stdout.hpp"
+#include "copy/misc.hpp"
+#include "file/file.hpp"
+#include "filter/filter.hpp"
+#include "sftp/sftp.hpp"
+#include "cppfs/cppfs.hpp"
 
 namespace lunas
 {

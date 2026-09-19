@@ -2,20 +2,17 @@
 
 #include <cassert>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <vector>
-#	include <memory>
-#	include <expected>
-#	include <variant>
-#	include <type_traits>
-#endif
+#include <vector>
+#include <memory>
+#include <expected>
+#include <variant>
+#include <type_traits>
 
 #include "cmd.hpp"
 #include "types.hpp"
 #include "parser.hpp"
 #include "file/file.hpp"
+#include "stdout/stdout.hpp"
 
 namespace lunas
 {

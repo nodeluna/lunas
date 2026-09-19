@@ -3,11 +3,7 @@
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#endif
+#include <string>
 
 enum key_type_t {
 	none	    = 1 << 0,

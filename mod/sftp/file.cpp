@@ -1,18 +1,16 @@
 #include <libssh/sftp.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <expected>
-#	include <variant>
-#	include <string>
-#	include <vector>
-#	include <memory>
-#	include <stdexcept>
-#	include <filesystem>
-#endif
+#include <expected>
+#include <variant>
+#include <string>
+#include <vector>
+#include <memory>
+#include <stdexcept>
+#include <filesystem>
 
 #include "file.hpp"
+#include "error.hpp"
+#include "log.hpp"
 
 namespace lunas
 {

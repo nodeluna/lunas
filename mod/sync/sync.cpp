@@ -1,19 +1,25 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <set>
-#	include <expected>
-#	include <variant>
-#	include <ctime>
-#	include <string>
-#	include <cstddef>
-#	include <exception>
-#	include <filesystem>
-#	include <algorithm>
-#	include <type_traits>
-#endif
+#include <set>
+#include <expected>
+#include <variant>
+#include <ctime>
+#include <string>
+#include <cstddef>
+#include <filesystem>
+#include <algorithm>
 
 #include "sync.hpp"
+#include "types.hpp"
+#include "checks.hpp"
+#include "updating.hpp"
+#include "remove.hpp"
+
+#include "file_table/file_table.hpp"
+#include "file_types/file_types.hpp"
+#include "file/file.hpp"
+#include "filter/filter.hpp"
+#include "hooks/hooks.hpp"
+#include "stdout/stdout.hpp"
+#include "stdout.hpp"
 
 namespace lunas
 {
@@ -77,8 +83,8 @@ namespace lunas
 		lunas::println(data.options.quiet, "--> opened source directory '{}'", ipaths.at(src_index).path);
 		lunas::println(data.options.quiet, "");
 
-		struct progress_stats			    progress_stats;
-		std::expected<std::monostate, lunas::error> ok;
+		struct progress_stats			     progress_stats;
+		std::expected<std::monostate, lunas::error>  ok;
 		std::expected<directory_entry, lunas::error> src_file = directory_entry{};
 
 		while (src_file)

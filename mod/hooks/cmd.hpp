@@ -1,18 +1,11 @@
 #pragma once
 
 #include <stdio.h>
-#include <cerrno>
 #include <sys/wait.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <expected>
-#	include <string>
-#	include <memory>
-#	include <utility>
-#	include <system_error>
-#endif
+#include <expected>
+#include <string>
+#include <utility>
 
 #include "error/error.hpp"
 

@@ -2,15 +2,11 @@
 
 #include <libssh/sftp.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <string_view>
-#	include <functional>
-#	include <format>
-#	include <any>
-#endif
+#include <string>
+#include <string_view>
+#include <functional>
+#include <format>
+#include <any>
 
 namespace lunas
 {

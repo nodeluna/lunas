@@ -1,13 +1,8 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <print>
-#	include <format>
-#	include <string>
-#	include <string_view>
-#endif
+#include <print>
+#include <format>
+#include <string>
 
 namespace lunas
 {

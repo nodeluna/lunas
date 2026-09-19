@@ -1,10 +1,6 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#endif
+#include <string>
 
 #if (!defined(DISABLE_REMOTE))
 #	define LOCAL_ONLY false

@@ -1,11 +1,6 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string_view>
-#	include <string>
-#	include <print>
-#	include <format>
-#endif
+#include <string_view>
+#include <string>
+#include <format>
 
 #include "log.hpp"
 

@@ -1,10 +1,6 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <expected>
-#	include <string>
-#	include <vector>
-#endif
+#include <expected>
+#include <string>
+#include <vector>
 
 #include "parser.hpp"
 

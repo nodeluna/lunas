@@ -2,13 +2,8 @@
 
 #include <libssh/sftp.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string_view>
-#	include <string>
-#	include <cstdint>
-#endif
+#include <string>
+#include <cstdint>
 
 #include "file_types/file_types.hpp"
 

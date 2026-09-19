@@ -1,10 +1,5 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <cstddef>
-#	include <limits>
-#endif
+#include <string>
+#include <cstddef>
 
 #include "types.hpp"
 

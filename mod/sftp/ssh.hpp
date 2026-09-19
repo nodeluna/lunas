@@ -3,20 +3,7 @@
 #include <libssh/sftp.h>
 #include <libssh/libssh.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <filesystem>
-#	include <chrono>
-#	include <thread>
-#	include <print>
-#	include <iostream>
-#endif
-
-#include "raii.hpp"
-#include "log.hpp"
-#include "stdout/stdout.hpp"
+#include <string>
 
 typedef int auth_response;
 

@@ -1,28 +1,17 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <cstdint>
-#	include <ctime>
-#	include <vector>
-#	include <memory>
-#	include <expected>
-#	include <string>
-#	include <iostream>
-#	include <iomanip>
-#	include <iostream>
-#	include <filesystem>
-#endif
+#include <cstdint>
+#include <ctime>
+#include <vector>
+#include <memory>
+#include <expected>
+#include <filesystem>
 
 #include "file_types/file_types.hpp"
 #include "file_table/file_table.hpp"
-#include "sftp/sftp.hpp"
 #include "config/options.hpp"
-#include "stats/stats.hpp"
-#include "terminal/terminal.hpp"
 #include "error/error.hpp"
-#include "hooks/hooks.hpp"
+#include "sftp/file.hpp"
 
 namespace lunas
 {

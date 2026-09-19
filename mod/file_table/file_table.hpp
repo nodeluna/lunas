@@ -1,12 +1,7 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <vector>
-#	include <string>
-#	include <cstdint>
-#endif
+#include <vector>
+#include <string>
 
 #include "file_types/file_types.hpp"
 

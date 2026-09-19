@@ -1,12 +1,10 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <print>
-#	include <cmath>
-#endif
+#include <string>
+#include <print>
+#include <cmath>
 
 #include "stdout.hpp"
+#include "file_types/file_types.hpp"
+#include "stdout/stdout.hpp"
 
 namespace lunas
 {

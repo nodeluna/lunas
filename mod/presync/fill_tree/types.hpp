@@ -1,12 +1,8 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <cstddef>
-#	include <limits>
-#endif
+#include <string>
+#include <cstddef>
+#include <limits>
 
 #include "config/options.hpp"
 #include "input_path/input_path.hpp"

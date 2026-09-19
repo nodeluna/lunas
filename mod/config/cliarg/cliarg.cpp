@@ -1,21 +1,18 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <cctype>
-#	include <cstdlib>
-#	include <iostream>
-#	include <string>
-#	include <vector>
-#	include <functional>
-#	include <optional>
-#	include <unordered_map>
-#	include <algorithm>
-#	include <expected>
-#	include <variant>
-#	include <print>
-#endif
+#include <cctype>
+#include <string>
+#include <vector>
+#include <functional>
+#include <unordered_map>
+#include <algorithm>
+#include <expected>
+#include <variant>
 
 #include "cliarg.hpp"
+#include "../options.hpp"
+#include "../options_functions.hpp"
+#include "input_path/input_path.hpp"
+#include "error/error.hpp"
+#include "kvoption.hpp"
 
 namespace lunas
 {

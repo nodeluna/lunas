@@ -1,10 +1,6 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <set>
-#endif
+#include <set>
 
 #include "file_table/file_table.hpp"
 

@@ -1,18 +1,21 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <cctype>
-#	include <expected>
-#	include <string>
-#	include <algorithm>
-#	include <print>
-#	include <variant>
-#	include <filesystem>
-#	include <unordered_map>
-#	include <functional>
-#endif
+#include <cctype>
+#include <expected>
+#include <string>
+#include <algorithm>
+#include <print>
+#include <variant>
+#include <filesystem>
+#include <unordered_map>
+#include <functional>
 
 #include "filler.hpp"
+#include "about/about.hpp"
+#include "input_path/input_path.hpp"
+#include "options.hpp"
+#include "path/path.hpp"
+#include "stdout/stdout.hpp"
+#include "error/error.hpp"
+#include "file_types/file_types.hpp"
 
 namespace lunas
 {

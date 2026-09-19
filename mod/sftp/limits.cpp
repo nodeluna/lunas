@@ -1,11 +1,7 @@
 #include <libssh/sftp.h>
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <stdexcept>
-#	include <string>
-#endif
+#include <stdexcept>
+#include <string>
 
 #include "limits.hpp"
 

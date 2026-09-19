@@ -1,22 +1,20 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <string>
-#	include <print>
-#	include <string>
-#	include <fstream>
-#	include <filesystem>
-#	include <expected>
-#	include <cstdlib>
-#	include <cstring>
-#	include <cerrno>
-#	include <unordered_map>
-#	include <map>
-#	include <variant>
-#	include <algorithm>
-#endif
+#include <string>
+#include <print>
+#include <string>
+#include <fstream>
+#include <filesystem>
+#include <expected>
+#include <unordered_map>
+#include <variant>
+#include <algorithm>
 
 #include "config_manager.hpp"
+#include "../options_functions.hpp"
+#include "../options.hpp"
+#include "cppfs/cppfs.hpp"
+#include "input_path/input_path.hpp"
+#include "stdout/stdout.hpp"
+#include "error/error.hpp"
 
 namespace fs = std::filesystem;
 

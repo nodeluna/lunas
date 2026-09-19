@@ -1,12 +1,6 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <expected>
-#	include <filesystem>
-#	include <cstring>
-#	include <cerrno>
-#	include <system_error>
-#endif
+#include <expected>
+#include <filesystem>
+#include <system_error>
 
 #include "file_type.hpp"
 

@@ -1,9 +1,4 @@
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
-#else
-#	include <string>
-#	include <filesystem>
-#endif
+#include <string>
 
 #include "path.hpp"
 

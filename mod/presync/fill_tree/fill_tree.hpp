@@ -1,23 +1,13 @@
 #pragma once
 
-#if defined(IMPORT_STD_IS_SUPPORTED)
-import std.compat;
-#else
-#	include <filesystem>
-#	include <memory>
-#	include <exception>
-#	include <string>
-#	include <set>
-#	include <expected>
-#	include <variant>
-#endif
+#include <string>
+#include <set>
+#include <expected>
+#include <variant>
 
 #include "types.hpp"
 #include "error/error.hpp"
-#include "file/file.hpp"
 #include "file_table/file_table.hpp"
-#include "filter/filter.hpp"
-#include "stdout/stdout.hpp"
 
 namespace lunas
 {
