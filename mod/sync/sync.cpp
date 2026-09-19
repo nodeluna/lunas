@@ -79,9 +79,15 @@ namespace lunas
 
 		struct progress_stats			    progress_stats;
 		std::expected<std::monostate, lunas::error> ok;
+		std::expected<directory_entry, lunas::error> src_file = directory_entry{};
 
-		while (auto src_file = directory.value()->read())
+		while (src_file)
 		{
+			src_file = directory.value()->read();
+			if (not src_file)
+			{
+				return std::unexpected(src_file.error());
+			}
 			if (auto ok = src_file.value().holds_attributes(); not ok)
 			{
 				lunas::printerr("{}", ok.error().message());
@@ -145,11 +151,6 @@ namespace lunas
 					}
 				}
 			}
-		}
-
-		if (not directory.value()->eof())
-		{
-			lunas::println(false, "didn't reach eof '{}'", ipaths.at(src_index).path);
 		}
 
 		if (data.options.remove_extra)
