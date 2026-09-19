@@ -1,11 +1,9 @@
-module;
-
 #include <sys/stat.h>
 #include <unistd.h>
 #include <system_error>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
+import std.compat;
 #else
 #	include <string>
 #	include <expected>
@@ -14,24 +12,7 @@ import std;
 #	include <cstring>
 #endif
 
-export module lunas.attributes:ownership;
-export import lunas.error;
-export import lunas.file_types;
-
-export namespace lunas
-{
-	namespace ownership
-	{
-		struct own {
-				int uid = -1;
-				int gid = -1;
-		};
-
-		std::expected<struct own, lunas::error>	    get(const std::string& path, lunas::follow_symlink follow);
-		std::expected<std::monostate, lunas::error> set(const std::string& path, const struct own& own,
-								lunas::follow_symlink follow);
-	}
-}
+#include "ownership.hpp"
 
 namespace lunas
 {

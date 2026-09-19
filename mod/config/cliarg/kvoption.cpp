@@ -1,6 +1,4 @@
-module;
 
-#include <string>
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -8,13 +6,13 @@ import std.compat;
 #	include <memory>
 #	include <expected>
 #	include <variant>
+#	include <string>
+#	include <print>
 #endif
 
-export module lunas.config.cliarg:kvoptions;
-export import luco;
-export import lunas.error;
+#include "kvoption.hpp"
 
-bool	      is_num(const std::string& x)
+bool is_num(const std::string& x)
 {
 	return std::all_of(x.begin(), x.end(),
 			   [](char c)
@@ -23,7 +21,7 @@ bool	      is_num(const std::string& x)
 			   });
 }
 
-export namespace lunas
+namespace lunas
 {
 	enum class token_type {
 		key,

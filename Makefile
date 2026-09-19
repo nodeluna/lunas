@@ -1,22 +1,22 @@
 SRCS := $(wildcard src/*.cpp)
 MODS := $(shell find mod -name "*.cpp")
+HEADERS := $(shell find mod -name "*.hpp")
 DIRS = build bin
-CMAKE_CMD=cmake -B build -G Ninja -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++ -Wno-author
 
 all:
-	@git submodule update --init --recursive
-	@$(CMAKE_CMD) -DCMAKE_BUILD_TYPE=Release
-	@ninja -C build
+	@git submodule update --init --remote --recursive
+	@xmake f -m release 
+	@xmake -P . 
 
 debug:
-	@$(CMAKE_CMD) -DCMAKE_BUILD_TYPE=Debug
-	@ninja -C build
+	@xmake f -m debug
+	@xmake -P .
 
-install: 
-	@ninja -C build install
+install:
+	@xmake install --root --installdir=/usr
 
 uninstall:
-	@ninja -C build uninstall
+	@xmake uninstall --root --installdir=/usr
 
 
 clean:
@@ -40,4 +40,4 @@ clean-test:
 	go run clean.go
 
 format:
-	clang-format -i $(MODS) $(SRCS)
+	clang-format -i $(MODS) $(SRCS) $(HEADERS)

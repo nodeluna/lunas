@@ -1,5 +1,3 @@
-module;
-
 #include <libssh/sftp.h>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
@@ -12,25 +10,7 @@ import std;
 #	include <filesystem>
 #endif
 
-export module lunas.sftp:dir;
-export import :attributes;
-import :error;
-import :log;
-
-export namespace lunas
-{
-	class sftp_dir {
-		private:
-			::sftp_dir m_dir = NULL;
-			bool	   m_eof = false;
-
-		public:
-			sftp_dir(const sftp_session& sftp, const std::string& path);
-			std::expected<std::unique_ptr<lunas::sftp_attributes>, lunas::error> read(const sftp_session& sftp);
-			std::expected<bool, lunas::error> eof(const sftp_session& sftp, const std::string& path);
-			~sftp_dir();
-	};
-}
+#include "dir.hpp"
 
 namespace lunas
 {

@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -8,31 +6,7 @@ import std;
 #	include <variant>
 #endif
 
-export module lunas.sync:local_attributes;
-export import :types;
-export import lunas.file_types;
-export import lunas.error;
-export import lunas.attributes;
-
-export namespace lunas
-{
-	namespace ownership
-	{
-		std::expected<std::monostate, lunas::error> local_to_local(const std::string& src, const std::string& dest,
-									   const syncmisc& misc);
-	}
-
-	namespace utimes
-	{
-		std::expected<std::monostate, lunas::error> local(const std::string& src, const std::string& dest, const syncmisc& misc);
-	}
-
-	namespace permissions
-	{
-		std::expected<std::monostate, lunas::error> local_to_local(const std::string& src, const std::string& dest,
-									   const syncmisc& misc);
-	}
-}
+#include "local_attributes.hpp"
 
 namespace lunas
 {

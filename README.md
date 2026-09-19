@@ -31,16 +31,15 @@ A syncing cli tool that can handle more than two directories locally and remotel
 
 ## dependencies
 
-* (clang >= 17) OR (clang >= 18.1.2 and libc++) for faster compliation
+* (clang >= 17) OR (gcc >= 15)
 
 * lunas need libssh >= 0.11.* to build and run. the package may be named libssh, libssh-dev or libssh-devel on your distro
 
 ## build dependencies
 
-* makefile
-* ninja
-* cmake
+* xmake
 * git
+* optional: make
 
 ## build
 
@@ -48,17 +47,22 @@ A syncing cli tool that can handle more than two directories locally and remotel
 
 or
 
-* git submodule update --init --recursive
-* cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_CXX_COMPILER=clang++
-* ninja -C build
+* git submodule update --init --remote --recursive
+* xmake f -m release
+* xmake -P .
 
 ## install
 
-* \# make install
+* sudo make install
 
 or
 
-* \# ninja -C build install
+* sudo xmake install --root --installdir=/usr
+
+## uninstall
+
+* sudo xmake uninstall --root --installdir=/usr
+
 ## remote syncing
 
 thanks to libssh, lunas can sync remote directories with local or/and remote ones using sftp. Read the --help statement

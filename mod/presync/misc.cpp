@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -12,25 +10,7 @@ import std.compat;
 #	include <cstdint>
 #endif
 
-export module lunas.presync:misc;
-
-import lunas.error;
-import lunas.stdout;
-import lunas.ipath;
-import lunas.sftp;
-import lunas.file_table;
-import lunas.file_types;
-
-export namespace lunas
-{
-	namespace presync
-	{
-		std::expected<std::monostate, lunas::error>
-		       input_paths_are_different(const std::vector<struct lunas::ipath::input_path>& ipaths);
-
-		size_t to_be_synced_counter(const std::set<file_table>& conent);
-	}
-}
+#include "misc.hpp"
 
 namespace lunas
 {

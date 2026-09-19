@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -15,29 +13,7 @@ import std.compat;
 #	include <type_traits>
 #endif
 
-export module lunas.sync;
-import :types;
-import :copy;
-import :checks;
-import :updating;
-import :remove;
-
-export import lunas.error;
-export import lunas.ipath;
-export import lunas.content;
-import lunas.file_table;
-import lunas.file_types;
-import lunas.file;
-import lunas.filter;
-import lunas.hooks;
-
-import lunas.stdout;
-
-export namespace lunas
-{
-	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data);
-	std::expected<std::monostate, lunas::error> sync(struct lunas::parsed_data& data, lunas::content& content);
-}
+#include "sync.hpp"
 
 namespace lunas
 {

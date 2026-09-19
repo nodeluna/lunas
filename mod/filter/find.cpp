@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -10,13 +8,7 @@ import std;
 #	include <functional>
 #endif
 
-export module lunas.filter:find;
-
-export namespace lunas
-{
-	bool find(const std::string& path, const std::unordered_set<std::string>& files, const std::unordered_set<std::string>& pattern,
-		  std::function<bool(void)> final_check);
-}
+#include "find.hpp"
 
 namespace lunas
 {

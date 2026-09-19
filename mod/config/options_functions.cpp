@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -10,18 +8,12 @@ import std;
 #	include <variant>
 #endif
 
-export module lunas.config.options.functions;
-import lunas.config.filler;
-import lunas.ipath;
-import lunas.config.options;
-import lunas.error;
+#include "options_functions.hpp"
 
-export namespace lunas
+namespace lunas
 {
 	namespace config
 	{
-		using onoff_func = std::function<std::expected<std::monostate, lunas::error>(std::string, lunas::config::options&)>;
-
 		std::unordered_map<std::string, onoff_func> get_onoff_options()
 		{
 			// clang-format off
@@ -100,8 +92,6 @@ export namespace lunas
 			// clang-format on
 			return rpaths_options;
 		}
-
-		using misc_func = std::function<std::expected<std::monostate, lunas::error>(std::string, lunas::config::options&)>;
 
 		std::unordered_map<std::string, misc_func> get_misc_options()
 		{

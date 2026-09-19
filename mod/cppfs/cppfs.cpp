@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -12,19 +10,7 @@ import std;
 #	include <cstring>
 #endif
 
-export module lunas.cppfs;
-import lunas.error;
-
-export namespace lunas
-{
-	namespace cppfs
-	{
-		std::expected<std::monostate, lunas::error> remove(const std::string& path, bool dry_run);
-		std::expected<std::monostate, lunas::error> mkdir(const std::string& path, bool dry_run);
-		std::expected<std::monostate, lunas::error> symlink(const std::string& target, const std::string& dest, bool dry_run);
-		std::expected<std::uintmax_t, lunas::error> file_size(const std::string& path);
-	}
-}
+#include "cppfs.hpp"
 
 namespace lunas
 {

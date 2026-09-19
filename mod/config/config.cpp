@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -8,22 +6,7 @@ import std;
 #	include <variant>
 #endif
 
-export module lunas.config;
-export import lunas.config.file;
-export import lunas.config.cliarg;
-
-import lunas.ipath;
-import lunas.stdout;
-import lunas.error;
-import lunas.path;
-
-export namespace lunas
-{
-	namespace config
-	{
-		std::expected<struct lunas::parsed_data, lunas::error> parse_cliarg(const int argc, const char* argv[]);
-	}
-}
+#include "config.hpp"
 
 namespace lunas
 {

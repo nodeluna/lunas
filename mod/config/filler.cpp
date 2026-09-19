@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -14,17 +12,9 @@ import std.compat;
 #	include <functional>
 #endif
 
-export module lunas.config.filler;
-import lunas.about;
-import lunas.ipath;
-import lunas.config.options;
-import lunas.sftp;
-import lunas.path;
-import lunas.stdout;
-import lunas.error;
-import lunas.file_types;
+#include "filler.hpp"
 
-export namespace lunas
+namespace lunas
 {
 	namespace config
 	{
@@ -646,7 +636,7 @@ export namespace lunas
 						temp = "";
 						if (*it == ',' || std::next(it) == data.end())
 						{
-							itr->second("on", options);
+							auto _ = itr->second("on", options);
 						}
 						else if (*it == '=')
 						{

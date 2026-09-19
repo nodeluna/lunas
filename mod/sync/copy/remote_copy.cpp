@@ -1,5 +1,3 @@
-module;
-
 #include <cassert>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
@@ -12,21 +10,11 @@ import std;
 #	include <chrono>
 #endif
 
-export module lunas.sync:remote_copy;
-export import :types;
-export import :stdout;
-export import :local_to_remote;
-export import :remote_to_local;
-export import :remote_to_remote;
-export import :remote_attributes;
-
-export import lunas.sftp;
-export import lunas.error;
-export import lunas.stdout;
+#include "remote_copy.hpp"
 
 #ifdef REMOTE_ENABLED
 
-export namespace lunas
+namespace lunas
 {
 	namespace remote
 	{

@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -9,14 +7,9 @@ import std;
 #	include <string>
 #endif
 
-export module lunas.file:operations;
-export import lunas.sftp;
-export import lunas.file_types;
-export import lunas.error;
-import lunas.attributes;
-import lunas.cppfs;
+#include "operations.hpp"
 
-export namespace lunas
+namespace lunas
 {
 	namespace file_operations
 	{

@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -10,15 +8,7 @@ import std.compat;
 #	include <print>
 #endif
 
-export module lunas.stats;
-import lunas.ipath;
-
-export namespace lunas
-{
-	std::string decimal_precision(const double& number, const int& percision);
-	std::string size_units(const std::uintmax_t& bytes);
-	void	    print_stats(const struct lunas::parsed_data& data);
-}
+#include "stats.hpp"
 
 namespace lunas
 {

@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -8,10 +6,9 @@ import std.compat;
 #	include <vector>
 #endif
 
-export module lunas.hooks:parser;
-export import lunas.error;
+#include "parser.hpp"
 
-export namespace lunas
+namespace lunas
 {
 	std::expected<std::vector<std::pair<size_t, size_t>>, lunas::error> hook_parser(const std::string& command)
 	{

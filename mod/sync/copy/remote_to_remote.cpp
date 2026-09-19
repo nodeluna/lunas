@@ -1,5 +1,3 @@
-module;
-
 #include <fcntl.h>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
@@ -11,48 +9,9 @@ import std;
 #	include <memory>
 #endif
 
-export module lunas.sync:remote_to_remote;
-export import :types;
-export import :misc;
-export import :remote_attributes;
-
-export import lunas.sftp;
-export import lunas.attributes;
-export import lunas.file_types;
-import lunas.config.options;
-import lunas.stdout;
+#include "remote_to_remote.hpp"
 
 #ifdef REMOTE_ENABLED
-export namespace lunas
-{
-	namespace remote_to_remote
-	{
-		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
-								  const std::unique_ptr<lunas::sftp>& src_sftp,
-								  const std::unique_ptr<lunas::sftp>& dest_sftp,
-								  const struct syncmisc&	      misc);
-
-		std::expected<struct syncstat, lunas::error> link(const std::string& src, const std::string& dest,
-								  const std::unique_ptr<lunas::sftp>& src_sftp,
-								  const std::unique_ptr<lunas::sftp>& dest_sftp,
-								  const struct syncmisc&	      misc);
-
-		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
-								   const std::unique_ptr<lunas::sftp>& src_sftp,
-								   const std::unique_ptr<lunas::sftp>& dest_sftp,
-								   const struct syncmisc&	       misc);
-
-		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
-								   const std::unique_ptr<lunas::sftp>& src_sftp,
-								   const std::unique_ptr<lunas::sftp>& dest_sftp,
-								   const struct syncmisc&	       misc);
-
-		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
-								     const std::unique_ptr<lunas::sftp>& src_sftp,
-								     const std::unique_ptr<lunas::sftp>& dest_sftp,
-								     const struct syncmisc&		 misc);
-	}
-}
 
 namespace lunas
 {

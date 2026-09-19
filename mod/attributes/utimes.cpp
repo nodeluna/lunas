@@ -1,12 +1,10 @@
-module;
-
-#include <system_error>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <ctime>
+#include <system_error>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
+import std.compat;
 #else
 #	include <string>
 #	include <expected>
@@ -15,47 +13,7 @@ import std;
 #	include <cstdint>
 #endif
 
-export module lunas.attributes:utimes;
-export import lunas.file_types;
-
-import lunas.error;
-
-#ifdef _POSIX_C_SOURCE
-#	if _POSIX_C_SOURCE >= 200809L
-#		define LUTIMES_EXISTS
-#	else
-#		warning lutimes() wasn't found. modifications to symlinks' mtime/atime will affect their target
-#	endif
-#elif __ANDROID_API__
-#	if __ANDROID_API__ >= 26
-#		define LUTIMES_EXISTS
-#	endif
-#endif
-
-export namespace lunas
-{
-	enum class time_type {
-		atime  = 1,
-		mtime  = 2,
-		utimes = 3,
-	};
-
-	struct time_val {
-			time_t atime	  = 0;
-			time_t atime_nsec = 0;
-			time_t mtime	  = 0;
-			time_t mtime_nsec = 0;
-	};
-
-	namespace utime
-	{
-		std::expected<struct time_val, lunas::error> get(const std::string& path, const time_type utime,
-								 lunas::follow_symlink follow);
-
-		std::expected<std::monostate, lunas::error>  set(const std::string& path, const struct time_val& time_val,
-								 lunas::follow_symlink follow);
-	}
-}
+#include "utimes.hpp"
 
 namespace lunas
 {

@@ -1,5 +1,3 @@
-module;
-
 #include <stdio.h>
 #include <cerrno>
 #include <sys/wait.h>
@@ -14,45 +12,34 @@ import std.compat;
 #	include <system_error>
 #endif
 
-export module lunas.hooks:cmd;
-export import lunas.error;
+#include "cmd.hpp"
 
-export namespace lunas
+namespace lunas
 {
-	class pipe {
-		public:
-			pipe(const std::string_view& command, const std::string_view& mode) : p(popen(command.data(), mode.data()))
-			{
-			}
+	pipe::~pipe()
+	{
+		if (p != nullptr)
+		{
+			pclose(p);
+		}
+	}
 
-			~pipe()
-			{
-				if (p != nullptr)
-				{
-					pclose(p);
-				}
-			}
+	std::expected<int, lunas::error> pipe::exit_status()
+	{
+		if (p != nullptr)
+		{
+			int rt = pclose(p);
+			p      = nullptr;
+			return WEXITSTATUS(rt);
+		}
 
-			std::expected<int, lunas::error> exit_status()
-			{
-				if (p != nullptr)
-				{
-					int rt = pclose(p);
-					p      = nullptr;
-					return WEXITSTATUS(rt);
-				}
+		return std::unexpected(lunas::error("tried to get status of a pipe that is already closed"));
+	}
 
-				return std::unexpected(lunas::error("tried to get status of a pipe that is already closed"));
-			}
-
-			FILE* data(void)
-			{
-				return p;
-			}
-
-		private:
-			FILE* p = nullptr;
-	};
+	FILE* pipe::data(void)
+	{
+		return p;
+	}
 
 	std::expected<std::pair<std::string, int>, lunas::error> cmd(const std::string_view& command)
 	{

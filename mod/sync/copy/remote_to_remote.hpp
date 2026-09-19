@@ -1,0 +1,57 @@
+#pragma once
+
+#include <fcntl.h>
+
+#if defined(IMPORT_STD_IS_SUPPORTED)
+import std;
+#else
+#	include <string>
+#	include <expected>
+#	include <queue>
+#	include <memory>
+#endif
+
+#include "../types.hpp"
+#include "misc.hpp"
+#include "remote_attributes.hpp"
+
+#include "sftp/sftp.hpp"
+#include "attributes/attributes.hpp"
+#include "file_types/file_types.hpp"
+#include "config/options.hpp"
+#include "stdout/stdout.hpp"
+
+#ifdef REMOTE_ENABLED
+
+namespace lunas
+{
+	namespace remote_to_remote
+	{
+		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
+								  const std::unique_ptr<lunas::sftp>& src_sftp,
+								  const std::unique_ptr<lunas::sftp>& dest_sftp,
+								  const struct syncmisc&	      misc);
+
+		std::expected<struct syncstat, lunas::error> link(const std::string& src, const std::string& dest,
+								  const std::unique_ptr<lunas::sftp>& src_sftp,
+								  const std::unique_ptr<lunas::sftp>& dest_sftp,
+								  const struct syncmisc&	      misc);
+
+		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
+								   const std::unique_ptr<lunas::sftp>& src_sftp,
+								   const std::unique_ptr<lunas::sftp>& dest_sftp,
+								   const struct syncmisc&	       misc);
+
+		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
+								   const std::unique_ptr<lunas::sftp>& src_sftp,
+								   const std::unique_ptr<lunas::sftp>& dest_sftp,
+								   const struct syncmisc&	       misc);
+
+		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
+								     const std::unique_ptr<lunas::sftp>& src_sftp,
+								     const std::unique_ptr<lunas::sftp>& dest_sftp,
+								     const struct syncmisc&		 misc);
+	}
+}
+
+#endif // REMOTE_ENABLED

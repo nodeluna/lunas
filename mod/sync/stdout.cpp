@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -8,12 +6,9 @@ import std;
 #	include <cmath>
 #endif
 
-export module lunas.sync:stdout;
-export import :types;
-export import lunas.file_types;
-export import lunas.stdout;
+#include "stdout.hpp"
 
-export namespace lunas
+namespace lunas
 {
 	void print_sync(const std::string& src, const std::string& dest, const struct lunas::syncmisc& misc)
 	{

@@ -7,16 +7,16 @@ import std;
 #	include <set>
 #endif
 
-import lunas.sftp;
-import lunas.config;
-import lunas.stdout;
-import lunas.about;
-import lunas.error;
-import lunas.ipath;
-import lunas.presync;
-import lunas.sync;
-import lunas.stats;
-import lunas.content;
+#include "sftp/sftp.hpp"
+#include "config/config.hpp"
+#include "stdout/stdout.hpp"
+#include "about/about.hpp"
+#include "error/error.hpp"
+#include "input_path/input_path.hpp"
+#include "presync/presync.hpp"
+#include "sync/sync.hpp"
+#include "stats/stats.hpp"
+#include "content/content.hpp"
 
 int main(const int argc, const char* argv[])
 {

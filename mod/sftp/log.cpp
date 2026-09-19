@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -9,7 +7,7 @@ import std;
 #	include <format>
 #endif
 
-export module lunas.sftp:log;
+#include "log.hpp"
 
 namespace fmt
 {

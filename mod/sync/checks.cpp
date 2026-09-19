@@ -1,5 +1,3 @@
-module;
-
 #include <cassert>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
@@ -15,19 +13,9 @@ import std.compat;
 #	include <filesystem>
 #endif
 
-export module lunas.sync:checks;
-export import :types;
-export import :copy;
+#include "checks.hpp"
 
-export import lunas.error;
-export import lunas.ipath;
-export import lunas.file_table;
-export import lunas.file_types;
-export import lunas.stdout;
-export import lunas.file;
-export import lunas.stats;
-
-export namespace lunas
+namespace lunas
 {
 	std::expected<size_t, lunas::error> get_src(const lunas::file_table& file_table, const struct lunas::parsed_data& data)
 	{

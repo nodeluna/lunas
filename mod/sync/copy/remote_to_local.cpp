@@ -1,5 +1,3 @@
-module;
-
 #include <system_error>
 #include <fcntl.h>
 
@@ -17,36 +15,7 @@ import std;
 #	include <filesystem>
 #endif
 
-export module lunas.sync:remote_to_local;
-export import :types;
-export import :misc;
-export import :remote_attributes;
-
-export import lunas.error;
-export import lunas.sftp;
-export import lunas.file_types;
-export import lunas.cppfs;
-export import lunas.stdout;
-
-export namespace lunas
-{
-#ifdef REMOTE_ENABLED
-	namespace remote_to_local
-	{
-		std::expected<struct syncstat, lunas::error> copy(const std::string& src, const std::string& dest,
-								  const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
-
-		std::expected<struct syncstat, lunas::error> rfile(const std::string& src, const std::string& dest,
-								   const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
-
-		std::expected<struct syncstat, lunas::error> mkdir(const std::string& src, const std::string& dest,
-								   const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
-
-		std::expected<struct syncstat, lunas::error> symlink(const std::string& src, const std::string& dest,
-								     const std::unique_ptr<lunas::sftp>& sftp, const struct syncmisc& misc);
-	}
-#endif // REMOTE_ENABLED
-}
+#include "remote_to_local.hpp"
 
 namespace lunas
 {

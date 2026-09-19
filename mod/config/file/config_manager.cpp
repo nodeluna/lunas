@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -18,49 +16,7 @@ import std.compat;
 #	include <algorithm>
 #endif
 
-export module lunas.config.file:manager;
-import lunas.config.options.functions;
-import lunas.config.options;
-import lunas.config.filler;
-import lunas.cppfs;
-import lunas.ipath;
-import lunas.stdout;
-import lunas.error;
-
-import luco;
-
-export namespace lunas
-{
-	namespace config_file
-	{
-		std::string				    config_dir = std::getenv("HOME") + std::string("/.config/lunas/");
-		std::string				    file_name  = std::string("lunas.luco");
-		std::expected<std::monostate, lunas::error> make_demo_config(lunas::config::options& options);
-		std::expected<std::monostate, lunas::error>
-		preset(const std::string& name, lunas::config::options& options,
-		       std::vector<std::variant<struct lunas::ipath::local_path, struct lunas::ipath::remote_path>>& ipaths);
-	}
-}
-
-#define DEMO_CONFIG                 \
-	"global{\n"                 \
-	"\t#mkdir = on\n"           \
-	"\t#compression = on\n"     \
-	"\t#resume = on\n"          \
-	"\t#progress = on\n"        \
-	"\t#update = on\n"          \
-	"\t#minimum-space = 1gib\n" \
-	"\t#attributes = mtime\n"   \
-	"}\n"                       \
-	"luna {\n"                  \
-	"\tpath = /path/to/dir1\n"  \
-	"\tpath = /path/to/dir2\n"  \
-	"\tpath = /path/to/dir3\n"  \
-	"\tremote {\n"              \
-	"\t\tr = user@ip:dir\n"     \
-	"\t\tport = 22\n"           \
-	"\t}\n"                     \
-	"}\n"
+#include "config_manager.hpp"
 
 namespace fs = std::filesystem;
 
@@ -191,7 +147,7 @@ namespace lunas
 						return std::unexpected(lunas::error(err, lunas::error_type::config_invalid_argument));
 					}
 
-					itr->second(value.as_boolean() ? "on" : "off", options);
+					auto _ = itr->second(value.as_boolean() ? "on" : "off", options);
 				}
 				else if (auto itr1 = lpaths_options.find("-" + key); itr1 != lpaths_options.end())
 				{

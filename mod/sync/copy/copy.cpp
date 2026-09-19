@@ -1,5 +1,3 @@
-module;
-
 #include <cassert>
 #include <thread>
 
@@ -13,17 +11,9 @@ import std.compat;
 #	include <cstddef>
 #endif
 
-export module lunas.sync:copy;
-export import :types;
-export import :remote_copy;
-export import :local_copy;
-import :remove;
-import :stdout;
-export import lunas.sftp;
+#include "copy.hpp"
 
-import lunas.error;
-
-export namespace lunas
+namespace lunas
 {
 #ifdef REMOTE_ENABLED
 	std::expected<syncstat, lunas::error> copy(const std::string& src, const std::string& dest,

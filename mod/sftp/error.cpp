@@ -1,5 +1,3 @@
-module;
-
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 
@@ -10,17 +8,8 @@ import std;
 #	include <typeinfo>
 #endif
 
-export module lunas.sftp:error;
-export import lunas.error;
-
-export namespace lunas
-{
-	lunas::error ssh_error(const sftp_session& sftp);
-	lunas::error ssh_error(const sftp_session& sftp, const std::string& message);
-	lunas::error ssh_error(const ssh_session& ssh);
-	lunas::error ssh_error(const std::string& msg);
-	lunas::error ssh_error(const ssh_session& ssh, const std::string& message);
-}
+#include "error.hpp"
+#include "error/error.hpp"
 
 namespace lunas
 {

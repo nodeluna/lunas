@@ -1,10 +1,8 @@
-module;
-
 #include <fcntl.h>
 #include <sys/stat.h>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
-import std;
+import std.compat;
 #else
 #	include <filesystem>
 #	include <expected>
@@ -13,27 +11,9 @@ import std;
 #	include <system_error>
 #endif
 
-export module lunas.attributes:permissions;
-export import lunas.file_types;
-export import lunas.error;
+#include "permissions.hpp"
 
 namespace fs = std::filesystem;
-
-export namespace lunas
-{
-	namespace permissions
-	{
-		std::expected<bool, lunas::error>		    is_file_readable(const std::string& path, lunas::follow_symlink follow);
-
-		std::expected<std::filesystem::perms, lunas::error> get(const std::string& path, lunas::follow_symlink follow);
-
-		std::expected<std::monostate, lunas::error>	    set(const std::string& path, std::filesystem::perms permissions,
-									lunas::follow_symlink follow);
-
-		std::expected<std::monostate, lunas::error>	    set(const std::string& path, unsigned int permissions,
-									lunas::follow_symlink follow);
-	}
-}
 
 namespace lunas
 {

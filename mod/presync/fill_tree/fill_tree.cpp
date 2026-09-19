@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -12,24 +10,7 @@ import std.compat;
 #	include <variant>
 #endif
 
-export module lunas.presync.fill_tree;
-export import :types;
-export import lunas.error;
-export import lunas.file;
-export import lunas.file_table;
-import lunas.filter;
-import lunas.stdout;
-
-export namespace lunas
-{
-	namespace presync
-	{
-		std::expected<std::monostate, lunas::error> readdir(std::set<lunas::file_table>& content, const std::string& path,
-								    const lunas::fill_tree_type& data);
-
-		std::expected<std::monostate, lunas::error> input_directory_check(const lunas::fill_tree_type& data);
-	}
-}
+#include "fill_tree.hpp"
 
 namespace lunas
 {

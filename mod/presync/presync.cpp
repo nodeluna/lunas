@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std.compat;
 #else
@@ -9,20 +7,7 @@ import std.compat;
 #	include <set>
 #endif
 
-export module lunas.presync;
-export import :misc;
-export import lunas.presync.fill_tree;
-export import lunas.file_table;
-export import lunas.content;
-
-import lunas.error;
-import lunas.ipath;
-import lunas.stdout;
-
-export namespace lunas
-{
-	std::expected<std::variant<lunas::content, std::monostate>, lunas::error> presync_operations(const lunas::parsed_data& cliopts);
-}
+#include "presync.hpp"
 
 namespace lunas
 {

@@ -1,5 +1,3 @@
-module;
-
 #include <cassert>
 
 #if defined(IMPORT_STD_IS_SUPPORTED)
@@ -16,19 +14,9 @@ import std.compat;
 #	include <filesystem>
 #endif
 
-export module lunas.sync:updating;
-export import :types;
-export import :checks;
-export import :copy;
+#include "updating.hpp"
 
-export import lunas.error;
-export import lunas.ipath;
-export import lunas.file_table;
-export import lunas.file_types;
-export import lunas.stdout;
-export import lunas.file;
-
-export namespace lunas
+namespace lunas
 {
 	using _file_metadata = struct file_metadata<std::filesystem::path>;
 
@@ -38,8 +26,7 @@ export namespace lunas
 									const struct lunas::hooks& hooks)
 	{
 
-		const auto& ipaths = data.get_ipaths();
-		bool	    sync   = false;
+		bool sync = false;
 
 		if (auto ok = check_dest(src, dest, data); not ok)
 		{
@@ -84,7 +71,8 @@ export namespace lunas
 			    .progress_stats	  = progress_stats,
 			};
 #ifdef REMOTE_ENABLED
-			auto syncstat = lunas::copy(src.path, dest.path, ipaths.at(src.index).sftp, ipaths.at(dest.index).sftp, misc);
+			const auto& ipaths = data.get_ipaths();
+			auto syncstat	   = lunas::copy(src.path, dest.path, ipaths.at(src.index).sftp, ipaths.at(dest.index).sftp, misc);
 #else
 			auto syncstat = lunas::copy(src.path, dest.path, misc);
 #endif // REMOTE_ENABLED

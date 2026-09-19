@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -7,9 +5,7 @@ import std;
 #	include <filesystem>
 #endif
 
-export module lunas.sftp:path;
-
-auto&	      path_seperator = std::filesystem::path::preferred_separator;
+#include "path.hpp"
 
 namespace path
 {

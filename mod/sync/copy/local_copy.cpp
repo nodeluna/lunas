@@ -1,5 +1,3 @@
-module;
-
 #if defined(IMPORT_STD_IS_SUPPORTED)
 import std;
 #else
@@ -7,15 +5,9 @@ import std;
 #	include <string>
 #endif
 
-export module lunas.sync:local_copy;
-export import :types;
-export import :stdout;
-export import :local_attributes;
-export import :local_to_local;
+#include "local_copy.hpp"
 
-export import lunas.error;
-
-export namespace lunas
+namespace lunas
 {
 	namespace local
 	{
