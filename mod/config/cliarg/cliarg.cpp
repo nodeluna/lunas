@@ -54,11 +54,11 @@ namespace lunas
 			rpath.srcdest	      = srcdest;
 			rpath.session_data.ip = argv[index + 1];
 
-			index++;
 			std::string options;
+			index++;
 			while (index++ != (argc - 1))
 			{
-				if (options[0] == '-')
+				if (argv[index][0] == '-')
 				{
 					index--;
 					break;
