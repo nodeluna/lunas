@@ -69,9 +69,9 @@ namespace lunas
 			}
 
 			std::map<std::string, luco::node> kv_map = {
-			    {	     "N",		  luco::node(0)},
-			    {    "port",	     luco::node(0)},
-			    {	     "pw", luco::node(std::string())},
+			    {	    "N",	     luco::node(0)},
+			    {	 "port",	     luco::node(0)},
+			    {	   "pw", luco::node(std::string())},
 			    {"password", luco::node(std::string())},
 			};
 

@@ -613,14 +613,14 @@ namespace lunas
 				std::unordered_map<std::string, std::function<std::expected<std::monostate, lunas::error>(
 								    const std::string& data, lunas::config::options& options)>>
 				    attributes_options = {
-					{	 "own",	attributes_own},
-					     {   "uid",    attributes_uid},
-					  {   "gid",	  attributes_gid},
+					{   "own",    attributes_own},
+					{   "uid",    attributes_uid},
+					{   "gid",    attributes_gid},
 					{ "atime",  attributes_atime},
-					     { "mtime",  attributes_mtime},
-					  {"utimes", attributes_utimes},
-					{	 "all",	attributes_all},
-				    };
+					    { "mtime",	attributes_mtime},
+					{"utimes", attributes_utimes},
+					{   "all",    attributes_all},
+				};
 
 				for (auto it = data.begin(); it != data.end(); ++it)
 				{

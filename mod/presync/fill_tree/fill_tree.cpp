@@ -57,7 +57,14 @@ namespace lunas
 				src_file = directory.value()->read();
 				if (not src_file)
 				{
-					return std::unexpected(src_file.error());
+					if (src_file.error().value() == lunas::error_type::readdir_eof)
+					{
+						break;
+					}
+					else
+					{
+						return std::unexpected(src_file.error());
+					}
 				}
 				if (auto ok = src_file.value().holds_attributes(); not ok)
 				{
