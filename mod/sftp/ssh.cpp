@@ -124,10 +124,9 @@ namespace lunas
 				password = getpass("   --> Password: ");
 			}
 			rc = ssh_userauth_password(ssh, NULL, password.c_str());
-			if (rc == SSH_AUTH_DENIED)
+			if (rc == SSH_AUTH_DENIED && retry >= 0)
 			{
-				lunas::printerr("{}", "access denied. retries left: " + std::to_string(retry));
-				continue;
+				lunas::printerr("{}{}", "access denied. retries left: ", retry);
 			}
 			else
 			{
@@ -291,6 +290,11 @@ namespace lunas
 		else if (method & SSH_AUTH_METHOD_INTERACTIVE || method & SSH_AUTH_METHOD_GSSAPI_MIC || method & SSH_AUTH_METHOD_HOSTBASED)
 		{
 			lunas::printerr("{}", "unsupported auth method for '" + ip + "', " + auth_method(method));
+		}
+		if (rc != SSH_AUTH_SUCCESS && ip.size() > 3 && ip.substr(0, 4) == "root")
+		{
+			lunas::warnln("note: the credentials for the 'root' user may be correct, but root login may be "
+					"disabled in the server's config file");
 		}
 
 		return SSH_AUTH_ERROR;

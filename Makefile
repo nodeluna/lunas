@@ -14,7 +14,7 @@ debug:
 	@xmake -P .
 
 install:
-	xmake install --root --installdir=$(prefix)
+	@xmake install --root --installdir=$(prefix)
 
 uninstall:
 	@xmake uninstall --root --installdir=$(prefix)
