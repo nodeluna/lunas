@@ -55,6 +55,10 @@ or
 
 * sudo make install
 
+to change the installation prefix. It defaults to /usr
+
+* sudo make prefix=/path/to/dir/ install
+
 or
 
 * sudo xmake install --root --installdir=/usr

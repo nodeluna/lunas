@@ -2,6 +2,7 @@ SRCS := $(wildcard src/*.cpp)
 MODS := $(shell find mod -name "*.cpp")
 HEADERS := $(shell find mod -name "*.hpp")
 DIRS = build bin
+prefix=/usr
 
 all:
 	@git submodule update --init --remote --recursive
@@ -13,10 +14,10 @@ debug:
 	@xmake -P .
 
 install:
-	@xmake install --root --installdir=/usr
+	xmake install --root --installdir=$(prefix)
 
 uninstall:
-	@xmake uninstall --root --installdir=/usr
+	@xmake uninstall --root --installdir=$(prefix)
 
 
 clean:
